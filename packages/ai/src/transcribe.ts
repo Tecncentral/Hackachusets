@@ -104,11 +104,77 @@ export async function transcribe(
 
 /**
  * Decide transcription availability from the process environment, without
- * reading or exposing the secret value. The server uses this to wire a provider.
+ * reading or exposing the secret value. "available" means a provider the code
+ * can actually call is configured — not merely that some key exists.
  */
 export function transcriptionAvailability(
   env: NodeJS.ProcessEnv = process.env,
-): { available: boolean; provider: string | null } {
+): { available: boolean; provider: string | null; reason?: string } {
   const hasKey = typeof env[TRANSCRIPTION_KEY_ENV] === 'string' && env[TRANSCRIPTION_KEY_ENV]!.length > 0;
-  return { available: hasKey, provider: hasKey ? env[TRANSCRIPTION_PROVIDER_ENV] ?? 'unspecified' : null };
+  if (!hasKey) return { available: false, provider: null };
+  const name = (env[TRANSCRIPTION_PROVIDER_ENV] ?? 'openai').toLowerCase();
+  if (!SUPPORTED_PROVIDERS.includes(name)) {
+    return { available: false, provider: name, reason: `Unsupported provider "${name}". Supported: ${SUPPORTED_PROVIDERS.join(', ')}.` };
+  }
+  return { available: true, provider: name };
+}
+
+// ---------- Live provider: OpenAI-compatible audio transcription ----------
+
+const SUPPORTED_PROVIDERS = ['openai'];
+/** Optional overrides (not secrets). */
+export const TRANSCRIPTION_MODEL_ENV = 'SCENEBRIEF_TRANSCRIBE_MODEL'; // default whisper-1
+export const TRANSCRIPTION_BASE_URL_ENV = 'SCENEBRIEF_TRANSCRIBE_BASE_URL'; // default https://api.openai.com/v1
+
+function extFor(mimeType: string): string {
+  const m = mimeType.toLowerCase();
+  if (m.includes('webm')) return 'webm';
+  if (m.includes('ogg')) return 'ogg';
+  if (m.includes('mp4') || m.includes('m4a') || m.includes('aac')) return 'm4a';
+  if (m.includes('mpeg') || m.includes('mp3')) return 'mp3';
+  if (m.includes('wav')) return 'wav';
+  return 'webm';
+}
+
+/** OpenAI `/audio/transcriptions`. The key never leaves the server and is never logged. */
+export function openAiTranscriptionProvider(opts: {
+  apiKey: string;
+  model?: string;
+  baseUrl?: string;
+  fetch?: typeof fetch;
+}): TranscriptionProvider {
+  const doFetch = opts.fetch ?? fetch;
+  const base = (opts.baseUrl ?? 'https://api.openai.com/v1').replace(/\/$/, '');
+  return {
+    name: 'openai',
+    async transcribe(audio) {
+      const form = new FormData();
+      // Copy into a plain ArrayBuffer so Blob accepts it regardless of the source buffer type.
+      const buf = audio.bytes.slice().buffer as ArrayBuffer;
+      form.append('file', new Blob([buf], { type: audio.mimeType }), `audio.${extFor(audio.mimeType)}`);
+      form.append('model', opts.model ?? 'whisper-1');
+      form.append('response_format', 'json');
+      const res = await doFetch(`${base}/audio/transcriptions`, {
+        method: 'POST',
+        headers: { authorization: `Bearer ${opts.apiKey}` },
+        body: form,
+      });
+      if (!res.ok) throw new Error(`provider HTTP ${res.status}`); // no body echo: may contain request data
+      const body = (await res.json()) as { text?: unknown };
+      if (typeof body.text !== 'string') throw new Error('provider returned no text');
+      return body.text;
+    },
+  };
+}
+
+/** Build the live provider from env, or undefined (→ explicit "unavailable"). */
+export function providerFromEnv(env: NodeJS.ProcessEnv = process.env, fetchImpl?: typeof fetch): TranscriptionProvider | undefined {
+  const a = transcriptionAvailability(env);
+  if (!a.available) return undefined;
+  return openAiTranscriptionProvider({
+    apiKey: env[TRANSCRIPTION_KEY_ENV]!,
+    model: env[TRANSCRIPTION_MODEL_ENV] || undefined,
+    baseUrl: env[TRANSCRIPTION_BASE_URL_ENV] || undefined,
+    fetch: fetchImpl,
+  });
 }

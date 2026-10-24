@@ -1,0 +1,25 @@
+{
+  "incidentId": "runner-found-down",
+  "revision": 3,
+  "mode": "rules-only",
+  "feedback": [
+    {
+      "kind": "missing_context",
+      "message": "A temperature taken after cooling does not reconstruct the pre-cooling temperature. The record has no temperature marked before cooling.",
+      "suggestedQuestion": "Was a temperature taken before cooling began? If so, what was its value, method, and time?",
+      "observationIds": [
+        "obs-postcool"
+      ],
+      "evidenceSourceIds": [
+        "src-temp-post"
+      ],
+      "knowledgeReferenceIds": [
+        "nata-2015-rec22-passive-cooling",
+        "acsm-2023-ehi-consensus"
+      ],
+      "spokenSummary": "A post-cooling temperature is not the pre-cooling temperature.",
+      "id": "fb-missing_context0-obs-postcool"
+    }
+  ],
+  "warnings": []
+}

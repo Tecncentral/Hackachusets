@@ -1,0 +1,23 @@
+{
+  "incidentId": "runner-found-down",
+  "revision": 1,
+  "mode": "rules-only",
+  "feedback": [
+    {
+      "kind": "unsupported_inference",
+      "message": "A consumer skin-temperature reading cannot establish core body temperature. Core temperature needs a clinical core method.",
+      "suggestedQuestion": "What was the core temperature by a clinical method (e.g., rectal), and at what time?",
+      "observationIds": [
+        "obs-skin-temp"
+      ],
+      "evidenceSourceIds": [],
+      "spokenSummary": "Skin temperature is not core temperature.",
+      "knowledgeReferenceIds": [
+        "nata-2015-rec8-temperature-method",
+        "acsm-2023-ehi-consensus"
+      ],
+      "id": "fb-unsupported_inference0-obs-skin-temp"
+    }
+  ],
+  "warnings": []
+}

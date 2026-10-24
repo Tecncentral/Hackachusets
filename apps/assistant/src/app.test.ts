@@ -58,4 +58,31 @@ describe('assistant service HTTP', () => {
     expect(body.mode).toBe('unavailable');
     expect(body.transcript).toBe('');
   });
+
+  it('POST /transcribe accepts the multipart upload the website sends', async () => {
+    const form = new FormData();
+    form.append('audio', new Blob([new Uint8Array([1, 2, 3, 4])], { type: 'audio/webm' }), 'clip.webm');
+    form.append('requestId', 'req-1');
+    const r = await fetch(`${base}/transcribe`, { method: 'POST', body: form });
+    expect(r.status).toBe(200);
+    const body = await r.json();
+    expect(body.mode).toBe('unavailable'); // no key in test env
+    expect(body.warnings.join(' ')).not.toMatch(/No audio data|No `audio`/);
+  });
+
+  it('POST /transcribe multipart without an audio field explains the problem', async () => {
+    const form = new FormData();
+    form.append('requestId', 'req-2');
+    const r = await fetch(`${base}/transcribe`, { method: 'POST', body: form });
+    const body = await r.json();
+    expect(body.mode).toBe('unavailable');
+    expect(body.warnings.join(' ')).toMatch(/audio/);
+  });
+
+  it('POST /transcribe rejects a non-audio file type with 415', async () => {
+    const form = new FormData();
+    form.append('audio', new Blob(['hello'], { type: 'text/plain' }), 'x.txt');
+    const r = await fetch(`${base}/transcribe`, { method: 'POST', body: form });
+    expect(r.status).toBe(415);
+  });
 });

@@ -4,6 +4,7 @@ import {
   evaluateHybrid,
   transcribe,
   transcriptionAvailability,
+  providerFromEnv,
   EvaluateRequest,
 } from '@scenebrief/ai';
 
@@ -43,17 +44,35 @@ export function createAssistantApp() {
     }
   });
 
-  // Raw audio body (the UI can also post multipart; a thin raw path keeps the
-  // service dependency-free). requestId travels in a header for the raw path.
+  // Accepts EITHER a raw audio body (Content-Type: audio/*) OR multipart/form-data
+  // with an `audio` (or `file`) field — the shape the website uploads and the
+  // platform forwards. Audio is held in memory for this request only, never logged
+  // or stored. A live provider is used only when configured server-side.
   app.post(
     '/transcribe',
-    express.raw({ type: ['audio/*', 'application/octet-stream'], limit: MAX_AUDIO_BYTES }),
+    express.raw({ type: ['audio/*', 'application/octet-stream', 'multipart/form-data'], limit: MAX_AUDIO_BYTES }),
     async (req, res, next) => {
       try {
-        const bytes = Buffer.isBuffer(req.body) ? new Uint8Array(req.body) : new Uint8Array();
-        const mimeType = req.headers['content-type'] ?? 'application/octet-stream';
-        // No provider wired by default -> explicit unavailable state (not a fabricated transcript).
-        const result = await transcribe({ bytes, mimeType });
+        const contentType = req.headers['content-type'] ?? 'application/octet-stream';
+        const body = Buffer.isBuffer(req.body) ? req.body : Buffer.alloc(0);
+        let bytes = new Uint8Array(body);
+        let mimeType = contentType;
+        if (contentType.startsWith('multipart/form-data')) {
+          // Parse with the built-in Web API; no extra dependency.
+          const form = await new Response(new Uint8Array(body), { headers: { 'content-type': contentType } }).formData();
+          const file = form.get('audio') ?? form.get('file');
+          if (!(file instanceof Blob)) {
+            res.json({ transcript: '', mode: 'unavailable', warnings: ['No `audio` file field in the upload.'] });
+            return;
+          }
+          bytes = new Uint8Array(await file.arrayBuffer());
+          mimeType = file.type || 'application/octet-stream';
+        }
+        if (!/^(audio|video)\/|application\/octet-stream/.test(mimeType)) {
+          res.status(415).json({ transcript: '', mode: 'unavailable', warnings: [`Unsupported audio type: ${mimeType}`] });
+          return;
+        }
+        const result = await transcribe({ bytes, mimeType }, { provider: providerFromEnv() });
         res.json(result);
       } catch (err) {
         next(err);

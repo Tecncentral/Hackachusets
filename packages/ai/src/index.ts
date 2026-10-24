@@ -37,6 +37,10 @@ export {
   type TranscriptionProvider,
   type TranscriptionConfig,
   type AudioInput,
+  openAiTranscriptionProvider,
+  providerFromEnv,
+  TRANSCRIPTION_MODEL_ENV,
+  TRANSCRIPTION_BASE_URL_ENV,
 } from './transcribe.js';
 export * from './fixtures.js';
 export * from './bridge.js';

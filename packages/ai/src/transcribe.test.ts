@@ -3,6 +3,8 @@ import {
   transcribe,
   transcriptionAvailability,
   TRANSCRIPTION_KEY_ENV,
+  openAiTranscriptionProvider,
+  providerFromEnv,
   type TranscriptionProvider,
 } from './transcribe.js';
 
@@ -55,5 +57,39 @@ describe('transcription adapter', () => {
     expect(JSON.stringify(a)).not.toContain('super-secret');
     const b = transcriptionAvailability({} as NodeJS.ProcessEnv);
     expect(b.available).toBe(false);
+  });
+});
+
+
+describe('live provider (OpenAI-compatible)', () => {
+  it('sends audio as multipart with the key in a header and returns text as live', async () => {
+    let seen: { url: string; auth: string | null; hasFile: boolean } | null = null;
+    const fakeFetch = (async (url: string, init: RequestInit) => {
+      const form = init.body as FormData;
+      seen = { url, auth: new Headers(init.headers).get('authorization'), hasFile: form.get('file') instanceof Blob };
+      return new Response(JSON.stringify({ text: 'Found him confused by the trail.' }), { status: 200 });
+    }) as unknown as typeof fetch;
+    const provider = providerFromEnv({ [TRANSCRIPTION_KEY_ENV]: 'k-test' } as NodeJS.ProcessEnv, fakeFetch)!;
+    const r = await transcribe(audio, { provider });
+    expect(r).toEqual({ transcript: 'Found him confused by the trail.', mode: 'live', warnings: [] });
+    expect(seen!.url).toBe('https://api.openai.com/v1/audio/transcriptions');
+    expect(seen!.auth).toBe('Bearer k-test');
+    expect(seen!.hasFile).toBe(true);
+  });
+
+  it('provider HTTP error -> unavailable with no secret in the warning', async () => {
+    const fakeFetch = (async () => new Response('bad key k-test', { status: 401 })) as unknown as typeof fetch;
+    const provider = openAiTranscriptionProvider({ apiKey: 'k-test', fetch: fakeFetch });
+    const r = await transcribe(audio, { provider });
+    expect(r.mode).toBe('unavailable');
+    expect(r.warnings.join(' ')).toContain('401');
+    expect(r.warnings.join(' ')).not.toContain('k-test');
+  });
+
+  it('unsupported provider name is reported, not silently treated as available', () => {
+    const a = transcriptionAvailability({ [TRANSCRIPTION_KEY_ENV]: 'x', SCENEBRIEF_TRANSCRIBE_PROVIDER: 'acme' } as NodeJS.ProcessEnv);
+    expect(a.available).toBe(false);
+    expect(a.reason).toMatch(/Unsupported/);
+    expect(providerFromEnv({ [TRANSCRIPTION_KEY_ENV]: 'x', SCENEBRIEF_TRANSCRIBE_PROVIDER: 'acme' } as NodeJS.ProcessEnv)).toBeUndefined();
   });
 });

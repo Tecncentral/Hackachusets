@@ -7,7 +7,7 @@
 | Base SHA | `2f622d4c419f43408428564029d427d88cb511ee` (origin/main) |
 | Owns | `packages/ai/`, `apps/assistant/` |
 | Does not touch | `apps/api`, `apps/web`, `packages/contracts` |
-| Checks | `npm run check` → typecheck clean, 6 files / 47 tests pass, web build OK |
+| Checks | `npm run check` → typecheck clean, 7 files / 54 tests pass, web build OK |
 
 ## What it does
 
@@ -70,7 +70,11 @@ router.post('/api/incidents/:id/evaluations', async (req, res) => {
 - Re-evaluating the same record gives the same feedback IDs. Skip IDs already stored to avoid repeats.
 - To use the separate service instead of in-process:
   `evaluateIncidentSnapshot(snapshot, { client: createAssistantClient({ baseUrl: 'http://127.0.0.1:3002' }) })`.
-- Audio: forward the uploaded bytes to `transcribe({ bytes, mimeType })` (in-process) or `POST :3002/transcribe`. Return `{ transcript, mode, warnings }` to the website. Do **not** save it as an observation; the EMT edits it and submits through `/observations`.
+- Audio: forward the uploaded file to `POST :3002/transcribe` **as-is** (multipart with an `audio` field, same as the website sends; raw `audio/*` body also works), or call `transcribe({ bytes, mimeType }, { provider: providerFromEnv() })` in-process. Return `{ transcript, mode, warnings }` to the website. Do **not** save it as an observation; the EMT edits it and submits through `/observations`. Non-audio files get 415. Max 10 MB. Audio is never logged or stored.
+
+### Example files (real output, checked in)
+
+`packages/ai/examples/*.json` — request and response pairs for `/evaluate`, the full platform snapshot and its result, the "assistant off" result, and the "transcription unavailable" response. A test fails if they drift from real output. Regenerate with `npx tsx packages/ai/scripts/write-examples.ts`.
 
 ### Field mapping the bridge applies
 
@@ -115,9 +119,10 @@ Example requests: `packages/ai/src/fixtures.ts` (`evaluateRequest*`, and `platfo
 |---|---|
 | `ASSISTANT_PORT` | Service port, default 3002 |
 | `SCENEBRIEF_TRANSCRIBE_API_KEY` | Live audio key. Server-side only. Not set → `/transcribe` returns `mode: "unavailable"` |
-| `SCENEBRIEF_TRANSCRIBE_PROVIDER` | Optional provider name for that key |
+| `SCENEBRIEF_TRANSCRIBE_PROVIDER` | `openai` (default, only one supported). Anything else → reported unavailable |
+| `SCENEBRIEF_TRANSCRIBE_MODEL`, `SCENEBRIEF_TRANSCRIBE_BASE_URL` | Optional; default `whisper-1`, `https://api.openai.com/v1` |
 
-No provider key exists on the build machine, so live transcription was **not** tested. Text evaluation needs no key.
+Live audio is coded (OpenAI-compatible `/audio/transcriptions`) and tested with a fake server. It was **not** run against the real provider: no key exists on the build machine.
 The optional model (`evaluateHybrid({ model })`) may only rephrase the three text fields; IDs and kinds are fixed by the rules, and output is re-validated.
 
 ## Files
@@ -149,6 +154,5 @@ Consensus papers are background, not the crew's local protocol.
 ## Known limits
 
 - Rules use keyword cues. Unusual wording can be missed; it fails quiet, not loud.
-- No live transcription without a provider key.
-- `/transcribe` on the service takes a raw audio body; the platform's route takes multipart and should forward the bytes.
+- Live audio needs a provider key; not run against the real provider.
 - Final schema names are Session 3's call. If they differ, only `packages/ai/src/bridge.ts` needs to change.

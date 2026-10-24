@@ -1,0 +1,28 @@
+{
+  "incidentId": "runner-found-down",
+  "revision": 1,
+  "observations": [
+    {
+      "id": "obs-skin-temp",
+      "text": "The wearable skin temperature is elevated, so core temperature is confirmed high.",
+      "observedAt": "2026-10-24T15:02:00Z",
+      "sourceIds": [
+        "src-wearable"
+      ]
+    }
+  ],
+  "measurements": [],
+  "sources": [
+    {
+      "id": "src-wearable",
+      "type": "wearable",
+      "label": "Consumer wearable (synthetic)",
+      "text": "Skin temperature trend elevated."
+    }
+  ],
+  "careEvents": [],
+  "protocolContext": {
+    "agency": null,
+    "protocolConfirmed": false
+  }
+}
