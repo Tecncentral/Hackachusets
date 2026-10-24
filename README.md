@@ -67,5 +67,6 @@ This API is local-only, unauthenticated, and exposes synthetic data. The sharing
 - [Kiro steering](.kiro/steering/project.md)
 - [Per-member Kiro kickoff prompts](docs/kickoff-prompts/)
 - [Kiro initialization review](docs/kiro-initialization.md)
+- [How we used Kiro (agents, specs, hooks, crew)](docs/kiro-usage.md)
 
 Each workstream has starter requirements, design, and tasks under `.kiro/specs/`. MCP tools remain a Member 3 follow-up; the API tests already provide a reproducible incident replay.

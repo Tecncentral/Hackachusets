@@ -73,7 +73,7 @@ Sample output (generated, not hand-written): [handoff-v1.txt](../samples/handoff
 - `apps/api/src/acceptance.test.ts` runs the shared acceptance scenario over HTTP: witness account, skin-temperature and sweating inferences, real assistant feedback, clarify/defer/dismiss, rectal temperature before and after cold-water immersion, reassessment, assistant disabled, review, and print.
 - `apps/api/src/ehs.test.ts` covers fixtures, measurement validation, idempotency, revision rules, corrections, cooling phase and conflicts, missing ≠ normal, matching exclusion, amendments, HTML escaping, stale/invalid/unavailable assistant results, the HTTP client (timeout, bad JSON, 503, unreachable), and resolutions.
 - The curl sequence in the contract was run against a live server on port 3101.
-- No Kiro hook was registered. `.kiro/hooks/scenario-check.mjs` exists but has no hook definition file; tests were run manually.
+- This workstream ran tests manually; its session did not use the `scenebrief` agent. The hook *is* defined (`.kiro/agents/scenebrief.json`, `postToolUse` → `.kiro/hooks/scenario-check.mjs`) and only fires in sessions started with `kiro-cli chat --agent scenebrief`. See `docs/kiro-usage.md`.
 
 ## Interface delta for the integration session
 

@@ -47,7 +47,7 @@ export function PatientMatch({ incident }: { incident: WorkspaceIncident }) {
           <p id={hintId} className="ws-summary-hint">
             {sharing
               ? 'Shown on the patient’s demo sharing page. Not production authentication.'
-              : 'Emergency sharing is off for this demo patient. Turn it on in “Patient sharing”.'}
+              : 'Emergency sharing is off for this demo patient. Turn it on in “Patient companion”.'}
           </p>
         </div>
         <div className="ws-summary-match-actions">
