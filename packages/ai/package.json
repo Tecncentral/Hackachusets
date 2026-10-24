@@ -5,6 +5,7 @@
   "type": "module",
   "exports": "./src/index.ts",
   "dependencies": {
-    "@scenebrief/contracts": "^0.1.0"
+    "@scenebrief/contracts": "^0.1.0",
+    "zod": "^4.6.7"
   }
 }
