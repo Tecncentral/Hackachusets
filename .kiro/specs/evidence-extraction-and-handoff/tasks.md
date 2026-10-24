@@ -15,7 +15,14 @@
 - [x] Human-readable evaluation test set + transcription tests + service HTTP tests.
 - [x] Extend the `.kiro` hook to cover ai/assistant changes.
 - [x] Env-var docs without secrets; `.kiro` spec updated; `docs/handoffs/ehs-assistant.md`.
-- [x] `npm run check` green (typecheck + 36 tests + web build).
+- [x] `npm run check` green (typecheck + 47 tests + web build).
+- [x] Integration bridge (`bridge.ts`): reads the website's proposed incident shape and the
+      scaffold `claims[]` shape; returns feedback/references in the website's schemas;
+      never throws (`unavailable` mode); discards answers for a different revision.
+- [x] Witness-timing check (collapse vs. discovery kept unknown) and temperature
+      method/time check (`rule-temp-needs-method-timing` now enforced).
+- [x] Reference IDs aligned with the website's NATA Rec. 8/22/25 entries.
+- [ ] Platform owner wires `evaluateIncidentSnapshot` into `POST /evaluations` (snippet in handoff).
 - [ ] Reconcile the assistant request/response seam with the platform owner's final schema.
 - [ ] Human verification of CDC + MA protocol passages; clinician review of clinical rules.
 - [ ] Wire a live transcription provider and/or a validated language model (server-side).

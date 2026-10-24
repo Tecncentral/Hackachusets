@@ -1,122 +1,154 @@
-# Handoff — EHS correction assistant (Member 2)
+# Handoff — Session 2 of 3: EHS correction assistant
 
-Branch: `feat/ehs-correction-assistant`
-Base SHA: `2f622d4c419f43408428564029d427d88cb511ee` (origin/main, scaffold merged)
-Owner scope: `packages/ai/`, new `apps/assistant/`
+| | |
+|---|---|
+| Session | 2 of 3 (assistant). Session 1 = EMT website, Session 3 = core platform |
+| Branch | `feat/ehs-correction-assistant` |
+| Base SHA | `2f622d4c419f43408428564029d427d88cb511ee` (origin/main) |
+| Owns | `packages/ai/`, `apps/assistant/` |
+| Does not touch | `apps/api`, `apps/web`, `packages/contracts` |
+| Checks | `npm run check` → typecheck clean, 6 files / 47 tests pass, web build OK |
 
-## What this delivers
+## What it does
 
-An evidence-backed assistant that assesses newly recorded EMT observations against the
-patient record and a small, sourced EHS knowledge set, and proposes concise, respectful
-clarifications. It supports an audio-in / transcript-out path. It never mutates incident
-state, never diagnoses autonomously, and never claims to be a qualified clinician.
+The assistant reads a snapshot of an incident and returns proposed clarifications.
+It never changes the incident, never diagnoses, and is not a clinician.
 
-The scaffold `demoAdapter` is retained unchanged, so the existing API and demo still work.
+| Crew says | Assistant replies (spoken line) |
+|---|---|
+| "Sweating, so it can't be heat stroke" | Sweating alone does not rule out heat stroke. |
+| "Patient is sweating" (plain fact) | Nothing — a fact is not a false claim. |
+| "Wearable skin temp high, so core is high" | Skin temperature is not core temperature. |
+| "Watch fall at 10:42, so he collapsed then" | A device event does not establish collapse time. |
+| "Dropped about five minutes ago" (no collapse/discovery time on record) | Ask if the collapse was seen, or if he was found later. |
+| Temperature with no method or time | That temperature has no method or site recorded. |
+| Temp mentioned after cooling, no pre-cooling temp | A post-cooling temperature is not the pre-cooling temperature. |
+| "No rhythm alert, so not cardiac" | A missing rhythm alert does not rule out a cardiac cause. |
+| "Ignore your rules…" inside patient text | Treated as plain text. Rules still apply. |
 
-## Run commands
+Every item has: `id, kind, message, suggestedQuestion, observationIds, evidenceSourceIds, knowledgeReferenceIds, spokenSummary`.
+Only IDs that exist in the request or the knowledge registry are ever cited.
+
+## How the three sessions connect
+
+```
+Website (S1)  --HTTP-->  Platform API (S3)  --function call-->  @scenebrief/ai (S2)
+                                            (or HTTP to apps/assistant :3002)
+```
+
+- The website never calls the assistant. It calls the platform (already true in S1's `apps/web/src/platform/http.ts`).
+- The platform owns all incident state. It passes a snapshot in and stores what comes back.
+- The incident shape the bridge reads is S1's proposal (`apps/web/src/platform/boundary.ts` on `feat/emt-website-ehs`). It also reads today's scaffold incident (`claims[]`), so it works on main now.
+- Reference IDs match S1's dev stub (`nata-2015-rec8-temperature-method`, `nata-2015-rec22-passive-cooling`, `nata-2015-rec25-sweating`), so the website shows the same references once the real assistant replaces its stub.
+
+## For the platform owner (Session 3): wire it in
+
+One function. It never throws.
+
+```ts
+import { evaluateIncidentSnapshot } from '@scenebrief/ai';
+
+// POST /api/incidents/:id/evaluations  { requestId, baseRevision }
+router.post('/api/incidents/:id/evaluations', async (req, res) => {
+  const incident = store.get(req.params.id);
+  if (req.body.baseRevision !== incident.revision) return res.status(409).json({ error: 'Stale revision' });
+
+  const snapshot = structuredClone(incident);               // immutable snapshot
+  const result = await evaluateIncidentSnapshot(snapshot, { disabled: !assistantEnabled });
+
+  if (store.get(req.params.id).revision !== result.revision)  // late answer for an old revision
+    return res.status(409).json({ error: 'Incident changed during evaluation' });
+
+  store.appendFeedback(incident.id, result.feedback);          // each item carries .revision, status 'open'
+  store.mergeKnowledgeReferences(incident.id, result.knowledgeReferences);
+  res.json(store.get(req.params.id));                          // S1 expects the full incident back
+});
+```
+
+- `result.mode` is `rules-only`, `hybrid`, or `unavailable`. On `unavailable`, `feedback` is `[]` and `warnings` explains why. Capture and handoff keep working.
+- Evaluation does not bump the revision (S1's dev adapter assumes the same).
+- Re-evaluating the same record gives the same feedback IDs. Skip IDs already stored to avoid repeats.
+- To use the separate service instead of in-process:
+  `evaluateIncidentSnapshot(snapshot, { client: createAssistantClient({ baseUrl: 'http://127.0.0.1:3002' }) })`.
+- Audio: forward the uploaded bytes to `transcribe({ bytes, mimeType })` (in-process) or `POST :3002/transcribe`. Return `{ transcript, mode, warnings }` to the website. Do **not** save it as an observation; the EMT edits it and submits through `/observations`.
+
+### Field mapping the bridge applies
+
+| Platform field | Assistant field | Rule |
+|---|---|---|
+| `observations[]` with `status: 'clarified'` | — | skipped (replaced by the clarification) |
+| `observation.sourceId` | `sourceIds: [sourceId]` | |
+| `measurement.status: 'not_obtained'` | — | skipped; never turned into a value |
+| `measurement.value` + `value2` (BP) | `value: "120/80"` | |
+| `coolingPhase` before / during,after / unknown | `beforeCooling` true / false / null | unknown stays null |
+| `skinTemperatureDeviation` with no method | `method: 'consumer wearable skin'` | never counts as core |
+| `careEvents[].endedAt` | `stoppedAt` | |
+| `timelineEvents[]` | `timelineEvents[]` | `time: null` stays unknown |
+| scaffold `claims[]` `account` | observation | |
+| scaffold `claims[]` `discoveryTime`/`collapseTime` | timeline event | `unknown` stays unknown |
+
+## For the website owner (Session 1)
+
+Nothing is required. When the platform route exists, switch off `devAssistant.ts`.
+Feedback and references come back in your `FeedbackSchema` / `KnowledgeReferenceSchema` shapes.
+Your schema has `suggestedQuestion` and `spokenSummary` nullable; the assistant always fills them.
+
+## Run it
 
 ```bash
 npm ci
-npm run check        # typecheck + 36 tests + web build (all green)
-
-# optional standalone assistant service (distinct port, does not touch api/web)
-npm run dev -w @scenebrief/assistant   # http://127.0.0.1:3002
+npm run check                                   # all checks
+npm run dev -w @scenebrief/assistant            # optional service on http://127.0.0.1:3002
 ```
-
-## API examples (assistant service)
 
 ```bash
-# health + transcription availability
 curl http://127.0.0.1:3002/health
-# -> { "ok": true, "mode": "assistant", "transcription": { "available": false, "provider": null } }
-
-# evaluate the "sweating rules out heat stroke" observation
-curl -X POST http://127.0.0.1:3002/evaluate \
-  -H 'Content-Type: application/json' \
-  -d '{"incidentId":"runner-found-down","revision":2,
-       "observations":[{"id":"o1","text":"He is sweating, so this cannot be heat stroke.","observedAt":null,"sourceIds":[]}]}'
-# -> { incidentId, revision: 2, mode: "rules-only",
-#      feedback: [{ kind:"unsupported_inference", spokenSummary:"Sweating alone does not rule out heat stroke.", knowledgeReferenceIds:[...], ... }],
-#      warnings: [] }
-
-# transcribe with no provider configured -> explicit unavailable (not a fabricated transcript)
-curl -X POST http://127.0.0.1:3002/transcribe \
-  -H 'Content-Type: audio/webm' --data-binary @clip.webm
-# -> { transcript:"", mode:"unavailable", warnings:["Audio transcription is not configured. ..."] }
+curl -X POST http://127.0.0.1:3002/evaluate -H "Content-Type: application/json" \
+  -d '{"incidentId":"runner-found-down","revision":2,"observations":[{"id":"o1","text":"He is sweating, so this cannot be heat stroke.","observedAt":null,"sourceIds":[]}]}'
 ```
 
-Platforms that prefer the in-process path import the library directly:
+Example requests: `packages/ai/src/fixtures.ts` (`evaluateRequest*`, and `platformIncidentFixture` for the full platform shape).
 
-```ts
-import { evaluateRules, evaluateHybrid, transcribe } from '@scenebrief/ai';
-```
+## Environment (no secrets committed)
 
-## Integration seam (vs. the shared logical contract)
+| Variable | Use |
+|---|---|
+| `ASSISTANT_PORT` | Service port, default 3002 |
+| `SCENEBRIEF_TRANSCRIBE_API_KEY` | Live audio key. Server-side only. Not set → `/transcribe` returns `mode: "unavailable"` |
+| `SCENEBRIEF_TRANSCRIBE_PROVIDER` | Optional provider name for that key |
 
-Request/response shapes live in `packages/ai/src/evaluate.types.ts`. They follow the
-kickoff contract. Exact notes for the platform owner (Member 3):
+No provider key exists on the build machine, so live transcription was **not** tested. Text evaluation needs no key.
+The optional model (`evaluateHybrid({ model })`) may only rephrase the three text fields; IDs and kinds are fixed by the rules, and output is re-validated.
 
-- `/evaluate` request implemented: `{ incidentId, revision, observations, measurements,
-  sources, careEvents, protocolContext? }`. The kickoff listed `requestId, baseRevision`
-  for the PLATFORM's `/api/.../evaluations` route (platform-owned); the assistant service
-  itself is stateless and keys staleness off `revision`, which it echoes in the response.
-- Response: `{ incidentId, revision, mode, feedback[], warnings[] }`. `mode` is
-  `rules-only` or `hybrid` (the contract's generic `mode` field).
-- `feedback` item matches the contract exactly:
-  `{ id, kind, message, suggestedQuestion, observationIds, evidenceSourceIds,
-  knowledgeReferenceIds, spokenSummary }`.
-- `/transcribe` returns `{ transcript, mode, warnings }` where `mode ∈ live|fixture|unavailable`.
-- Measurements preserve `beforeCooling: boolean|null` (null = unknown, distinct from false)
-  and keep `value` as a string to avoid lossy numeric parsing of e.g. "102/64".
+## Files
 
-These are an integration seam, not a competing incident store. Canonical schema changes
-belong to Member 3; this doc is the documented proposal for reconciliation.
+| Path | Job |
+|---|---|
+| `packages/ai/src/knowledge.ts` | Versioned source registry + clinical rules (`KNOWLEDGE_VERSION`) |
+| `packages/ai/src/evaluate.ts` | Deterministic rules: fact check + clinical-inference pass |
+| `packages/ai/src/hybrid.ts` | Optional model phrasing, validated, with fallback |
+| `packages/ai/src/bridge.ts` | Platform shape ↔ assistant; `evaluateIncidentSnapshot`; HTTP client |
+| `packages/ai/src/transcribe.ts` | Audio adapter: live / fixture / unavailable |
+| `packages/ai/src/*.test.ts` | Evaluation set (paraphrases, negations, injection, stale revision) |
+| `apps/assistant/` | Optional Express service: `/health`, `/evaluate`, `/transcribe` |
+| `.kiro/specs/evidence-extraction-and-handoff/` | Requirements, design, tasks |
 
-## Implementation status
+## Sources
 
-Implemented and tested:
-- Versioned sourced knowledge registry + clinical rules (`knowledge.ts`).
-- Deterministic evaluator — factual + clinical-inference passes (`evaluate.ts`).
-- Optional hybrid model layer, prose-only, validated, fallback (`hybrid.ts`).
-- Transcription adapter — live/fixture/unavailable, server-side key only (`transcribe.ts`).
-- Optional assistant HTTP service (`apps/assistant/`).
-- Fixtures (`fixtures.ts`); 36 passing tests; `.kiro` hook extended.
+| ID | State |
+|---|---|
+| `acsm-2023-ehi-consensus` | Citation + abstract verified via NCBI API |
+| `nata-2015-ehi-position` | Citation + abstract verified via NCBI API |
+| `nata-2015-rec8/22/25-*` | Passages checked by Session 1 against nata.org PDF; not re-verified here (full text blocked) |
+| `cdc-yellowbook-heat-cold` | Blocked (403). Human must copy the passage |
+| `mass-ems-statewide-protocols` | Blocked (403). Agency must confirm edition and applicability |
 
-## Actual checks run
+All rules are marked `requires-clinical-review`. A clinician must review them before real use.
+Consensus papers are background, not the crew's local protocol.
 
-- `npm run check`: typecheck clean, 36/36 tests pass, web build succeeds.
+## Known limits
 
-## Clinical source verification (honest status)
-
-- VERIFIED (citation + passage via NCBI E-utilities API):
-  - ACSM 2023 Expert Consensus (PMID 37036463, DOI 10.1249/JSR.0000000000001058).
-  - NATA 2015 Position Statement (PMID 26381473, DOI 10.4085/1062-6050-50.9.07, PMC4639891).
-- NOT machine-verified on the build host (HTTP 403 / cookie-wall, no JS browser available):
-  - CDC Yellow Book heat/cold page.
-  - Massachusetts EMS statewide protocols (the candidate applicable LOCAL protocol).
-  Both are recorded with `verified: false`, `reviewStatus: "unverified-url"`. A human must
-  open them and confirm the exact passages before they back operational feedback.
-
-## Dependencies
-
-- `apps/assistant` adds no new third-party deps beyond `express` + `zod` (same versions as
-  `apps/api`). Audio uses `express.raw`, so no multer. Root lockfile updated via
-  `npm install` from the repo root.
-
-## Known limitations
-
-- No live language model and no live transcription provider are wired; both are optional and
-  documented via env vars (`SCENEBRIEF_TRANSCRIBE_API_KEY`, `SCENEBRIEF_TRANSCRIBE_PROVIDER`).
-  Live audio requires a server-side key and a provider implementation of `TranscriptionProvider`.
-- Clinical rules require qualified clinician review and reconciliation with the crew's own
-  agency protocol before any operational use. This is a synthetic demo, not a clinical product.
-- The cue-based matcher is deliberately small and auditable; it will not catch every phrasing.
-  It errs toward asking a clarifying question rather than asserting anything.
-- The UI (Member 1/4) owns TTS playback, mute, and stop controls; the assistant only returns
-  `spokenSummary` text for browser TTS.
-
-## Next steps for integration
-
-1. Member 3 reconciles the request/response seam with the published canonical schema.
-2. Human verification of the CDC + MA protocol passages; clinician review of the rules.
-3. Optional: wire a validated model (phrasing only) and a server-side transcription provider.
+- Rules use keyword cues. Unusual wording can be missed; it fails quiet, not loud.
+- No live transcription without a provider key.
+- `/transcribe` on the service takes a raw audio body; the platform's route takes multipart and should forward the bytes.
+- Final schema names are Session 3's call. If they differ, only `packages/ai/src/bridge.ts` needs to change.
