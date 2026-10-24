@@ -4,7 +4,7 @@
 - Base: `origin/main` @ `2f622d4c419f43408428564029d427d88cb511ee`
 - Superseded work: `feat/paramedic-capture` @ `5fe4f77` (local checkpoint, not pushed). Reused: time formatting, source list, association step, scoped-CSS approach, real-store test states.
 - Spec: `.kiro/specs/paramedic-capture-and-clarification/` (requirements R1–R10, design, tasks)
-- PR: see the draft PR linked from this branch.
+- PR (draft): https://github.com/Tecncentral/Hackachusets/pull/3
 
 ## Run
 
