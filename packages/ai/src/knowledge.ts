@@ -42,7 +42,7 @@ export interface KnowledgeReference {
  * Registry version. Bump when references or passages change so that stored
  * feedback can be traced to the knowledge set that produced it.
  */
-export const KNOWLEDGE_VERSION = '2026-10-24.1';
+export const KNOWLEDGE_VERSION = '2026-10-24.2';
 
 export const KNOWLEDGE: readonly KnowledgeReference[] = [
   {
@@ -76,6 +76,54 @@ export const KNOWLEDGE: readonly KnowledgeReference[] = [
     reviewStatus: 'background-evidence',
     verified: true,
     identifier: 'doi:10.4085/1062-6050-50.9.07 / PMID:26381473 / PMC4639891',
+  },
+  // --- NATA 2015 recommendation-level passages ---
+  // IDs match the website session's (Member 1) reference IDs so feedback renders the
+  // same reference in the UI. Member 1 recorded these as checked against the nata.org
+  // PDF on 2026-10-24. This build host could NOT retrieve the full text (PMC/NCBI do
+  // not allow full-text download for this article), so `verified` stays false here
+  // until a human re-checks the quoted wording.
+  {
+    id: 'nata-2015-rec25-sweating',
+    title: 'NATA Position Statement: Exertional Heat Illnesses (2015) — Recommendation 25',
+    url: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC4639891/',
+    publisher: "National Athletic Trainers' Association — Journal of Athletic Training",
+    publishedOn: '2015-09-01',
+    passage:
+      'Most patients with EHS have hot, sweaty skin as opposed to those with the classical type of heat stroke … who present with dry skin.',
+    locator: 'Recommendation 25 (cross-session check against nata.org PDF, 2026-10-24)',
+    applicability: 'Consensus background for athletic trainers; not the responder’s local EMS protocol.',
+    reviewStatus: 'background-evidence',
+    verified: false,
+    identifier: 'doi:10.4085/1062-6050-50.9.07',
+  },
+  {
+    id: 'nata-2015-rec8-temperature-method',
+    title: 'NATA Position Statement: Exertional Heat Illnesses (2015) — Recommendation 8',
+    url: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC4639891/',
+    publisher: "National Athletic Trainers' Association — Journal of Athletic Training",
+    publishedOn: '2015-09-01',
+    passage:
+      'The assessment of rectal temperature is the clinical gold standard for obtaining core body temperature of patients with EHS … No other field-expedient methods … are valid or reliable after intense exercise in the heat.',
+    locator: 'Recommendation 8 (cross-session check against nata.org PDF, 2026-10-24)',
+    applicability: 'Consensus background; the measurement method under local protocol is the crew’s decision.',
+    reviewStatus: 'background-evidence',
+    verified: false,
+    identifier: 'doi:10.4085/1062-6050-50.9.07',
+  },
+  {
+    id: 'nata-2015-rec22-passive-cooling',
+    title: 'NATA Position Statement: Exertional Heat Illnesses (2015) — Recommendation 22',
+    url: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC4639891/',
+    publisher: "National Athletic Trainers' Association — Journal of Athletic Training",
+    publishedOn: '2015-09-01',
+    passage:
+      'After initial collapse, recognition is often delayed, and the patient may begin to cool passively … A delay in accurately assessing temperature … may also explain a body temperature that is lower than expected.',
+    locator: 'Recommendation 22 (cross-session check against nata.org PDF, 2026-10-24)',
+    applicability: 'Consensus background; does not reconstruct an earlier temperature.',
+    reviewStatus: 'background-evidence',
+    verified: false,
+    identifier: 'doi:10.4085/1062-6050-50.9.07',
   },
   {
     id: 'cdc-yellowbook-heat-cold',
@@ -120,28 +168,28 @@ export const CLINICAL_RULES: readonly ClinicalRule[] = [
     id: 'rule-sweating-not-exclusionary',
     statement:
       'Sweating does not exclude exertional heat stroke. Presence of sweat is not a reliable rule-out; EHS can occur with intact sweating.',
-    referenceIds: ['nata-2015-ehi-position', 'acsm-2023-ehi-consensus'],
+    referenceIds: ['nata-2015-rec25-sweating', 'nata-2015-ehi-position', 'acsm-2023-ehi-consensus'],
     reviewStatus: 'requires-clinical-review',
   },
   {
     id: 'rule-skin-not-core',
     statement:
       'Consumer/skin temperature cannot establish core body temperature. Core temperature for EHS is obtained by a clinical core method (e.g., rectal), with method and site documented.',
-    referenceIds: ['acsm-2023-ehi-consensus'],
+    referenceIds: ['nata-2015-rec8-temperature-method', 'acsm-2023-ehi-consensus'],
     reviewStatus: 'requires-clinical-review',
   },
   {
     id: 'rule-temp-needs-method-timing',
     statement:
       'A temperature reading is only interpretable with its measurement method/site, event time, unit, and whether it was taken before or after cooling.',
-    referenceIds: ['acsm-2023-ehi-consensus'],
+    referenceIds: ['nata-2015-rec8-temperature-method', 'acsm-2023-ehi-consensus'],
     reviewStatus: 'requires-clinical-review',
   },
   {
     id: 'rule-postcooling-not-precooling',
     statement:
       'A lower temperature measured after cooling cannot by itself reconstruct the pre-cooling temperature or exclude an earlier heat emergency; outcomes relate to duration of severe hyperthermia.',
-    referenceIds: ['acsm-2023-ehi-consensus'],
+    referenceIds: ['nata-2015-rec22-passive-cooling', 'acsm-2023-ehi-consensus'],
     reviewStatus: 'requires-clinical-review',
   },
   {

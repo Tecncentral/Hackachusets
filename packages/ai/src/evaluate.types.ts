@@ -24,6 +24,9 @@ export const MeasurementInput = z.object({
     'respiratoryRate',
     'spo2',
     'glucose',
+    'ambientTemperature', // weather/context — never body temperature
+    'humidity',
+    'skinTemperatureDeviation', // consumer wearable — never core temperature
     'other',
   ]),
   value: z.string(), // kept as string to preserve "38.9" vs "102/64" without lossy parsing
@@ -52,6 +55,16 @@ export const CareEventInput = z.object({
 });
 export type CareEventInput = z.infer<typeof CareEventInput>;
 
+/** Key times. `time: null` with certainty `unknown` keeps an unknown time unknown. */
+export const TimelineEventInput = z.object({
+  id: z.string().min(1),
+  kind: z.string(), // e.g. discovery, collapse, deviceFall, symptomOnset, lastKnownWell
+  time: z.string().nullable(),
+  certainty: z.enum(['recorded', 'reported', 'estimated', 'unknown']).default('unknown'),
+  sourceIds: z.array(z.string()).default([]),
+});
+export type TimelineEventInput = z.infer<typeof TimelineEventInput>;
+
 export const ProtocolContext = z.object({
   agency: z.string().nullable().default(null),
   protocolConfirmed: z.boolean().default(false), // true only when a human confirmed local applicability
@@ -66,6 +79,8 @@ export const EvaluateRequest = z
     measurements: z.array(MeasurementInput).default([]),
     sources: z.array(SourceInput).default([]),
     careEvents: z.array(CareEventInput).default([]),
+    /** Optional. When absent, timing checks treat collapse/discovery as not documented. */
+    timelineEvents: z.array(TimelineEventInput).optional(),
     protocolContext: ProtocolContext.optional(),
   })
   .strict();

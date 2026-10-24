@@ -69,7 +69,8 @@ function hasClinicalCoreTemp(req: EvaluateRequest): boolean {
   );
 }
 
-type Candidate = Omit<FeedbackItem, 'id'>;
+/** `stableId` (internal) gives record-level items an ID that does not shift with list order. */
+type Candidate = Omit<FeedbackItem, 'id'> & { stableId?: string };
 
 function makeId(obsIds: string[], tag: string): string {
   return `fb-${tag}-${obsIds.join('_') || 'none'}`;
@@ -154,10 +155,64 @@ function clinicalInferenceChecks(
   return out;
 }
 
+/** Witness timing words. Device-based timing claims are handled by the clinical pass. */
+const TIMING_CUES = ['went down', 'collapsed', 'collapse', 'dropped', 'minutes ago', 'mins ago', 'not sure when', 'found him', 'found her', 'found them'];
+
+/** Is a collapse or discovery time already recorded with a known time? */
+function hasKnownCollapseOrDiscovery(req: EvaluateRequest): boolean {
+  return (req.timelineEvents ?? []).some(
+    (e) => (e.kind === 'collapse' || e.kind === 'discovery') && e.time !== null && e.certainty !== 'unknown',
+  );
+}
+
+/** Existing source IDs only — never reference a source the platform did not send. */
+function knownSources(req: EvaluateRequest, ids: (string | null | undefined)[]): string[] {
+  return [...new Set(ids.filter((s): s is string => !!s && req.sources.some((src) => src.id === s)))];
+}
+
+/** Record-level check: a temperature without method/site or time cannot be interpreted. */
+function measurementChecks(req: EvaluateRequest): Candidate[] {
+  const out: Candidate[] = [];
+  const rule = CLINICAL_RULES.find((r) => r.id === 'rule-temp-needs-method-timing')!;
+  for (const m of req.measurements) {
+    if (m.kind !== 'temperature' || m.value.trim() === '') continue;
+    const missing = [m.method == null && m.site == null ? 'method or site' : null, m.eventTime == null ? 'time' : null].filter(
+      (x): x is string => x !== null,
+    );
+    if (missing.length === 0) continue;
+    out.push({
+      stableId: `fb-temp-context-${m.id}`,
+      kind: 'missing_context',
+      message: `The temperature ${m.value}${m.unit ? ` ${m.unit}` : ''} has no ${missing.join(' or ')} recorded, so it cannot be compared reliably with other readings.`,
+      suggestedQuestion: `How and when was the ${m.value}${m.unit ? ` ${m.unit}` : ''} temperature taken?`,
+      observationIds: [],
+      evidenceSourceIds: knownSources(req, [m.sourceId]),
+      knowledgeReferenceIds: rule.referenceIds.filter((id) => referenceById(id)),
+      spokenSummary: `That temperature has no ${missing.join(' or ')} recorded.`,
+    });
+  }
+  return out;
+}
+
 /** Factual reconciliation pass: statement vs. the measurement/source record. */
 function factualChecks(req: EvaluateRequest, obs: ObservationInput): Candidate[] {
   const t = norm(obs.text);
   const out: Candidate[] = [];
+
+  // Witness account gives timing words but the record has no collapse/discovery time.
+  // Preserve the uncertainty: ask whether the collapse was witnessed; never fill it in.
+  if (hasAny(t, TIMING_CUES) && !hasAny(t, DEVICE_ONSET_CUES) && !hasKnownCollapseOrDiscovery(req)) {
+    out.push({
+      kind: 'missing_context',
+      message:
+        'The account mentions timing but does not say whether the collapse was seen. Collapse time stays unknown until someone reports it.',
+      suggestedQuestion: 'Did anyone see him collapse, or was he found afterward? About what time?',
+      observationIds: [obs.id],
+      evidenceSourceIds: knownSources(req, obs.sourceIds),
+      knowledgeReferenceIds: [],
+      spokenSummary: 'Ask if the collapse was seen, or if he was found later.',
+    });
+  }
 
   // Post-cooling temperature cited to characterize the earlier (pre-cooling) state.
   const mentionsCooling = hasAny(t, COOLING_CUES);
@@ -191,7 +246,7 @@ function dedupe(items: Candidate[]): Candidate[] {
   const seen = new Set<string>();
   const kept: Candidate[] = [];
   for (const it of items) {
-    const key = `${it.kind}|${it.knowledgeReferenceIds.join(',')}|${it.spokenSummary}`;
+    const key = it.stableId ?? `${it.kind}|${it.knowledgeReferenceIds.join(',')}|${it.spokenSummary}`;
     if (seen.has(key)) continue;
     seen.add(key);
     kept.push(it);
@@ -209,9 +264,10 @@ export function evaluateRules(req: EvaluateRequest): EvaluateResponse {
     candidates.push(...factualChecks(req, obs));
     candidates.push(...clinicalInferenceChecks(req, obs));
   }
+  candidates.push(...measurementChecks(req));
   const feedback: FeedbackItem[] = dedupe(candidates)
     .slice(0, MAX_FEEDBACK)
-    .map((c, i) => ({ ...c, id: makeId(c.observationIds, `${c.kind}${i}`) }));
+    .map(({ stableId, ...c }, i) => ({ ...c, id: stableId ?? makeId(c.observationIds, `${c.kind}${i}`) }));
 
   return {
     incidentId: req.incidentId,

@@ -39,3 +39,4 @@ export {
   type AudioInput,
 } from './transcribe.js';
 export * from './fixtures.js';
+export * from './bridge.js';
