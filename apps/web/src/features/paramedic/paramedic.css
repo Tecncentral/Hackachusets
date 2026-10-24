@@ -1,0 +1,85 @@
+/* Trauma Llama workspace layout, capture and feedback styles. Scoped under .ws. */
+.ws h2 { font-size: 20px; margin: 0 0 8px; }
+.ws .ws-hint { font-size: 14px; color: var(--ink-2); margin: 4px 0; }
+.ws .ws-section-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; }
+.ws .ws-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 12px 0 4px; }
+.ws .ws-row { display: flex; flex-wrap: wrap; gap: 0 12px; }
+.ws .ws-field { margin: 8px 0; min-width: 0; flex: 1 1 200px; }
+.ws .ws-field label, .ws .ws-field-label { display: block; font-weight: 600; margin-bottom: 4px; }
+.ws .ws-empty { padding: 8px 0 16px; }
+
+/* Incident bar */
+.ws .ws-incident { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin: 0 0 16px; }
+.ws .ws-incident-text { flex: 1 1 320px; min-width: 0; }
+.ws .ws-incident-title { font-size: 18px; font-weight: 700; margin: 0; }
+
+/* Three wrapping columns (desktop); phone shows one tab at a time. */
+.ws .ws-body { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }
+.ws .ws-col { min-width: 0; }
+.ws .ws-col-summary { flex: 1 1 300px; }
+.ws .ws-col-centre { flex: 999 1 520px; }
+.ws .ws-col-right { flex: 1 1 320px; }
+
+/* Capture */
+.ws .ws-capture h2 { font-size: 22px; }
+.ws .ws-cap-start { display: flex; flex-wrap: wrap; gap: 12px; margin: 8px 0 12px; }
+.ws .ws-cap-start .btn-record { flex: 1 1 260px; }
+.ws .ws-examples { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; }
+.ws .ws-recording { padding: 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-sunken); margin: 8px 0 12px; }
+.ws .ws-rec-status { display: flex; align-items: center; gap: 8px; font-size: 18px; font-weight: 700; margin: 0; }
+.ws .ws-rec-dot { width: 14px; height: 14px; border-radius: 50%; background: var(--rec); animation: ws-pulse 1.2s ease-in-out infinite; }
+@keyframes ws-pulse { 50% { opacity: .35; } }
+.ws .ws-textarea { min-height: 96px; resize: vertical; line-height: 1.5; }
+.ws .ws-cap-more { margin-top: 8px; }
+.ws .ws-cap-more summary { min-height: 44px; display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--primary); font-weight: 600; }
+
+/* Observations + assistant */
+.ws .ws-obs { margin: 0 0 16px; }
+.ws .ws-obs-list { list-style: none; padding: 0; margin: 8px 0 0; display: grid; gap: 16px; }
+.ws .ws-obs-card { margin: 0; }
+.ws .ws-obs-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 14px; color: var(--ink-2); margin: 0 0 8px; }
+.ws .ws-statement { margin: 4px 0 8px; font-size: 18px; line-height: 1.5; padding: 0; }
+.ws .ws-clar { margin: 8px 0; }
+.ws .ws-fb { background: var(--surface-sunken); border: 1px solid var(--line); border-left: 4px solid var(--attn-line); border-radius: 8px; padding: 12px 14px; margin-top: 12px; }
+.ws .ws-fb-done { border-left-color: var(--line-strong); }
+.ws .ws-fb-stale { border-left-style: dashed; }
+.ws .ws-fb-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+.ws .ws-fb-msg { margin: 8px 0; }
+.ws .ws-fb-question { background: var(--surface); border: 1px solid var(--attn-line); border-radius: 8px; padding: 10px 12px; margin: 8px 0; }
+.ws .ws-question { font-size: 18px; font-weight: 600; margin: 4px 0 0; }
+.ws .ws-fb-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 12px 0 4px; }
+.ws .ws-fb-form { margin-top: 10px; }
+.ws .ws-fb-form label { display: block; font-weight: 600; margin-bottom: 4px; }
+.ws .ws-fb-disclosures { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.ws .ws-refs, .ws .ws-ref { margin-top: 6px; }
+.ws .ws-ref + .ws-ref { border-top: 1px solid var(--line); padding-top: 6px; }
+.ws .ws-quote { margin: 4px 0; padding: 6px 10px; background: var(--surface); border-left: 3px solid var(--line-strong); border-radius: 4px; }
+.ws .ws-fb-foot { border-top: 1px solid var(--line); padding-top: 6px; margin-top: 8px; }
+.ws .ws-speech-controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.ws .ws-earlier { margin-top: 8px; }
+.ws .ws-disclosure { font-weight: 600; }
+
+/* Phone tab bar: the only navigation on phones. */
+.ws .ws-tabbar { display: none; }
+@media (max-width: 720px) {
+  .ws { padding-bottom: 72px; }
+  .ws .ws-body { display: block; }
+  .ws[data-tab=capture] [data-tabs]:not([data-tabs=capture]),
+  .ws[data-tab=care] [data-tabs]:not([data-tabs=care]),
+  .ws[data-tab=handoff] [data-tabs]:not([data-tabs=handoff]) { display: none; }
+  .ws .ws-col { flex: none; width: 100%; }
+  .ws[data-tab=capture] .ws-col-right { display: none; }
+  .ws[data-tab=capture] .ws-col-summary { order: 2; }
+  .ws[data-tab=capture] .ws-body { display: flex; flex-direction: column; gap: 0; }
+  .ws[data-tab=capture] .ws-col-centre { order: 1; }
+  .ws .ws-tabbar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; padding: 8px 8px calc(8px + env(safe-area-inset-bottom)); background: var(--surface); border-top: 1px solid var(--line); }
+  .ws .ws-tabbar button { font: inherit; font-size: 15px; font-weight: 600; min-height: 52px; border-radius: 8px; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink); cursor: pointer; padding: 0 4px; }
+  .ws .ws-tabbar button[aria-current=page] { border: 2px solid var(--primary); background: var(--primary-soft); }
+  .ws .ws-incident-ho { display: none; }
+  .ws .ws-fb-actions .btn { min-height: 52px; }
+  .ws .ws-capture h2 { font-size: 20px; }
+}
+@media (prefers-reduced-motion: reduce) { .ws .ws-rec-dot { animation: none; } }
+@media print {
+  .ws .ws-body, .ws .ws-strip { display: none !important; }
+}
