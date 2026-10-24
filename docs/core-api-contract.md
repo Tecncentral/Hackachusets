@@ -29,7 +29,7 @@ The platform is the sole owner of incident state. The assistant returns proposal
 | POST | `/api/demo/assistant` | `{ enabled: boolean }` | Runtime on/off switch for the "assistant disabled" check; keeps in-memory state |
 | GET | `/api/incidents/:id` | — | Full `Incident` |
 | POST | `/api/incidents/:id/observations` | `{ requestId, baseRevision, text, observedAt, category?, reportedBy?, inputMode?, sourceIds?, recordedBy? }` | `observedAt` required, nullable. `inputMode: "transcribed"` = assistant transcript reviewed by the crew |
-| POST | `/api/incidents/:id/measurements` | `{ requestId, baseRevision, kind, value, unit, measuredAt, diastolic?, site?, device?, observer?, deviceClass?, coolingPhase?, note?, sourceIds? }` | See measurement rules |
+| POST | `/api/incidents/:id/measurements` | `{ requestId, baseRevision, kind, value, unit, measuredAt, obtained?, diastolic?, site?, device?, observer?, deviceClass?, coolingPhase?, note?, sourceIds? }` | See measurement rules |
 | POST | `/api/incidents/:id/care-events` | `{ requestId, baseRevision, kind, description, startedAt, performance?, coolingMethod?, endedAt?, performedBy?, response?, sourceIds? }` | Records care; never prescribes it |
 | POST | `/api/incidents/:id/timeline-events` | `{ requestId, baseRevision, kind, time, certainty, reportedBy?, note?, sourceIds? }` | `certainty: "unknown"` exactly when `time: null` |
 | POST | `/api/incidents/:id/context-facts` | `{ requestId, baseRevision, category, value, state, reportedBy?, note?, sourceIds? }` | Identity, history, allergies, medications, witness, exertion, clothing, acclimatization, loss of consciousness. `state: "unknown"` exactly when `value: null` |
@@ -45,10 +45,10 @@ The platform is the sole owner of incident state. The assistant returns proposal
 
 ### Enumerations
 
-- Observation `category`: `account` (witness/patient account), `neurological`, `skin`, `general` (default), `reassessment`, `care_response`.
+- Observation `category`: `account` (witness/patient account), `neurological`, `skin`, `exertion`, `environment`, `history`, `general` (default), `reassessment`, `care_response`. `inputMode`: `typed` (default), `transcribed` (assistant transcript reviewed by the crew), `example` (demo text, not a recording).
 - `reportedBy` (who asserted it): `crew` (default), `witness`, `patient`, `bystander`, `device`, `dispatch`, `other`.
 - Measurement `kind` → allowed `unit`: `body_temperature` °C/°F · `skin_temperature` °C/°F · `heart_rate` bpm · `blood_pressure` mmHg (+ `diastolic`) · `respiratory_rate` breaths/min · `spo2` % · `glucose` mg/dL or mmol/L.
-- `site` (body temperature only, required; may be `"unknown"`): `rectal`, `esophageal`, `oral`, `tympanic`, `temporal_artery`, `axillary`, `unknown`.
+- `site` (body temperature only, required; may be `"unknown"`): `rectal`, `esophageal`, `oral`, `tympanic`, `temporal_artery`, `axillary`, `other`, `unknown`. `obtained: false` records that the crew did not obtain the measurement: `value` (and `diastolic`) must be `null`. This is "not performed", distinct from "not documented".
 - `coolingPhase`: `before_cooling` (no cooling had started), `during_cooling`, `after_cooling` (cooling had stopped), `unknown` (default).
 - `deviceClass`: `clinical`, `consumer`, `unknown` (default).
 - Care `kind`: `cooling`, `oxygen`, `airway`, `vascular_access`, `fluids`, `medication`, `positioning`, `other`. `performance`: `performed` (default), `not_performed`, `unknown`. `coolingMethod` (cooling only): `cold_water_immersion`, `ice_water_towels`, `ice_packs`, `evaporative_fanning`, `other`.
@@ -56,7 +56,7 @@ The platform is the sole owner of incident state. The assistant returns proposal
 
 ### Measurement rules (enforced)
 
-Unit must match kind. Values must be physically plausible for the unit, which catches unit mix-ups such as 104 °C. These bounds are not clinical thresholds. Blood pressure needs `diastolic`; other kinds must not have one. Body temperature needs `site`; other kinds must not have one. Consumer or wearable skin readings must use `skin_temperature`, never `body_temperature`. A care event marked `not_performed` cannot have times, and `endedAt` cannot be before `startedAt`.
+Unit must match kind. An obtained measurement needs a value; a not-obtained one has none. Values must be physically plausible for the unit, which catches unit mix-ups such as 104 °C. These bounds are not clinical thresholds. Blood pressure needs `diastolic`; other kinds must not have one. Body temperature needs `site`; other kinds must not have one. Consumer or wearable skin readings must use `skin_temperature`, never `body_temperature`. A care event marked `not_performed` cannot have times, and `endedAt` cannot be before `startedAt`.
 
 ## Evaluation semantics
 
@@ -65,7 +65,7 @@ Unit must match kind. Values must be physically plausible for the unit, which ca
 3. The result is applied:
    - `unavailable` (disabled, not configured, unreachable, HTTP 503) or `failed` (timeout, non-2xx, invalid JSON, schema failure, incidentId/revision mismatch) → recorded with `error`. No feedback is stored.
    - If the incident revision changed meanwhile → `status: "stale"`, and feedback is stored with `status: "stale"`. Stale feedback cannot be resolved (`409`); re-evaluate instead.
-   - Items that reference observation, source or knowledge IDs absent from the snapshot or response are discarded (`discardedItems`). Items equal to existing non-stale feedback (same kind, observationIds, evidenceSourceIds, knowledgeReferenceIds) are suppressed (`suppressedDuplicates`). This includes items the crew already dismissed.
+   - Items that reference observation, source or knowledge IDs absent from the snapshot or response are discarded (`discardedItems`). Items equal to existing non-stale feedback (same kind, observationIds, evidenceSourceIds, knowledgeReferenceIds) are suppressed (`suppressedDuplicates`). This includes items the crew already dismissed. A suppressed duplicate of an `open` or `deferred` item moves that item to the evaluated revision (with the new wording), so the crew can act on it again; dismissed and clarified items are left unchanged.
    - Storing feedback does not change `revision`.
 
 ## Resolution semantics
@@ -79,7 +79,7 @@ Unit must match kind. Values must be physically plausible for the unit, which ca
 `HandoffDraft = { incidentId, revision, status: "draft", synthetic: true, generatedAt, patientMatched, sections, sourceIds, uncertainties, text }`
 
 - `sections[]`: `{ id, title, items: [{ text, state, recordIds, sourceIds }] }`. Ids, in order: `presentation`, `exertion_environment`, `neurological`, `measurements`, `care`, `history`, `device_context`, `timeline`, `changes`. Item `state`: `documented`, `reported`, `unknown`, `not_documented`, `superseded`.
-- `uncertainties[]`: `{ topic, state: "unknown" | "not_documented" | "approximate" | "conflicting", text, sourceIds }`. Includes collapse, symptom onset, discovery, last known normal, loss of consciousness, missing clinical body temperature, missing vitals, unknown temperature site or time, and a missing pre-cooling temperature. It also flags readings whose recorded cooling phase conflicts with care-event times.
+- `uncertainties[]`: `{ topic, state: "unknown" | "not_documented" | "not_performed" | "approximate" | "conflicting", text, sourceIds }`. Includes collapse, symptom onset, discovery, last known normal, loss of consciousness, missing clinical body temperature, missing vitals, unknown temperature site or time, and a missing pre-cooling temperature. It also flags readings whose recorded cooling phase conflicts with care-event times.
 - Deterministic: built from stored records only, with no model calls. Times render in America/New_York.
 - `POST /handoffs` freezes `Handoff = { version, revision, reviewedAt, reviewedBy, text, kind: "initial" | "amendment", amendsVersion, patientMatched, sections, sourceIds, uncertainties, changeSummary }`. Earlier versions never change. Re-reviewing the same revision returns the existing version. A later review is an amendment, and its `changeSummary` lists items added or no longer current since the previous version.
 

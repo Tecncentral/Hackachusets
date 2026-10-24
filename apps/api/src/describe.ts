@@ -23,15 +23,17 @@ export const PHASE_LABEL: Record<Measurement['coolingPhase'], string> = {
   before_cooling: 'before cooling started', during_cooling: 'during cooling', after_cooling: 'after cooling stopped', unknown: 'relation to cooling not recorded',
 };
 const SITE_LABEL: Record<NonNullable<Measurement['site']>, string> = {
-  rectal: 'rectal', esophageal: 'esophageal', oral: 'oral', tympanic: 'tympanic', temporal_artery: 'temporal artery', axillary: 'axillary', unknown: 'site/method unknown',
+  rectal: 'rectal', esophageal: 'esophageal', oral: 'oral', tympanic: 'tympanic', temporal_artery: 'temporal artery', axillary: 'axillary', other: 'other site', unknown: 'site/method unknown',
 };
 
-export function measurementValue(m: Pick<Measurement, 'kind' | 'value' | 'diastolic' | 'unit'>): string {
+export function measurementValue(m: Pick<Measurement, 'kind' | 'obtained' | 'value' | 'diastolic' | 'unit'>): string {
+  if (!m.obtained) return 'not obtained';
   if (m.kind === 'blood_pressure') return `${m.value}/${m.diastolic} mmHg`;
   return m.unit === '%' ? `${m.value}%` : `${m.value} ${m.unit}`;
 }
 
 export function describeMeasurement(m: Omit<Measurement, 'id' | 'status' | 'sourceIds' | 'recordedAt' | 'recordedBy' | 'addedAtRevision' | 'baseRevision'>, day?: string | null): string {
+  if (!m.obtained) return [`${MEASUREMENT_LABEL[m.kind]}: not obtained (crew recorded it was not done)`, m.measuredAt ? `at ${formatTime(m.measuredAt, day)}` : null, m.note].filter(Boolean).join(' — ');
   const parts = [`${MEASUREMENT_LABEL[m.kind]} ${measurementValue(m)}`];
   if (m.site) parts.push(SITE_LABEL[m.site]);
   parts.push(m.measuredAt ? `at ${formatTime(m.measuredAt, day)}` : 'time unknown');

@@ -3,6 +3,7 @@
 // collections. It derives records from what the platform stored; it never adds facts.
 import { WorkspaceIncidentSchema, type WorkspaceIncident } from './boundary';
 import { zoneDate, zoneTimeToIso } from './time';
+import { fromCanonicalIncident, isCanonicalIncident } from './canonical';
 
 type Raw = Record<string, unknown> & { sources?: Array<Record<string, any>>; claims?: Array<Record<string, any>>; corrections?: Array<Record<string, any>> };
 
@@ -11,6 +12,8 @@ export function isLegacy(raw: unknown): boolean {
 }
 
 export function normalizeIncident(raw: unknown): WorkspaceIncident {
+  // The current core platform returns the canonical incident (docs/core-api-contract.md).
+  if (isCanonicalIncident(raw)) return fromCanonicalIncident(raw);
   const base = WorkspaceIncidentSchema.parse(raw);
   if (!isLegacy(raw)) return base;
   const r = raw as Raw;

@@ -171,7 +171,7 @@ export function createDevPlatform(opts: { storage?: DevStorage; seed?: () => Pro
       if (input.revision !== s.incident.revision) throw new PlatformError('conflict', 'Incident changed. Review the latest draft before sharing.', 'handoffs', 409);
       if (!s.incident.handoffs.some(h => h.revision === input.revision)) {
         const draft = buildDraft(patientScoped(s.incident));
-        s.incident.handoffs.push({ version: s.incident.handoffs.length + 1, revision: input.revision, reviewedAt: now(), reviewedBy: input.reviewedBy, text: draftText(draft), draft });
+        s.incident.handoffs.push({ version: s.incident.handoffs.length + 1, revision: input.revision, reviewedAt: now(), reviewedBy: input.reviewedBy, text: draftText(draft), changeSummary: [], draft });
       }
       return snapshot(s);
     })

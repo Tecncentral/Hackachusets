@@ -15,7 +15,8 @@ export const HandoffItemSchema = z.object({
 export const HandoffSectionSchema = z.object({ id: HandoffSectionId, title: z.string(), items: z.array(HandoffItemSchema) });
 export const UncertaintySchema = z.object({
   topic: z.string(),
-  state: z.enum(['unknown', 'not_documented', 'approximate', 'conflicting']),
+  // not_performed: the crew recorded that it was not done (e.g. a measurement not obtained).
+  state: z.enum(['unknown', 'not_documented', 'not_performed', 'approximate', 'conflicting']),
   text: z.string(),
   sourceIds: z.array(z.string()),
 });

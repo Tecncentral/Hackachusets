@@ -253,12 +253,22 @@ export class IncidentStore {
     const sourceIds = new Set(request.sources.map(s => s.id));
     const key = (f: { kind: string; observationIds: string[]; knowledgeReferenceIds: string[]; evidenceSourceIds: string[] }) =>
       [f.kind, [...f.observationIds].sort(), [...f.knowledgeReferenceIds].sort(), [...f.evidenceSourceIds].sort()].map(String).join('|');
-    const seen = new Set(draft.feedback.filter(f => f.status !== 'stale').map(key));
+    const existing = new Map(draft.feedback.filter(f => f.status !== 'stale').map(f => [key(f), f] as const));
+    const seen = new Set(existing.keys());
     for (const { id: assistantItemId, ...item } of response.feedback) {
       // Only IDs that exist in the evaluated snapshot (or supplied references) are accepted.
       const valid = item.observationIds.every(id => observationIds.has(id)) && item.evidenceSourceIds.every(id => sourceIds.has(id)) && item.knowledgeReferenceIds.every(id => known.has(id) || offered.has(id));
       if (!valid) { evaluation.discardedItems++; continue; }
-      if (!stale && seen.has(key(item))) { evaluation.suppressedDuplicates++; continue; }
+      if (!stale && seen.has(key(item))) {
+        // Not stored again. A still-unresolved item the assistant re-confirms moves to this revision,
+        // so the crew can act on it; dismissed and clarified items stay as they are.
+        const prior = existing.get(key(item));
+        if (prior && (prior.status === 'open' || prior.status === 'deferred')) {
+          Object.assign(prior, { message: item.message, suggestedQuestion: item.suggestedQuestion, spokenSummary: item.spokenSummary, revision: request.revision, mode: response.mode, evaluationId });
+          evaluation.feedbackIds.push(prior.id);
+        }
+        evaluation.suppressedDuplicates++; continue;
+      }
       seen.add(key(item));
       for (const id of item.knowledgeReferenceIds) if (!known.has(id)) { const ref = offered.get(id)!; draft.knowledgeReferences.push(ref); known.set(id, ref); }
       const feedbackId = `fb-${randomUUID()}`;

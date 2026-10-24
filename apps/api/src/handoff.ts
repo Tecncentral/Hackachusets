@@ -53,9 +53,11 @@ export function buildHandoffDraft(incident: Incident, now: Date): HandoffDraft {
 
   // Exertion and environment
   const exertionFacts = facts.filter(f => ['activity', 'exertion_duration', 'exertion_intensity', 'location', 'clothing_equipment', 'acclimatization'].includes(f.category));
+  const exertionObs = observations.filter(o => o.category === 'exertion');
   const environment = current(view.environmentReadings).sort(byTime(e => e.measuredAt));
   const exertionEnvironment = [
-    ...(exertionFacts.length ? exertionFacts.map(factItem) : [item('Exertion details: not documented.', 'not_documented')]),
+    ...(exertionFacts.length || exertionObs.length ? [...exertionFacts.map(factItem), ...exertionObs.map(obsItem)] : [item('Exertion details: not documented.', 'not_documented')]),
+    ...observations.filter(o => o.category === 'environment').map(obsItem),
     ...(environment.length ? environment.map(e => item(describeEnvironment(e, day), 'documented', [e.id], e.sourceIds)) : [item('Environmental conditions: not documented.', 'not_documented')]),
   ];
 
@@ -70,6 +72,11 @@ export function buildHandoffDraft(incident: Incident, now: Date): HandoffDraft {
     const readings = measurements.filter(m => m.kind === kind).sort(byTime(m => m.measuredAt));
     if (!readings.length) { if (kind !== 'skin_temperature') measurementItems.push(item(`${MEASUREMENT_LABEL[kind]}: not documented.`, 'not_documented')); continue; }
     for (const m of readings) {
+      if (!m.obtained) {
+        measurementItems.push(item(describeMeasurement(m, day), 'documented', [m.id], m.sourceIds));
+        unsure(MEASUREMENT_LABEL[kind], 'not_performed', `${MEASUREMENT_LABEL[kind]}: not obtained (crew recorded it was not done).`, m.sourceIds);
+        continue;
+      }
       const derived = coolingRelation(m.measuredAt, intervals);
       let text = describeMeasurement(m, day);
       if (m.coolingPhase === 'unknown' && derived) text += ` (care-event times place this reading ${PHASE_LABEL[derived]})`;
@@ -80,18 +87,19 @@ export function buildHandoffDraft(incident: Incident, now: Date): HandoffDraft {
       measurementItems.push(item(text, 'documented', [m.id], m.sourceIds));
     }
   }
-  const bodyTemps = measurements.filter(m => m.kind === 'body_temperature');
+  const bodyTemps = measurements.filter(m => m.kind === 'body_temperature' && m.obtained);
+  const recordedNotObtained = new Set(measurements.filter(m => !m.obtained).map(m => m.kind));
   // A reading counts as pre-cooling only if its recorded phase and the care-event times agree (or one is unknown).
   const effectivePhase = (m: Measurement) => {
     const derived = coolingRelation(m.measuredAt, intervals);
     if (m.coolingPhase === 'unknown') return derived;
     return derived && derived !== m.coolingPhase ? null : m.coolingPhase;
   };
-  if (!bodyTemps.length) unsure('Clinical body temperature', 'not_documented', `No clinical body temperature documented.${measurements.some(m => m.kind === 'skin_temperature') || view.wearableRecords.some(w => w.metric === 'skin_temperature_deviation') ? ' Skin or wearable temperature readings do not substitute for it.' : ''}`);
+  if (!bodyTemps.length && !recordedNotObtained.has('body_temperature')) unsure('Clinical body temperature', 'not_documented', `No clinical body temperature documented.${measurements.some(m => m.kind === 'skin_temperature') || view.wearableRecords.some(w => w.metric === 'skin_temperature_deviation') ? ' Skin or wearable temperature readings do not substitute for it.' : ''}`);
   else if (intervals.length && !bodyTemps.some(m => effectivePhase(m) === 'before_cooling')) {
     unsure('Pre-cooling temperature', 'not_documented', 'No body temperature before cooling is documented. Readings taken after cooling started do not show the pre-cooling temperature.');
   }
-  const missingVitals = CORE_VITALS.filter(k => k !== 'body_temperature' && !measurements.some(m => m.kind === k)).map(k => MEASUREMENT_LABEL[k].toLowerCase().replace('spo2', 'SpO2'));
+  const missingVitals = CORE_VITALS.filter(k => k !== 'body_temperature' && !measurements.some(m => m.kind === k && m.obtained) && !recordedNotObtained.has(k)).map(k => MEASUREMENT_LABEL[k].toLowerCase().replace('spo2', 'SpO2'));
   if (missingVitals.length) unsure('Vital signs', 'not_documented', `Not documented: ${missingVitals.join(', ')}.`);
 
   // Care and response
@@ -106,6 +114,7 @@ export function buildHandoffDraft(incident: Incident, now: Date): HandoffDraft {
   const history = [
     ...(!matched ? [item('Patient association not confirmed: profile history is excluded.', 'not_documented')] : []),
     ...historyFacts.map(factItem),
+    ...observations.filter(o => o.category === 'history').map(obsItem),
     ...(['age', 'relevant_history', 'allergy', 'medication'] as const).filter(k => !historyFacts.some(f => f.category === k)).map(k => item(`${FACT_LABEL[k]}: not documented.`, 'not_documented')),
   ];
 

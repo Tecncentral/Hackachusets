@@ -22,7 +22,8 @@ const PERSON = new Set(['witness', 'patient', 'bystander']);
 
 /** Canonical (already current-only, matching-filtered) snapshot → assistant request. */
 export function toAssistantRequest(req: EvaluateRequest): AssistantRequest {
-  const measurements: AssistantRequest['measurements'] = req.measurements.map(m => {
+  // "Not obtained" is not a value; it is never sent as one.
+  const measurements: AssistantRequest['measurements'] = req.measurements.filter(m => m.obtained).map(m => {
     const site = m.site && m.site !== 'unknown' ? m.site : null; // "unknown" site stays missing
     return {
       id: m.id, kind: MEASUREMENT_KIND[m.kind],

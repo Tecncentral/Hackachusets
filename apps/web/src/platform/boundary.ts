@@ -3,7 +3,7 @@
 // canonical `IncidentSchema` with OPTIONAL collections so the website validates today's platform
 // responses unchanged and tomorrow's richer ones. Differences are recorded in docs/handoffs/emt-website.md.
 import { z } from 'zod';
-import { IncidentSchema, HandoffSchema, SourceSchema } from '@scenebrief/contracts';
+import { ClaimSchema, IncidentSchema, HandoffSchema, SourceSchema } from '@scenebrief/contracts';
 
 const iso = z.string().datetime();
 const isoOrNull = iso.nullable();
@@ -117,7 +117,13 @@ export const HandoffDraftSchema = z.object({
   mode: z.enum(['platform', 'website-grouped']).default('platform')
 });
 
-export const WorkspaceHandoffSchema = HandoffSchema.extend({ draft: HandoffDraftSchema.optional() });
+/** Reviewed handoff as the website shows it. The platform's structured snapshot is mapped into `draft`. */
+export const WorkspaceHandoffSchema = HandoffSchema.pick({ version: true, revision: true, reviewedAt: true, reviewedBy: true, text: true }).extend({
+  kind: z.enum(['initial', 'amendment']).optional(),
+  amendsVersion: z.number().int().positive().nullable().optional(),
+  changeSummary: z.array(z.string()).default([]),
+  draft: HandoffDraftSchema.optional()
+});
 
 export const PatientContextSchema = z.object({
   age: z.string().nullable().default(null), history: z.string().nullable().default(null),
@@ -125,11 +131,26 @@ export const PatientContextSchema = z.object({
   contact: z.string().nullable().default(null)
 });
 
-/** Canonical source plus provisional types for crew-entered and reference records (proposal; see handoff doc). */
-export const WorkspaceSourceSchema = SourceSchema.extend({ type: z.enum(['wearable', 'dispatch', 'voice', 'crew', 'reference']) });
+/**
+ * Website view of a source. Canonical platform sources (`@scenebrief/contracts`) map onto it in
+ * canonical.ts; `origin`/`limitation` are optional so the dev adapter's own records still validate.
+ * patient_profile and weather are canonical types; `reference` is kept for dev-adapter records.
+ */
+export const WorkspaceSourceSchema = SourceSchema.pick({ id: true, label: true, capturedAt: true, eventTime: true, text: true }).extend({
+  type: z.enum(['wearable', 'dispatch', 'voice', 'crew', 'patient_profile', 'weather', 'reference']),
+  origin: SourceSchema.shape.origin.optional(),
+  limitation: z.string().nullable().optional()
+});
 
-export const WorkspaceIncidentSchema = IncidentSchema.extend({
+/** The website's view model. The platform's canonical incident is mapped onto it (canonical.ts). */
+export const WorkspaceIncidentSchema = z.object({
+  id: z.string(),
+  revision: z.number().int().nonnegative(),
+  synthetic: z.literal(true),
   sources: z.array(WorkspaceSourceSchema),
+  claims: z.array(ClaimSchema).default([]),
+  /** Legacy claim corrections (scaffold shape); observation corrections are in `observationCorrections`. */
+  corrections: z.array(z.record(z.string(), z.unknown())).default([]),
   patient: IncidentSchema.shape.patient.extend({ context: PatientContextSchema.optional() }),
   handoffs: z.array(WorkspaceHandoffSchema),
   observations: z.array(ObservationSchema).default([]),

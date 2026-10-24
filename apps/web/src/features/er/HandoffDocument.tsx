@@ -36,6 +36,8 @@ const SOURCE_TYPE_LABEL: Record<WorkspaceSource['type'], string> = {
   wearable: 'Consumer wearable',
   dispatch: 'Dispatch',
   voice: 'Voice note',
+  patient_profile: 'Patient profile (self-reported)',
+  weather: 'Weather record',
   crew: 'Crew entry',
   reference: 'Reference'
 };

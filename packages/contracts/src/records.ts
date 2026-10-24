@@ -40,8 +40,9 @@ const RecordMeta = {
 };
 
 // ---- Observations ---------------------------------------------------------
-export const ObservationCategory = z.enum(['account', 'neurological', 'skin', 'general', 'reassessment', 'care_response']);
-export const InputMode = z.enum(['typed', 'transcribed']);
+export const ObservationCategory = z.enum(['account', 'neurological', 'skin', 'exertion', 'environment', 'history', 'general', 'reassessment', 'care_response']);
+// example = demo text loaded by the user, not a recording or a crew statement made on scene.
+export const InputMode = z.enum(['typed', 'transcribed', 'example']);
 export const ObservationFields = {
   text: LongText,
   observedAt: IsoTime.nullable(),
@@ -65,7 +66,7 @@ export const ObservationSchema = z.object({
 export const MeasurementKind = z.enum(['body_temperature', 'skin_temperature', 'heart_rate', 'blood_pressure', 'respiratory_rate', 'spo2', 'glucose']);
 export const MeasurementUnit = z.enum(['°C', '°F', 'bpm', 'mmHg', 'breaths/min', '%', 'mg/dL', 'mmol/L']);
 // Body temperature sites only. Consumer/wearable skin readings must use kind "skin_temperature".
-export const TemperatureSite = z.enum(['rectal', 'esophageal', 'oral', 'tympanic', 'temporal_artery', 'axillary', 'unknown']);
+export const TemperatureSite = z.enum(['rectal', 'esophageal', 'oral', 'tympanic', 'temporal_artery', 'axillary', 'other', 'unknown']);
 // before_cooling: no cooling had started. during_cooling: cooling in progress. after_cooling: cooling had stopped.
 export const CoolingPhase = z.enum(['before_cooling', 'during_cooling', 'after_cooling', 'unknown']);
 export const DeviceClass = z.enum(['clinical', 'consumer', 'unknown']);
@@ -81,7 +82,9 @@ const BOUNDS: Record<string, [number, number]> = {
 
 export const MeasurementFields = {
   kind: MeasurementKind,
-  value: z.number(),
+  // false: the crew recorded that this measurement was not obtained. Distinct from "not documented" (no record).
+  obtained: z.boolean().default(true),
+  value: z.number().nullable(),
   diastolic: z.number().nullable().default(null),
   unit: MeasurementUnit,
   site: TemperatureSite.nullable().default(null),
@@ -93,10 +96,17 @@ export const MeasurementFields = {
   note: Note.nullable().default(null),
   sourceIds: z.array(RecordId).max(20).default([]),
 };
-type MeasurementShape = { kind: string; value: number; diastolic: number | null; unit: string; site: string | null };
+type MeasurementShape = { kind: string; obtained: boolean; value: number | null; diastolic: number | null; unit: string; site: string | null };
 export function checkMeasurement(m: MeasurementShape, ctx: z.RefinementCtx) {
   const kind = m.kind as z.infer<typeof MeasurementKind>;
   if (!UNITS[kind].includes(m.unit)) ctx.addIssue({ code: 'custom', path: ['unit'], message: `Unit ${m.unit} is not valid for ${kind}. Use ${UNITS[kind].join(' or ')}.` });
+  if (!m.obtained) {
+    // Recorded as not done: no value is stored or invented.
+    if (m.value !== null || m.diastolic !== null) ctx.addIssue({ code: 'custom', path: ['value'], message: 'A measurement recorded as not obtained has no value.' });
+    if (kind !== 'body_temperature' && m.site !== null) ctx.addIssue({ code: 'custom', path: ['site'], message: 'Site applies to body temperature only.' });
+    return;
+  }
+  if (m.value === null) { ctx.addIssue({ code: 'custom', path: ['value'], message: 'Enter a value, or record the measurement as not obtained.' }); return; }
   const [min, max] = BOUNDS[m.unit] ?? [-Infinity, Infinity];
   if (m.value < min || m.value > max) ctx.addIssue({ code: 'custom', path: ['value'], message: `Value ${m.value} ${m.unit} is outside the plausible range ${min}–${max}. Check the unit.` });
   if (kind === 'blood_pressure') {
@@ -109,7 +119,8 @@ export function checkMeasurement(m: MeasurementShape, ctx: z.RefinementCtx) {
 export const MeasurementSchema = z.object({
   ...RecordMeta,
   kind: MeasurementKind,
-  value: z.number(),
+  obtained: z.boolean(),
+  value: z.number().nullable(),
   diastolic: z.number().nullable(),
   unit: MeasurementUnit,
   site: TemperatureSite.nullable(),

@@ -5,11 +5,13 @@
 import { IncidentId } from '@scenebrief/contracts';
 import { HandoffDraftSchema, PlatformError, TranscriptionSchema, type HandoffDraft, type WorkspaceIncident } from './boundary';
 import { normalizeIncident } from './legacy';
+import { fromCanonicalDraft, toCareEventRequest, toMeasurementRequest, toObservationRequest, toTimelineEventRequest } from './canonical';
 import { buildDraft } from './draft';
 import { patientScoped } from './scope';
 import type { Platform } from './types';
 
 const base = `/api/incidents/${IncidentId}`;
+const ASSISTANT_TRANSCRIBE = '/assistant/transcribe';
 
 async function call(endpoint: string, init?: RequestInit): Promise<unknown> {
   let response: Response;
@@ -38,7 +40,7 @@ export function createHttpPlatform(): Platform {
     match: patientId => incident(post(`${base}/match`, { patientId, confirmed: true })),
     async addObservation(input) {
       try {
-        return { incident: await incident(post(`${base}/observations`, input)), compatibility: null };
+        return { incident: await incident(post(`${base}/observations`, toObservationRequest(input))), compatibility: null };
       } catch (e) {
         if (!(e instanceof PlatformError && e.kind === 'unavailable')) throw e;
         // Compatibility: the current platform stores notes through /transcripts (no category, observed time, or revision check).
@@ -46,19 +48,45 @@ export function createHttpPlatform(): Platform {
         return { incident: saved, compatibility: 'Saved through the platform’s transcript route: category and observed time were not stored, and no revision check was applied.' };
       }
     },
-    addMeasurement: input => incident(post(`${base}/measurements`, input)),
-    addCareEvent: input => incident(post(`${base}/care-events`, input)),
-    addTimelineEvent: input => incident(post(`${base}/timeline-events`, input)),
+    addMeasurement(input) {
+      const { route, body } = toMeasurementRequest(input);
+      return incident(post(`${base}/${route}`, body));
+    },
+    addCareEvent: input => incident(post(`${base}/care-events`, toCareEventRequest(input))),
+    addTimelineEvent: input => incident(post(`${base}/timeline-events`, toTimelineEventRequest(input))),
+    // Audio goes to the correction assistant service (Vite proxies /assistant → :3002), never to the
+    // platform. The transcript comes back for crew review and is then saved through /observations.
     async transcribe(audio, requestId) {
       const form = new FormData();
       form.append('requestId', requestId);
       form.append('audio', audio, `recording.${audio.type.includes('mp4') ? 'mp4' : audio.type.includes('ogg') ? 'ogg' : 'webm'}`);
-      return TranscriptionSchema.parse(await call(`${base}/audio/transcriptions`, { method: 'POST', body: form }));
+      let raw: unknown;
+      try { raw = await call(ASSISTANT_TRANSCRIBE, { method: 'POST', body: form }); }
+      catch (e) {
+        if (e instanceof PlatformError && (e.kind === 'network' || e.kind === 'server' || e.kind === 'unavailable')) throw new PlatformError('unavailable', 'The transcription service is not running (start it with npm run dev -w @scenebrief/assistant).', ASSISTANT_TRANSCRIBE, e.status);
+        throw e;
+      }
+      const result = TranscriptionSchema.parse(raw);
+      if (result.mode === 'unavailable') throw new PlatformError('unavailable', result.warnings[0] ?? 'Transcription is not configured.', ASSISTANT_TRANSCRIBE, 503);
+      return result;
     },
-    evaluate: input => incident(post(`${base}/evaluations`, input)),
-    resolveFeedback: ({ feedbackId, ...body }) => incident(post(`${base}/feedback/${encodeURIComponent(feedbackId)}/resolutions`, body)),
+    // The platform records every check. Surface its outcome the way the workspace expects.
+    async evaluate(input) {
+      const raw = await call(`${base}/evaluations`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(input) });
+      const evaluation = (raw as { evaluations?: Array<{ requestId: string; status: string; error: string | null }> }).evaluations?.find(e => e.requestId === input.requestId);
+      if (evaluation?.status === 'unavailable') throw new PlatformError('unavailable', evaluation.error ?? 'Assistant unavailable.', 'evaluations', 503);
+      if (evaluation?.status === 'failed') throw new PlatformError('server', `The assistant check failed: ${evaluation.error ?? 'unknown error'}. Records are unaffected.`, 'evaluations', 502);
+      if (evaluation?.status === 'stale') throw new PlatformError('conflict', 'New information was added while the check ran; its feedback was not applied. Check again.', 'evaluations', 409);
+      return normalizeIncident(raw);
+    },
+    // A dismissal reason is the platform's resolution note; only clarify carries clarificationText.
+    resolveFeedback: ({ feedbackId, clarificationText, ...body }) => incident(post(`${base}/feedback/${encodeURIComponent(feedbackId)}/resolutions`,
+      body.action === 'clarify' ? { ...body, clarificationText } : { ...body, ...(clarificationText ? { note: clarificationText.slice(0, 500) } : {}) })),
     async getHandoffDraft(current: WorkspaceIncident): Promise<HandoffDraft> {
-      try { return HandoffDraftSchema.parse(await call(`${base}/handoff-draft`)); }
+      try {
+        const raw = await call(`${base}/handoff-draft`);
+        return fromCanonicalDraft(raw) ?? HandoffDraftSchema.parse(raw);
+      }
       catch (e) { if (e instanceof PlatformError && e.kind === 'unavailable') return buildDraft(patientScoped(current)); throw e; }
     },
     approveHandoff: input => incident(post(`${base}/handoffs`, input))

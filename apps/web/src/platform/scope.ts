@@ -4,7 +4,7 @@ import type { WorkspaceIncident } from './boundary';
 
 export function patientScoped(incident: WorkspaceIncident): WorkspaceIncident {
   if (incident.patient.matched) return incident;
-  const hidden = new Set(incident.sources.filter(s => s.type === 'wearable').map(s => s.id));
+  const hidden = new Set(incident.sources.filter(s => s.type === 'wearable' || s.type === 'patient_profile').map(s => s.id));
   return {
     ...incident,
     patient: { ...incident.patient, context: undefined },

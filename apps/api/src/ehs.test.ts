@@ -178,6 +178,28 @@ describe('assistant evaluation', () => {
     expect(again.feedback).toHaveLength(2);
     expect(again.evaluations.at(-1)?.suppressedDuplicates).toBe(2);
   });
+  it('re-evaluation moves still-open feedback to the new revision, but not dismissed feedback', async () => {
+    const s = matched({ assistant: new AssistantGateway(new MockAssistant()) });
+    obs(s, ExampleStatements.skinTemperatureInference); obs(s, ExampleStatements.sweatingInference);
+    const first = await s.evaluate({ requestId: rid(), baseRevision: 2 });
+    const [skin, sweat] = first.feedback;
+    s.resolve(sweat.id, { requestId: rid(), baseRevision: 2, action: 'dismiss', note: 'Crew disagrees' });
+    obs(s, 'Unrelated new note.'); // revision 3
+    const again = await s.evaluate({ requestId: rid(), baseRevision: 3 });
+    expect(again.feedback).toHaveLength(2);
+    expect(again.feedback.find(f => f.id === skin.id)).toMatchObject({ status: 'open', revision: 3, evaluationId: again.evaluations.at(-1)!.id });
+    expect(again.feedback.find(f => f.id === sweat.id)).toMatchObject({ status: 'dismissed', revision: 2 });
+  });
+  it('records a measurement the crew did not obtain without inventing a value', () => {
+    const s = matched();
+    const result = s.addMeasurement({ requestId: rid(), baseRevision: 0, kind: 'blood_pressure', obtained: false, value: null, unit: 'mmHg', measuredAt: null, note: 'Cuff unavailable' });
+    expect(result.measurements.at(-1)).toMatchObject({ obtained: false, value: null, diastolic: null });
+    expect(() => s.addMeasurement({ requestId: rid(), baseRevision: 1, kind: 'heart_rate', value: null, unit: 'bpm', measuredAt: null })).toThrow('not obtained');
+    const draft = s.handoffDraft();
+    expect(draft.sections.find(x => x.id === 'measurements')!.items.map(i => i.text)).toContain('Blood pressure: not obtained (crew recorded it was not done) — Cuff unavailable');
+    expect(draft.uncertainties.find(u => u.topic === 'Blood pressure')).toMatchObject({ state: 'not_performed' });
+    expect(draft.uncertainties.find(u => u.topic === 'Vital signs')!.text).not.toContain('blood pressure');
+  });
   it('with the assistant unavailable, records the state and capture and handoff keep working', async () => {
     for (const gateway of [new AssistantGateway(new UnavailableAssistant()), Object.assign(new AssistantGateway(new MockAssistant()), { enabled: false })]) {
       const s = new IncidentStore({ assistant: gateway }); obs(s, ExampleStatements.sweatingInference);

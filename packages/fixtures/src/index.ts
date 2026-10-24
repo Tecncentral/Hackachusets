@@ -30,7 +30,7 @@ function ehsRunner(): Incident {
       { ...FIXTURE, id: 'obs-arrival-skin', sourceIds: ['crew-arrival'], text: 'Skin hot and sweaty to touch.', observedAt: '2026-10-24T14:56:00Z', category: 'skin', reportedBy: 'crew', inputMode: 'typed', clarifiesFeedbackId: null },
     ],
     measurements: [
-      { ...FIXTURE, id: 'meas-hr-arrival', sourceIds: ['crew-arrival'], kind: 'heart_rate', value: 140, diastolic: null, unit: 'bpm', site: null, device: 'Cardiac monitor (synthetic)', observer: 'Crew', deviceClass: 'clinical', measuredAt: '2026-10-24T14:57:00Z', coolingPhase: 'before_cooling', note: null },
+      { ...FIXTURE, id: 'meas-hr-arrival', sourceIds: ['crew-arrival'], kind: 'heart_rate', obtained: true, value: 140, diastolic: null, unit: 'bpm', site: null, device: 'Cardiac monitor (synthetic)', observer: 'Crew', deviceClass: 'clinical', measuredAt: '2026-10-24T14:57:00Z', coolingPhase: 'before_cooling', note: null },
     ],
     careEvents: [],
     timelineEvents: [

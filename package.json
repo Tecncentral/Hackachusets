@@ -11,7 +11,7 @@
     "node": "^22.12.0 || >=24.0.0"
   },
   "scripts": {
-    "dev": "concurrently -k -n api,web \"npm run dev -w @scenebrief/api\" \"npm run dev -w @scenebrief/web\"",
+    "dev": "concurrently -k -n api,web,assistant \"npm run dev -w @scenebrief/api\" \"npm run dev -w @scenebrief/web\" \"npm run dev -w @scenebrief/assistant\"",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "build": "npm run build -w @scenebrief/web",

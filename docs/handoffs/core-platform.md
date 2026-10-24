@@ -17,6 +17,32 @@ npm run check                                 # typecheck + tests + web build
 
 The contract, routes, curl examples and semantics are in [core-api-contract.md](../core-api-contract.md).
 
+## Integration with `feat/emt-website-ehs` (EMT website)
+
+Branch `integrate/emt-website` merges `origin/feat/emt-website-ehs` (`5ff7f33`) onto `integrate/session-2`. With `npm run dev` the website's default "Platform API" mode now runs the whole flow against the real platform and the real assistant. The web shell also launches the assistant service on :3002.
+
+- **One translation point in the website:** `apps/web/src/platform/canonical.ts` maps the canonical incident to the website's view model. Outgoing requests go the other way.
+  - `legacy.ts` sends canonical responses through this mapper; the old scaffold shape still works.
+  - `http.ts` maps every request. It sends air temperature and humidity to `/environment-readings` and turns a dismissal reason into the resolution `note`. It maps the platform's recorded evaluation outcome (`unavailable` / `failed` / `stale`) to the errors the workspace already handles, and uses the platform's `/handoff-draft`.
+  - The website's schemas in `boundary.ts` no longer extend the full canonical `IncidentSchema`. They now describe the view model only, so the dev adapter and its tests still work.
+- **Audio:** the website posts recordings to `/assistant/transcribe`, which Vite proxies to `apps/assistant`'s `/transcribe`. The transcript returns to the crew for review and is saved through `/observations`. The platform has no audio route.
+- **Platform changes the website needed:**
+  - `obtained: false` measurements, recorded as not done and shown as "not obtained" / "not performed";
+  - observation categories `exertion`, `environment`, `history`, and input mode `example`;
+  - body-temperature site `other`;
+  - uncertainty state `not_performed`;
+  - re-evaluation moves still-open feedback to the new revision. Without that, the website's "Re-check current revision" could never clear stale items.
+- **Mapping choices worth knowing:**
+  - website time certainty `reported` → platform `approximate`, reported by `other`;
+  - website care `transport` → platform care `other` with a "Transport:" prefix, and platform `oxygen` → website "Airway / breathing";
+  - stale feedback is hidden in the website;
+  - the website's "Unresolved" list is the platform draft's uncertainties. Open assistant feedback is not counted there, because assistant text is kept out of the handoff.
+- **Verified:**
+  - `apps/web/src/platform/platform-integration.test.ts` drives the website's HTTP adapter against a real API server and a real assistant server. It covers capture, feedback, clarify/dismiss, re-check, readings before and after cooling, not-obtained BP, humidity as context, key times, the draft, approval and amendment, transcription unavailable, and the assistant switched off.
+  - `npm run dev` was run through the Vite proxy.
+  - Headless Chrome screenshots against the live stack are in [integration-screenshots/](integration-screenshots/). The workspace shows real assistant feedback and readings before/after cooling, and the receiving view shows the approved structured handoff.
+- **Not verified:** interactive browser clicks (no browser automation is installed; the screenshots are of data entered through the API), real microphone transcription (no provider key), screen readers.
+
 ## Integration with `session-2` (correction assistant)
 
 Branch `integrate/session-2` merges `origin/session-2` (`4102e50`) into `main` (`22eebdf`) and wires the assistant into the platform.

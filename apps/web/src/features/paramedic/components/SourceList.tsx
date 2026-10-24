@@ -5,6 +5,8 @@ const TYPE_LABEL: Record<WorkspaceSource['type'], string> = {
   wearable: 'Device record · synthetic',
   dispatch: 'Dispatch · simulated',
   voice: 'Crew entry',
+  patient_profile: 'Patient profile · self-reported',
+  weather: 'Weather record · synthetic',
   crew: 'Crew entry',
   reference: 'Reference'
 };
