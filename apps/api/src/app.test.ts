@@ -15,7 +15,8 @@ it('runs patient-to-paramedic-to-ER flow over HTTP', async () => {
  expect((await post(`${route}/transcripts`, { requestId: 'one', text: DemoInitial })).status).toBe(200);
  const incident = IncidentSchema.parse(await (await post(`${route}/transcripts`, { requestId: 'two', text: DemoClarification })).json());
  const shared = IncidentSchema.parse(await (await post(`${route}/handoffs`, { revision: incident.revision, reviewedBy: 'test crew' })).json());
- expect(shared.handoffs[0].text).toContain('collapseTime: Unknown');
+ // Handoff text is now the deterministic structured handoff (was "collapseTime: Unknown").
+ expect(shared.handoffs[0].text).toContain('Collapse time: unknown');
  const received = IncidentSchema.parse(await (await fetch(`${base}${route}`)).json()); expect(received.handoffs).toEqual(shared.handoffs);
  expect((await post(`${route}/transcripts`, { text: '' })).status).toBe(400);
  expect((await post('/incidents/not-real/sharing', { sharing: true })).status).toBe(404);

@@ -1,5 +1,7 @@
 # Shared API contract
 
+> **Superseded for the EHS scope by [core-api-contract.md](core-api-contract.md)**, which covers the full route set and the changed `Source`, `Correction` and `Handoff` fields. The legacy routes below still work.
+
 Base URL in the web app: `/api` (proxied to port 3001). Runtime schemas and TypeScript types are exported by `@scenebrief/contracts`. The only demo incident is `runner-found-down`.
 
 | Method | Path | Request | Response |
