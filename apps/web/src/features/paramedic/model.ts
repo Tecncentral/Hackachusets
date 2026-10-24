@@ -1,7 +1,7 @@
 // Pure derivations for the EMT workspace. Everything is computed from the platform incident; no
 // clinical interpretation is added. Unknown and not-documented values stay explicit.
 import type { CareEvent, Feedback, Measurement, Observation, TimelineEvent, WorkspaceIncident } from '../../platform';
-import { CLINICAL_KINDS, TIME_LABEL, latestTime } from '../../platform/draft';
+import { CLINICAL_KINDS, MEASUREMENT_LABEL, TIME_LABEL, latestTime, phaseOf, type PhaseLabel } from '../../platform/draft';
 import { zoneDate } from '../../platform/time';
 
 
@@ -60,12 +60,11 @@ export function isStale(f: Feedback, incident: WorkspaceIncident): boolean {
 }
 export const openFeedback = (incident: WorkspaceIncident) => incident.feedback.filter(f => f.status === 'open');
 
-export type StepId = 'associate' | 'capture' | 'feedback' | 'temperature' | 'care' | 'review' | 'shared';
+export type StepId = 'capture' | 'feedback' | 'temperature' | 'care' | 'review' | 'shared';
 export interface NextStep { id: StepId; title: string; action: string; detail: string }
 
 /** One suggested next task. Suggestions never gate care, transport, or any other action. */
 export function nextStep(incident: WorkspaceIncident): NextStep {
-  if (!incident.patient.matched) return { id: 'associate', title: 'Confirm the patient', action: 'Confirm patient', detail: 'Patient history stays hidden until the crew confirms the association.' };
   if (incident.observations.length === 0) return { id: 'capture', title: 'Capture what you see and hear', action: 'Add observation', detail: 'Witness account, mental status, skin, exertion — short notes are enough.' };
   if (openFeedback(incident).length > 0) return { id: 'feedback', title: 'Review a question from the assistant', action: 'Review feedback', detail: 'Clarify, dismiss, or defer. Nothing changes until you choose.' };
   if (!temperatureSummary(incident).latest && !temperatureSummary(incident).notObtained) return { id: 'temperature', title: 'Record a clinical temperature when obtained', action: 'Add measurement', detail: 'Include method/site, time, and whether before or after cooling.' };
@@ -104,4 +103,58 @@ export function changes(incident: WorkspaceIncident): ChangeRow[] {
 
 export function hasWearableData(incident: WorkspaceIncident): boolean {
   return incident.sources.some(s => s.type === 'wearable') || incident.measurements.some(m => m.sourceKind === 'wearable');
+}
+
+/**
+ * Scenario-level working concern from the incident brief. Not established by the app; replace with
+ * a platform field when one exists.
+ */
+export const WORKING_CONCERN = 'Suspected exertional heat stroke';
+
+/** Most recent active witness/account observation. */
+export function witnessAccount(incident: WorkspaceIncident): Observation | undefined {
+  return incident.observations.filter(o => o.category === 'account' && o.status === 'active').sort((a, b) => a.capturedAt.localeCompare(b.capturedAt)).at(-1);
+}
+
+export function initialMentalStatus(incident: WorkspaceIncident): Observation | undefined {
+  const all = incident.observations.filter(o => o.category === 'mental_status').sort((a, b) => a.capturedAt.localeCompare(b.capturedAt));
+  return all.length > 1 ? all[0] : undefined;
+}
+
+export interface ReadingRow { kind: Measurement['kind']; label: string; initial: Measurement; latest: Measurement | null; initialPhase: PhaseLabel; latestPhase: PhaseLabel | null }
+/** Per clinical measurement type: first and latest entry (by event time; undated last), with cooling phase labels. */
+export function readings(incident: WorkspaceIncident): ReadingRow[] {
+  return CLINICAL_KINDS.flatMap(kind => {
+    const list = incident.measurements.filter(m => m.kind === kind).sort((a, b) => (a.eventTime ?? '9999').localeCompare(b.eventTime ?? '9999') || a.capturedAt.localeCompare(b.capturedAt));
+    if (list.length === 0) return [];
+    const initial = list[0], latest = list.length > 1 ? list.at(-1)! : null;
+    return [{ kind, label: MEASUREMENT_LABEL[kind], initial, latest, initialPhase: phaseOf(initial, incident.careEvents), latestPhase: latest ? phaseOf(latest, incident.careEvents) : null }];
+  });
+}
+export function undocumentedKinds(incident: WorkspaceIncident): string[] {
+  return CLINICAL_KINDS.filter(k => !incident.measurements.some(m => m.kind === k)).map(k => MEASUREMENT_LABEL[k]);
+}
+
+/** Feedback attached to an observation (by observationIds). */
+export function feedbackFor(incident: WorkspaceIncident, observationId: string): Feedback[] {
+  return incident.feedback.filter(f => f.observationIds.includes(observationId));
+}
+/** Feedback not tied to any observation (e.g. a measurement missing its method). */
+export function recordFeedback(incident: WorkspaceIncident): Feedback[] {
+  return incident.feedback.filter(f => f.observationIds.length === 0);
+}
+
+/**
+ * Observations needing attention: those with open or deferred feedback, plus the newest observation.
+ * Everything else (including dismissed/clarified items) is in "Earlier observations & resolved feedback".
+ */
+export function partitionObservations(incident: WorkspaceIncident): { attention: Observation[]; earlier: Observation[] } {
+  // Clarifications are shown inside the card of the statement they clarify, not as separate cards.
+  const replacementOf = new Map(incident.observationCorrections.map(k => [k.replacementObservationId, k.originalObservationId]));
+  const cards = [...incident.observations].filter(o => !replacementOf.has(o.id)).sort((a, b) => b.capturedAt.localeCompare(a.capturedAt));
+  const newestAny = [...incident.observations].sort((a, b) => b.capturedAt.localeCompare(a.capturedAt))[0];
+  const newestCardId = newestAny ? replacementOf.get(newestAny.id) ?? newestAny.id : null;
+  const pending = (o: Observation) => feedbackFor(incident, o.id).some(f => f.status === 'open' || f.status === 'deferred');
+  const attention = cards.filter(o => (o.status === 'active' && pending(o)) || o.id === newestCardId);
+  return { attention, earlier: cards.filter(o => !attention.includes(o)) };
 }

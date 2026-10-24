@@ -13,7 +13,9 @@ function handoffMeta(handoff: WorkspaceHandoff): HandoffMeta {
     status: 'Reviewed and shared',
     reviewedBy: handoff.reviewedBy,
     reviewedAt: handoff.reviewedAt,
-    version: handoff.version
+    version: handoff.version,
+    // A shared handoff is, by definition, crew-approved for its own revision.
+    approval: { approved: true, revision: handoff.revision, at: handoff.reviewedAt }
   };
 }
 
@@ -36,7 +38,7 @@ export function ErPage({ incident }: { incident: WorkspaceIncident }) {
 
   return (
     <section className="er">
-      <header className="er-head">
+      <header className="er-head no-print">
         <h1>Receiving view — simulated; no hospital system is connected.</h1>
         <p className="text-quiet">Refreshes every two seconds while this page is open. Only crew-reviewed handoffs are shown here.</p>
       </header>
@@ -47,12 +49,12 @@ export function ErPage({ incident }: { incident: WorkspaceIncident }) {
         </article>
       ) : (
         <article className="card">
-          <p className="er-meta">
+          <p className="er-meta no-print">
             Version {latest.version} · reviewed by {latest.reviewedBy} at {clock(latest.reviewedAt)}
           </p>
 
           {latest.revision !== incident.revision && (
-            <p className="er-amendment" role="status">
+            <p className="er-amendment alert alert-attn no-print" role="status">
               New information has been recorded since this version was reviewed; an amendment has not been shared yet.
             </p>
           )}

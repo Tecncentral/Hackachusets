@@ -2,7 +2,7 @@
 // records into sections and lists uncertainties; it adds no clinical interpretation. These tests
 // assert the grouping, labelling, and the explicit unknown / not_documented / not_obtained states.
 import { describe, expect, it } from 'vitest';
-import { buildDraft, draftText } from './draft';
+import { buildDraft, draftText, phaseOf } from './draft';
 import { WorkspaceIncidentSchema, type Measurement, type TimelineEvent, type WorkspaceIncident } from './boundary';
 
 const ISO = '2026-10-24T14:43:00Z';
@@ -37,7 +37,9 @@ describe('buildDraft measurements', () => {
     });
     const draft = buildDraft(inc);
     const measurements = draft.sections.find(s => s.id === 'measurements')!;
-    expect(measurements.items).toHaveLength(2);
+    // Two readings plus one 'Not documented: …' row for clinical kinds with no entry.
+    expect(measurements.items).toHaveLength(3);
+    expect(measurements.items[2].text).toMatch(/^Not documented: Heart rate/);
     // Chronological: the 14:30 "before cooling" reading precedes the 15:00 "after cooling" one.
     expect(measurements.items[0].text).toContain('before cooling');
     expect(measurements.items[0].text).toContain('method/site: rectal');
@@ -123,5 +125,21 @@ describe('buildDraft context and feedback', () => {
 describe('draftText', () => {
   it('always includes the UNCERTAIN / NOT DOCUMENTED section', () => {
     expect(draftText(buildDraft(incident()))).toContain('UNCERTAIN / NOT DOCUMENTED');
+  });
+});
+
+describe('phaseOf', () => {
+  const cooling = [{ id: 'c1', category: 'cooling' as const, action: 'immersion', startedAt: '2026-10-24T15:03:00Z', endedAt: '2026-10-24T15:18:00Z', note: null, recordedBy: 'crew', capturedAt: ISO, sourceId: 's' }];
+  it('uses the explicit crew entry first', () => {
+    expect(phaseOf(temp({ coolingPhase: 'after', eventTime: '2026-10-24T14:00:00Z' }), cooling)).toMatchObject({ phase: 'after', derived: false });
+  });
+  it('places an unlabelled reading relative to documented cooling times, and says so', () => {
+    expect(phaseOf(temp({ coolingPhase: 'unknown', eventTime: '2026-10-24T15:01:00Z' }), cooling)).toMatchObject({ phase: 'before', derived: true, label: 'Before cooling (from cooling times)' });
+    expect(phaseOf(temp({ coolingPhase: 'unknown', eventTime: '2026-10-24T15:10:00Z' }), cooling).phase).toBe('during');
+    expect(phaseOf(temp({ coolingPhase: 'unknown', eventTime: '2026-10-24T15:20:00Z' }), cooling).phase).toBe('after');
+  });
+  it('cannot place a reading without a time or without cooling events', () => {
+    expect(phaseOf(temp({ coolingPhase: 'unknown', eventTime: null }), cooling).label).toBe('Time not documented');
+    expect(phaseOf(temp({ coolingPhase: 'unknown' }), []).label).toBe('Cooling phase not documented');
   });
 });

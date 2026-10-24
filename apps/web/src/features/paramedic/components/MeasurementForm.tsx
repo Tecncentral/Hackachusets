@@ -27,6 +27,7 @@ export function MeasurementForm({ incident, initialKind = 'temperature', onSaved
   const [device, setDevice] = useState('');
   const [notObtained, setNotObtained] = useState(false);
   const [note, setNote] = useState('');
+  const [revision, setRevision] = useState<number | null>(null);
 
   const isTemp = kind === 'temperature', isBp = kind === 'bloodPressure', context = kind === 'ambientTemperature' || kind === 'humidity';
   const num = (s: string) => (s.trim() === '' || Number.isNaN(Number(s)) ? null : Number(s));
@@ -39,42 +40,42 @@ export function MeasurementForm({ incident, initialKind = 'temperature', onSaved
       method: isTemp && method ? method : null, eventTime: time ? zoneTimeToIso(incidentDate(incident), time) : null,
       coolingPhase: context ? 'unknown' as const : phase, sourceKind: 'manual' as const, device: device.trim() || null, recordedBy: 'crew', note: note.trim() || null
     };
-    const ok = await save.run(() => platform.addMeasurement({ ...body, requestId: req.forContent(JSON.stringify(body)), baseRevision: incident.revision }));
-    if (ok) { req.done(); setValue(''); setValue2(''); setNote(''); setNotObtained(false); setTime(''); setPhase('unknown'); onSaved?.(); }
+    const result = await save.run(() => platform.addMeasurement({ ...body, requestId: req.forContent(JSON.stringify(body)), baseRevision: incident.revision }));
+    if (result) { setRevision(result.revision); req.done(); setValue(''); setValue2(''); setNote(''); setNotObtained(false); setTime(''); setPhase('unknown'); onSaved?.(); }
   };
 
   return <form className="ws-form" aria-label="Add measurement" onSubmit={e => { e.preventDefault(); void submit(); }}>
-    <p className="ws-hint">Entered manually by the crew — no monitor is connected.</p>
+    <p className="ws-hint">Entered manually by crew — no monitor connected.</p>
     <div className="ws-row">
       <div className="ws-field">
         <label htmlFor="ws-m-kind">Measurement</label>
-        <select id="ws-m-kind" value={kind} onChange={e => { const k = e.target.value as Kind; setKind(k); setUnit(UNITS[k][0]); }}>
+        <select id="ws-m-kind" className="field" value={kind} onChange={e => { const k = e.target.value as Kind; setKind(k); setUnit(UNITS[k][0]); }}>
           {FORM_KINDS.map(k => <option key={k} value={k}>{MEASUREMENT_LABEL[k]}{k === 'ambientTemperature' || k === 'humidity' ? ' (environment)' : ''}</option>)}
         </select>
       </div>
       <TimeField id="ws-m-time" label="Collected at" value={time} onChange={setTime} />
     </div>
 
-    <label className="app-switch"><input type="checkbox" checked={notObtained} onChange={e => setNotObtained(e.target.checked)} /> Not obtained</label>
+    <label className="app-switch"><input type="checkbox" checked={notObtained} onChange={e => setNotObtained(e.target.checked)} /> Not performed (crew recorded it was not done)</label>
 
     {!notObtained && <div className="ws-row">
       <div className="ws-field">
         <label htmlFor="ws-m-value">{isBp ? 'Systolic' : 'Value'}</label>
-        <input id="ws-m-value" inputMode="decimal" value={value} onChange={e => setValue(e.target.value)} autoComplete="off" />
+        <input id="ws-m-value" className="field" inputMode="decimal" value={value} onChange={e => setValue(e.target.value)} autoComplete="off" />
       </div>
       {isBp && <div className="ws-field">
         <label htmlFor="ws-m-value2">Diastolic</label>
-        <input id="ws-m-value2" inputMode="decimal" value={value2} onChange={e => setValue2(e.target.value)} autoComplete="off" />
+        <input id="ws-m-value2" className="field" inputMode="decimal" value={value2} onChange={e => setValue2(e.target.value)} autoComplete="off" />
       </div>}
       <div className="ws-field ws-field-narrow">
         <label htmlFor="ws-m-unit">Unit</label>
-        <select id="ws-m-unit" value={unit} onChange={e => setUnit(e.target.value)}>{UNITS[kind].map(u => <option key={u}>{u}</option>)}</select>
+        <select id="ws-m-unit" className="field" value={unit} onChange={e => setUnit(e.target.value)}>{UNITS[kind].map(u => <option key={u}>{u}</option>)}</select>
       </div>
     </div>}
 
     {isTemp && !notObtained && <div className="ws-field">
       <label htmlFor="ws-m-method">Method / site</label>
-      <select id="ws-m-method" value={method} onChange={e => setMethod(e.target.value)}>
+      <select id="ws-m-method" className="field" value={method} onChange={e => setMethod(e.target.value)}>
         <option value="">Not documented</option>
         {METHODS.map(m => <option key={m} value={m}>{m}</option>)}
       </select>
@@ -90,16 +91,16 @@ export function MeasurementForm({ incident, initialKind = 'temperature', onSaved
     <div className="ws-row">
       <div className="ws-field">
         <label htmlFor="ws-m-device">Device or observer (optional)</label>
-        <input id="ws-m-device" value={device} onChange={e => setDevice(e.target.value)} autoComplete="off" />
+        <input id="ws-m-device" className="field" value={device} onChange={e => setDevice(e.target.value)} autoComplete="off" />
       </div>
       <div className="ws-field">
         <label htmlFor="ws-m-note">{notObtained ? 'Reason (optional)' : 'Note (optional)'}</label>
-        <input id="ws-m-note" value={note} onChange={e => setNote(e.target.value)} autoComplete="off" />
+        <input id="ws-m-note" className="field" value={note} onChange={e => setNote(e.target.value)} autoComplete="off" />
       </div>
     </div>
     <div className="ws-actions">
       <button type="submit" className="btn" disabled={save.pending || !valid}>{save.state === 'error' ? 'Retry save' : 'Save measurement'}</button>
     </div>
-    <SaveStatus state={save.state} error={save.error} saved="Measurement added." />
+    <SaveStatus state={save.state} error={save.error} saved="Measurement added." revision={revision} thing="measurements" />
   </form>;
 }

@@ -1,7 +1,9 @@
-// Print-friendly, exportable handoff document. It renders the structured draft the crew reviewed
-// (sections, source attribution, and explicit uncertainties) without adding any clinical
-// interpretation. Unknown / not documented / not obtained are kept distinct, and every source in
-// the draft is listed with its own attribution in the Sources appendix.
+// Print-friendly, exportable handoff document (Trauma Llama "Handoff-Print" design). It renders the
+// structured draft the crew reviewed (sections, source attribution, and explicit uncertainties)
+// without adding any clinical interpretation. Unknown / Not documented / Not performed are kept
+// distinct, and every source in the draft is listed with its own attribution in the Sources legend.
+// Single column, near-black ink, >=1px rules, grayscale-legible. All patient data comes from the
+// incident record; nothing is hard-coded from the design's demo values.
 import { renderToStaticMarkup } from 'react-dom/server';
 import type { HandoffDraft, WorkspaceIncident, WorkspaceSource } from '../../platform';
 import { clock } from '../../platform/time';
@@ -13,6 +15,8 @@ export interface HandoffMeta {
   reviewedBy?: string;
   reviewedAt?: string;
   version?: number;
+  /** Approval banner state. Drives the "DRAFT — NOT CREW APPROVED" / "CREW APPROVED" top-right banner. */
+  approval?: { approved: boolean; revision: number; at?: string };
 }
 
 export interface HandoffDocumentProps {
@@ -24,8 +28,8 @@ export interface HandoffDocumentProps {
 const UNCERTAINTY_LABEL: Record<HandoffDraft['uncertainties'][number]['state'], string> = {
   unknown: 'Unknown',
   not_documented: 'Not documented',
-  not_obtained: 'Not obtained',
-  unresolved: 'Unresolved question'
+  not_obtained: 'Not performed',
+  unresolved: 'Unresolved'
 };
 
 const SOURCE_TYPE_LABEL: Record<WorkspaceSource['type'], string> = {
@@ -46,53 +50,45 @@ function sourceAnchor(sourceId: string): string {
   return `hd-src-${sourceId.replace(/[^a-zA-Z0-9_-]/g, '-')}`;
 }
 
+/** The right-hand banner text: approval status for the revision this document represents. */
+function approvalText(meta: HandoffMeta, draft: HandoffDraft): string {
+  const a = meta.approval;
+  if (a && a.approved && a.revision === draft.revision) {
+    return `CREW APPROVED · revision ${a.revision}${a.at ? ` · ${clock(a.at)}` : ''}`;
+  }
+  return 'DRAFT — NOT CREW APPROVED';
+}
+
 export function HandoffDocument({ draft, incident, meta }: HandoffDocumentProps) {
   // Every source listed in the draft that we can find in the incident record, in draft order.
   const sources = draft.sourceIds
     .map(id => incident.sources.find(s => s.id === id))
     .filter((s): s is WorkspaceSource => s !== undefined);
   const known = new Set(sources.map(s => s.id));
+  const approved = approvalText(meta, draft);
+
+  // Omit the device/wearable section entirely when empty; every other section renders even if empty.
+  const sections = draft.sections.filter(s => !(s.id === 'device' && s.items.length === 0));
 
   return (
     <article className="hd" aria-label={meta.title}>
-      <p className="hd-banner">SYNTHETIC DEMO</p>
-      <h1>{meta.title}</h1>
-      <p className="hd-review">{incident.patient.name}</p>
-      <dl className="hd-review">
-        <div>
-          <dt>Revision</dt>
-          <dd>{draft.revision}</dd>
-        </div>
-        <div>
-          <dt>Status</dt>
-          <dd>{meta.status}</dd>
-        </div>
-        {meta.version !== undefined && (
-          <div>
-            <dt>Version</dt>
-            <dd>{meta.version}</dd>
-          </div>
-        )}
-        {meta.reviewedBy && (
-          <div>
-            <dt>Reviewed by</dt>
-            <dd>{meta.reviewedBy}</dd>
-          </div>
-        )}
-        {meta.reviewedAt && (
-          <div>
-            <dt>Reviewed at</dt>
-            <dd>{clock(meta.reviewedAt)}</dd>
-          </div>
-        )}
-      </dl>
+      <div className="hd-banner">
+        <span>SYNTHETIC DEMO — NOT A REAL PATIENT</span>
+        <span>{approved}</span>
+      </div>
+
+      <h1 className="hd-title">ER handoff — Trauma Llama</h1>
+      <p className="hd-meta">
+        Incident <span className="mono">{incident.id}</span> · Revision <span className="mono">{draft.revision}</span> · Printed{' '}
+        <span className="mono">{clock(new Date().toISOString())}</span> · Source tags in [brackets] refer to the source list at the end.
+      </p>
 
       {draft.mode === 'website-grouped' && (
         <p className="hd-grouped">Grouped by the website because the platform draft endpoint is unavailable.</p>
       )}
 
-      {draft.sections.map(section => (
-        <section key={section.id}>
+      {sections.map(section => (
+        <section key={section.id} className="hd-section">
           <h2>{section.title}</h2>
           {section.items.length === 0 ? (
             <p className="hd-empty">Not documented</p>
@@ -107,11 +103,11 @@ export function HandoffDocument({ draft, incident, meta }: HandoffDocumentProps)
                       {item.sourceIds.map(id =>
                         known.has(id) ? (
                           <a key={id} className="hd-ref" href={`#${sourceAnchor(id)}`} title={`Source ${shortRef(id)}`}>
-                            {shortRef(id)}
+                            [{shortRef(id)}]
                           </a>
                         ) : (
                           <span key={id} className="hd-ref" title={`Source ${shortRef(id)}`}>
-                            {shortRef(id)}
+                            [{shortRef(id)}]
                           </span>
                         )
                       )}
@@ -124,25 +120,23 @@ export function HandoffDocument({ draft, incident, meta }: HandoffDocumentProps)
         </section>
       ))}
 
-      <section>
-        <h2>Uncertain / not documented</h2>
+      <section className="hd-unresolved">
+        <h2>Unresolved ({draft.uncertainties.length})</h2>
         {draft.uncertainties.length === 0 ? (
           <p className="hd-empty">None listed</p>
         ) : (
-          <dl className="hd-unc">
+          <ul className="hd-unc">
             {draft.uncertainties.map((u, i) => (
-              <div key={i}>
-                <dt>
-                  {u.label}: <span className="hd-state">{UNCERTAINTY_LABEL[u.state]}</span>
-                </dt>
-                {u.detail && <dd>{u.detail}</dd>}
-              </div>
+              <li key={i}>
+                <span className="hd-unc-label">{u.label}</span> — <span className="hd-state">{UNCERTAINTY_LABEL[u.state]}</span>
+                {u.detail ? <span className="hd-note">. {u.detail}</span> : null}
+              </li>
             ))}
-          </dl>
+          </ul>
         )}
       </section>
 
-      <section>
+      <section className="hd-section">
         <h2>Sources</h2>
         {sources.length === 0 ? (
           <p className="hd-empty">No sources attached</p>
@@ -150,47 +144,59 @@ export function HandoffDocument({ draft, incident, meta }: HandoffDocumentProps)
           <div className="hd-sources">
             {sources.map(s => (
               <div key={s.id} id={sourceAnchor(s.id)} className="hd-source">
-                <h3>
-                  {s.label} <span className="hd-note">({shortRef(s.id)})</span>
-                </h3>
-                <p className="hd-source-meta">
-                  Type: {SOURCE_TYPE_LABEL[s.type]} · Event time: {s.eventTime ? clock(s.eventTime) : 'unknown'} · Captured: {clock(s.capturedAt)}
-                </p>
-                <p className="hd-source-text">{s.text}</p>
+                <span className="hd-src-id mono">[{shortRef(s.id)}]</span>
+                <span className="hd-src-body">
+                  <strong>{s.label}</strong> · {SOURCE_TYPE_LABEL[s.type]} · event time{' '}
+                  {s.eventTime ? <span className="mono">{clock(s.eventTime)}</span> : 'unknown'} · captured{' '}
+                  <span className="mono">{clock(s.capturedAt)}</span>
+                </span>
               </div>
             ))}
           </div>
         )}
       </section>
+
+      <div className="hd-sign">
+        <div className="hd-sign-line">Reviewed by ______</div>
+        <div className="hd-sign-line">Time ______</div>
+      </div>
+
+      <p className="hd-footer">Generated from a synthetic demonstration incident. Not for clinical use.</p>
     </article>
   );
 }
 
-/** Minimal readable print stylesheet duplicating the essential .hd styles for the standalone export. */
+/** Print stylesheet duplicating the essential .hd styles for the standalone export. Matches er.css. */
 const EXPORT_STYLE = `
   :root { color-scheme: light; }
-  body { margin: 24px; max-width: 820px; color: #142e32; background: #fff;
-    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
-  .hd-banner { display: inline-block; font-size: .75rem; font-weight: 700; letter-spacing: .04em;
-    padding: 3px 10px; border-radius: 999px; background: #fff4d5; border: 1px solid #8a6a1c; color: #142e32; margin: 0 0 10px; }
-  h1 { font-size: 1.4rem; margin: 0 0 4px; }
-  h2 { font-size: 1.1rem; margin: 18px 0 6px; border-bottom: 1px solid #cfdcd7; padding-bottom: 3px; }
-  h3 { font-size: 1rem; margin: 0 0 2px; }
-  .hd-review { color: #46615b; margin: 0 0 6px; }
-  .hd-review dt { font-weight: 650; }
+  body { margin: 0; padding: 48px; max-width: 820px; color: #15191F; background: #fff;
+    font: 15px/1.5 "Atkinson Hyperlegible Next", system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .mono { font-family: "Atkinson Hyperlegible Mono", ui-monospace, Menlo, monospace; font-variant-numeric: tabular-nums; }
+  .hd-banner { border: 2px solid #15191F; padding: 6px 10px; font-weight: 700; font-size: 13px; letter-spacing: .04em;
+    display: flex; justify-content: space-between; gap: 12px; }
+  .hd-title { margin: 20px 0 4px; font-size: 28px; line-height: 1.2; }
+  .hd-meta { margin: 0 0 4px; font-size: 14px; color: #3F4752; }
+  h2 { margin: 24px 0 6px; font-size: 19px; border-bottom: 1px solid #15191F; padding-bottom: 4px; }
   ul.hd-list { margin: 4px 0 0; padding-left: 20px; }
   ul.hd-list li { margin: 6px 0; }
-  .hd-note { color: #46615b; }
-  .hd-empty { color: #46615b; font-style: italic; }
-  .hd-ref { font-size: .8rem; font-weight: 650; text-decoration: none; color: #175d55; margin-left: 4px; white-space: nowrap; }
-  .hd-unc dt { font-weight: 650; margin-top: 6px; }
-  .hd-unc dd { margin: 0; color: #46615b; }
-  .hd-state { font-weight: 650; color: #142e32; }
-  .hd-source { margin: 0 0 12px; padding: 0 0 10px; border-bottom: 1px solid #cfdcd7; }
-  .hd-source-meta { color: #46615b; font-size: .9rem; margin: 0 0 2px; }
-  .hd-grouped { margin: 10px 0 0; padding: 8px 12px; border-radius: 8px; background: #e3f1ec; border: 1px solid #8fb9ab; color: #142e32; font-size: .9rem; }
+  .hd-note { color: #3F4752; }
+  .hd-empty { color: #3F4752; font-style: italic; }
+  .hd-ref { font-size: .85rem; font-weight: 600; text-decoration: none; color: #15191F; margin-left: 4px; white-space: nowrap; }
+  .hd-unresolved { border: 2px solid #15191F; padding: 12px 14px; margin-top: 24px; }
+  .hd-unresolved h2 { margin: 0 0 6px; border: none; padding: 0; }
+  ul.hd-unc { margin: 0; padding-left: 20px; }
+  ul.hd-unc li { margin: 4px 0; }
+  .hd-unc-label { font-weight: 600; }
+  .hd-state { font-weight: 700; }
+  .hd-sources { display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
+  .hd-source { display: grid; grid-template-columns: 70px 1fr; gap: 12px; }
+  .hd-src-id { font-weight: 700; }
+  .hd-grouped { margin: 10px 0 0; padding: 8px 12px; border: 1px solid #15191F; color: #15191F; font-size: 14px; }
+  .hd-sign { margin-top: 28px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; font-size: 14px; }
+  .hd-sign-line { border-bottom: 1px solid #15191F; padding-top: 28px; }
+  .hd-footer { margin: 20px 0 0; font-size: 12px; color: #3F4752; }
   p { overflow-wrap: anywhere; }
-  @media print { body { margin: 0; } }
+  @media print { body { margin: 0; padding: 0; } }
 `;
 
 /** A complete standalone HTML file string for the handoff document. */
@@ -240,9 +246,10 @@ export function textHandoffHtml(title: string, text: string): string {
 <style>${EXPORT_STYLE}</style>
 </head>
 <body>
-<p class="hd-banner">SYNTHETIC DEMO</p>
-<h1>${escapeHtml(title)}</h1>
-<pre style="white-space: pre-wrap; overflow-wrap: anywhere; font: 14px/1.5 ui-monospace, Menlo, monospace;">${escapeHtml(text)}</pre>
+<div class="hd-banner"><span>SYNTHETIC DEMO — NOT A REAL PATIENT</span><span>DRAFT — NOT CREW APPROVED</span></div>
+<h1 class="hd-title">${escapeHtml(title)}</h1>
+<pre style="white-space: pre-wrap; overflow-wrap: anywhere; font: 14px/1.5 'Atkinson Hyperlegible Mono', ui-monospace, Menlo, monospace;">${escapeHtml(text)}</pre>
+<p class="hd-footer">Generated from a synthetic demonstration incident. Not for clinical use.</p>
 </body>
 </html>`;
 }

@@ -7,24 +7,35 @@ import { ErPage } from './features/er/ErPage';
 import { PatientPage } from './features/patient/PatientPage';
 import './style.css';
 
-const VIEWS = [{ id: 'paramedic', label: 'EMT workspace' }, { id: 'er', label: 'Receiving view' }, { id: 'patient', label: 'Patient sharing' }] as const;
+const VIEWS = [{ id: 'paramedic', label: 'EMT workspace' }, { id: 'er', label: 'Receiving view' }, { id: 'patient', label: 'Patient sharing (demo)' }] as const;
 type View = typeof VIEWS[number]['id'];
 const viewFromHash = (): View => (VIEWS.find(v => v.id === location.hash.slice(1))?.id ?? 'paramedic');
+
+function SaveStatus() {
+  const { save, incident } = useIncidentState();
+  const text = save.state === 'saving' ? 'Saving…' : save.state === 'error' ? '⚠ Not saved — see highlighted item' : incident ? `✓ Saved · revision ${incident.revision}` : '';
+  return <span className="save-status" data-state={save.state === 'error' ? 'error' : save.state === 'saving' ? 'saving' : 'saved'} role="status" aria-live="polite">{text}</span>;
+}
 
 function Shell() {
   const { platform, incident, loadError } = useIncidentState();
   const [view, setView] = useState<View>(viewFromHash);
-  const reset = useAction();
+  const reset = useAction({ reportsSave: false });
   useEffect(() => { const on = () => setView(viewFromHash()); window.addEventListener('hashchange', on); return () => window.removeEventListener('hashchange', on); }, []);
   const [assistantOn, setAssistantOn] = useState(() => platform.info.kind === 'dev' ? devAssistantEnabled() : true);
   const href = (id: string) => `${location.search}#${id}`;
 
   return <div className="app">
     <header className="app-header no-print">
-      <div className="app-brand">
-        <span className="app-name">SceneBrief</span>
-        <span className="app-badge">Synthetic data</span>
-        <span className={`app-badge ${platform.info.kind === 'dev' ? 'app-badge-dev' : ''}`} title={platform.info.description}>{platform.info.label}</span>
+      <div className="app-header-inner">
+        <a className="app-wordmark" href={href('paramedic')}>
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ color: 'var(--primary)' }}><path d="M4 12h3l2-5 4 10 2-5h5" /></svg>
+          Trauma Llama
+        </a>
+        <span className="demo-label">SYNTHETIC DEMO — NOT A REAL PATIENT</span>
+        {platform.info.kind === 'dev' && <span className="chip chip-demo" title={platform.info.description}>Development adapter</span>}
+        <span className="app-spacer" />
+        <SaveStatus />
       </div>
       <nav aria-label="Views" className="app-nav">
         {VIEWS.map(v => <a key={v.id} href={href(v.id)} aria-current={view === v.id ? 'page' : undefined}>{v.label}</a>)}
@@ -39,7 +50,7 @@ function Shell() {
       {!incident ? <p className="app-loading">{loadError ? 'Waiting for the platform…' : 'Loading incident…'}</p>
         : view === 'er' ? <ErPage incident={incident} />
         : view === 'patient' ? <PatientPage incident={incident} />
-        : <Workspace incident={incident} assistantSwitch={assistantOn} />}
+        : <Workspace incident={incident} />}
     </main>
     <footer className="app-footer no-print">
       <p>Local demo with synthetic data. No authentication, real patient data, clinical decision support, or production integrations. The assistant proposes; the crew decides and records.</p>
@@ -51,6 +62,7 @@ function Shell() {
 
 function App() {
   const platform = useMemo(() => selectPlatform(), []);
+  useEffect(() => { document.title = 'Trauma Llama — EMT incident workspace (synthetic demo)'; }, []);
   return <IncidentProvider platform={platform}><Shell /></IncidentProvider>;
 }
 

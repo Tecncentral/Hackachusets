@@ -40,6 +40,7 @@ export function useRecorder() {
   const chunks = useRef<Blob[]>([]);
   const cancelled = useRef(false);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const sessionRef = useRef(0);
 
   const release = useCallback(() => {
     if (timer.current) clearInterval(timer.current);
@@ -54,13 +55,19 @@ export function useRecorder() {
     const support = recorderSupport();
     if (!support.ok) { setState({ phase: 'error', reason: support.reason, message: support.message }); return; }
     const mimeType = pickMimeType(t => MediaRecorder.isTypeSupported(t));
+    const session = ++sessionRef.current;
+    cancelled.current = false;
     setState({ phase: 'requesting' });
+    let media: MediaStream;
     try {
-      stream.current = await navigator.mediaDevices.getUserMedia({ audio: true });
-    } catch (e) { release(); setState(describe(e)); return; }
+      media = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (e) { if (session === sessionRef.current) { release(); setState(describe(e)); } return; }
+    // Cancelled (or restarted) while waiting for permission: close the microphone and stop here.
+    if (cancelled.current || session !== sessionRef.current) { media.getTracks().forEach(t => t.stop()); return; }
+    stream.current = media;
     try {
-      const r = new MediaRecorder(stream.current, mimeType ? { mimeType } : undefined);
-      chunks.current = []; cancelled.current = false;
+      const r = new MediaRecorder(media, mimeType ? { mimeType } : undefined);
+      chunks.current = [];
       const startedAt = Date.now();
       r.ondataavailable = ev => { if (ev.data.size > 0) chunks.current.push(ev.data); };
       r.onerror = () => { release(); setState({ phase: 'error', reason: 'failed', message: 'Recording stopped unexpectedly. Type the observation instead, or try again.' }); };

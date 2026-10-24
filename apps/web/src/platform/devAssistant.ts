@@ -39,7 +39,8 @@ const INTERVAL = /\b(minutes?|mins?)\b.*\bago\b|\bdropped\b|\bcollapsed\b|\bwent
 export function devEvaluate(incident: WorkspaceIncident): Feedback[] {
   const out: Feedback[] = [];
   const add = (f: Omit<Feedback, 'revision' | 'mode' | 'status' | 'resolution'>) => {
-    if (incident.feedback.some(x => x.id === f.id) || out.some(x => x.id === f.id)) return;
+    // Resolved items are not re-raised; still-applicable open/deferred items are re-proposed so a re-check refreshes their revision.
+    if (incident.feedback.some(x => x.id === f.id && (x.status === 'clarified' || x.status === 'dismissed')) || out.some(x => x.id === f.id)) return;
     out.push({ ...f, revision: incident.revision, mode: 'development-stub', status: 'open', resolution: null });
   };
   const wearable = incident.sources.filter(s => s.type === 'wearable').map(s => s.id);

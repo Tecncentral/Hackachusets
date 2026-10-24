@@ -10,5 +10,6 @@ export function selectPlatform(search = typeof location === 'undefined' ? '' : l
 }
 
 export * from './boundary';
+export { patientScoped } from './scope';
 export type { Platform, AdapterInfo } from './types';
-export { IncidentProvider, useIncidentState, useAction, type ActionState } from './store';
+export { IncidentProvider, useIncidentState, useAction, type ActionState, type SaveIndicator } from './store';

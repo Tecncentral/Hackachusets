@@ -7,6 +7,7 @@ import { PlatformError, WorkspaceIncidentSchema, type Feedback, type Mutation, t
 import { createHttpPlatform } from './http';
 import { devEvaluate, DEV_REFERENCES } from './devAssistant';
 import { buildDraft, draftText } from './draft';
+import { patientScoped } from './scope';
 import type { Platform } from './types';
 
 const KEY = 'scenebrief.dev-adapter.v1';
@@ -53,10 +54,10 @@ export function createDevPlatform(opts: { storage?: DevStorage; seed?: () => Pro
     queue = next.catch(() => undefined);
     return next;
   }
-  const requireMatch = (s: Stored, endpoint: string) => { if (!s.incident.patient.sharing || !s.incident.patient.matched) throw new PlatformError('forbidden', 'Confirm the patient association first.', endpoint, 403); };
+  // Documentation never waits for identification: an unidentified patient can still be documented and handed off.
+  // Matching only unlocks patient-linked context (profile, wearable records).
   /** Idempotency + revision check. Returns true when this exact request was already applied. */
   function guard(s: Stored, endpoint: string, input: Mutation): boolean {
-    requireMatch(s, endpoint);
     const body = JSON.stringify({ endpoint, ...input });
     const previous = s.requests[input.requestId];
     if (previous !== undefined) { if (previous !== body) throw new PlatformError('conflict', 'Request ID already used for different content.', endpoint, 409); return true; }
@@ -124,17 +125,20 @@ export function createDevPlatform(opts: { storage?: DevStorage; seed?: () => Pro
     },
     async evaluate(input) {
       const start = await tx(s => {
-        requireMatch(s, 'evaluations');
         if (!devAssistantEnabled(storage)) throw new PlatformError('unavailable', 'The assistant is switched off in the development adapter.', 'evaluations', 503);
         if (input.baseRevision !== s.incident.revision) throw new PlatformError('conflict', 'The incident changed before the check started.', 'evaluations', 409);
         return snapshot(s);
       });
-      const proposed = devEvaluate(start);
+      const proposed = devEvaluate(patientScoped(start));
       await new Promise(r => setTimeout(r, delay));
       return tx(s => {
         // A late response must not be applied to a different revision.
         if (s.incident.revision !== start.revision) throw new PlatformError('conflict', 'New information was added while the check ran; its feedback was not applied. Check again.', 'evaluations', 409);
-        s.incident.feedback.push(...proposed);
+        for (const f of proposed) {
+          const existing = s.incident.feedback.find(x => x.id === f.id);
+          if (existing) { existing.revision = f.revision; existing.message = f.message; existing.suggestedQuestion = f.suggestedQuestion; existing.evidenceSourceIds = f.evidenceSourceIds; }
+          else s.incident.feedback.push(f);
+        }
         return snapshot(s);
       });
     },
@@ -162,12 +166,11 @@ export function createDevPlatform(opts: { storage?: DevStorage; seed?: () => Pro
       f.resolution = { action: input.action, text: input.clarificationText?.trim() || null, recordedAt: now(), author: 'crew', revision: input.baseRevision, replacementObservationId };
       return snapshot(s);
     }),
-    async getHandoffDraft(current) { return buildDraft(current); },
+    async getHandoffDraft(current) { return buildDraft(patientScoped(current)); },
     approveHandoff: input => tx(s => {
-      requireMatch(s, 'handoffs');
       if (input.revision !== s.incident.revision) throw new PlatformError('conflict', 'Incident changed. Review the latest draft before sharing.', 'handoffs', 409);
       if (!s.incident.handoffs.some(h => h.revision === input.revision)) {
-        const draft = buildDraft(s.incident);
+        const draft = buildDraft(patientScoped(s.incident));
         s.incident.handoffs.push({ version: s.incident.handoffs.length + 1, revision: input.revision, reviewedAt: now(), reviewedBy: input.reviewedBy, text: draftText(draft), draft });
       }
       return snapshot(s);

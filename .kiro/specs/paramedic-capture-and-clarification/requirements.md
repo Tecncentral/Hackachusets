@@ -1,4 +1,4 @@
-# paramedic-capture-and-clarification — EMT website (EHS scope)
+# paramedic-capture-and-clarification — EMT website (EHS scope, "Trauma Llama" display name)
 
 Owner: EMT website session · Branch `feat/emt-website-ehs` · Paths: `apps/web/**`
 Supersedes the earlier video-first paramedic requirements. Clinical evidence boundaries in AGENTS.md still apply.
@@ -13,6 +13,8 @@ Scenario: a person found confused after strenuous activity in hot conditions; su
 3. The workspace SHALL show one primary next action for the current task while keeping capture and handoff access available.
 4. Detailed evidence, wearable background, and the extended timeline SHALL use progressive disclosure.
 5. WHEN no wearable data is available THEN the workspace SHALL say so and all other functions SHALL work.
+
+6. Patient identification SHALL NOT gate documentation: capture, feedback, care entry, and handoff SHALL work for an unidentified patient. Confirming the match SHALL only add patient-linked context (profile, wearable records and their derived events), which SHALL stay hidden until then.
 
 ### R2 Observations and structured entries
 1. The EMT SHALL be able to save free-text observations with an optional category and observed time; saved items SHALL come back from the platform with source attribution and capture time.
@@ -56,6 +58,14 @@ Scenario: a person found confused after strenuous activity in hot conditions; su
 
 ### R10 Accessibility and quality
 Phone (≥360 px) and desktop layouts, keyboard operation with visible focus, ≥44 px targets, readable contrast, no text overflow, reduced-motion support, and calm professional language that does not shame the EMT or witness.
+
+### R11 Visual design integration (design handoff, 2026-10-24)
+1. Desktop: header with wordmark, synthetic label and live save status (`role=status`); three wrapping columns (summary · capture + observations needing attention · care & reassessment + ER handoff card); review view replaces the body.
+2. Phone (≤720 px): vitals strip and a fixed 3-button bottom bar (Capture · Care & vitals · Handoff) with `aria-current`, the only workspace navigation.
+3. Status vocabulary: Unknown (dashed), Not documented, Not performed (measurement status `not_obtained`), Not yet measured; never colour alone.
+4. Feedback sits under its observation; stale feedback shows both revisions and hides Clarify/Defer/Dismiss until re-checked; clarified statements show "Original statement — kept in record" with the saved clarification.
+5. Readings show Initial/Latest with before/after cooling labels (crew entry, or derived from documented cooling times and labeled as such).
+6. Review: approval requires the review checkbox; approval failure, version conflict, and changed-after-approval are distinct; print shows a DRAFT or CREW APPROVED banner, Unresolved box, sources, signature lines, and no UI chrome.
 
 ## Out of scope
 Diagnosis, treatment recommendations, protocol dosing/thresholds, production auth/EHR/wearable OAuth, camera OCR, server TTS, deployment, video production.

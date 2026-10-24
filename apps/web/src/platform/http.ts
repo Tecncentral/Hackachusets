@@ -6,6 +6,7 @@ import { IncidentId } from '@scenebrief/contracts';
 import { HandoffDraftSchema, PlatformError, TranscriptionSchema, type HandoffDraft, type WorkspaceIncident } from './boundary';
 import { normalizeIncident } from './legacy';
 import { buildDraft } from './draft';
+import { patientScoped } from './scope';
 import type { Platform } from './types';
 
 const base = `/api/incidents/${IncidentId}`;
@@ -58,7 +59,7 @@ export function createHttpPlatform(): Platform {
     resolveFeedback: ({ feedbackId, ...body }) => incident(post(`${base}/feedback/${encodeURIComponent(feedbackId)}/resolutions`, body)),
     async getHandoffDraft(current: WorkspaceIncident): Promise<HandoffDraft> {
       try { return HandoffDraftSchema.parse(await call(`${base}/handoff-draft`)); }
-      catch (e) { if (e instanceof PlatformError && e.kind === 'unavailable') return buildDraft(current); throw e; }
+      catch (e) { if (e instanceof PlatformError && e.kind === 'unavailable') return buildDraft(patientScoped(current)); throw e; }
     },
     approveHandoff: input => incident(post(`${base}/handoffs`, input))
   };

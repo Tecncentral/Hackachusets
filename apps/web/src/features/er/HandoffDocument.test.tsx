@@ -70,15 +70,16 @@ async function captureFlow(): Promise<{ platform: ReturnType<typeof makePlatform
   return { platform, incident };
 }
 
-const META: HandoffMeta = { title: 'Crew-reviewed handoff — version 1', status: 'Reviewed and shared', reviewedBy: 'medic-1', reviewedAt: '2026-10-24T15:10:00Z', version: 1 };
+const DRAFT_META: HandoffMeta = { title: 'ER handoff — Trauma Llama', status: 'Draft — not crew approved' };
 
 describe('HandoffDocument', () => {
   it('renders both temperature phases in chronological order with method and the collapse unknown', async () => {
     const { incident } = await captureFlow();
     const draft = buildDraft(incident);
-    const html = renderToStaticMarkup(<HandoffDocument draft={draft} incident={incident} meta={META} />);
+    const html = renderToStaticMarkup(<HandoffDocument draft={draft} incident={incident} meta={DRAFT_META} />);
 
-    expect(html).toContain('SYNTHETIC DEMO');
+    expect(html).toContain('SYNTHETIC DEMO — NOT A REAL PATIENT');
+    expect(html).toContain('ER handoff — Trauma Llama');
     expect(html).toContain('before cooling');
     expect(html).toContain('after cooling');
     // chronological: the 40.6 (before) reading must appear before the 39.0 (after) reading.
@@ -88,16 +89,54 @@ describe('HandoffDocument', () => {
     expect(html).toContain('Collapse: Unknown');
   });
 
-  it('lists the attached sources in the appendix and marks empty sections "Not documented"', async () => {
+  it('shows the DRAFT banner when not approved and CREW APPROVED when approved for this revision', async () => {
     const { incident } = await captureFlow();
     const draft = buildDraft(incident);
-    const html = renderToStaticMarkup(<HandoffDocument draft={draft} incident={incident} meta={META} />);
 
-    // Sources appendix exists and contains at least one captured source entry.
+    const draftHtml = renderToStaticMarkup(<HandoffDocument draft={draft} incident={incident} meta={DRAFT_META} />);
+    expect(draftHtml).toContain('DRAFT — NOT CREW APPROVED');
+    expect(draftHtml).not.toContain('CREW APPROVED · revision');
+
+    const approvedMeta: HandoffMeta = {
+      title: 'ER handoff — Trauma Llama', status: 'Crew approved',
+      approval: { approved: true, revision: draft.revision, at: '2026-10-24T15:10:00Z' }
+    };
+    const approvedHtml = renderToStaticMarkup(<HandoffDocument draft={draft} incident={incident} meta={approvedMeta} />);
+    expect(approvedHtml).toContain(`CREW APPROVED · revision ${draft.revision}`);
+    expect(approvedHtml).not.toContain('DRAFT — NOT CREW APPROVED');
+  });
+
+  it('renders an Unresolved box using "Not performed" for a not_obtained temperature', async () => {
+    const platform = makePlatform();
+    await platform.setSharing(true);
+    let incident = await platform.match('patient-demo-01');
+    // Record a temperature explicitly as not performed (status not_obtained).
+    incident = await platform.addMeasurement({
+      requestId: 'r-temp-np', baseRevision: incident.revision,
+      kind: 'temperature', status: 'not_obtained', value: null, value2: null, unit: '°C',
+      method: null, eventTime: null, coolingPhase: 'unknown',
+      sourceKind: 'manual', device: null, recordedBy: 'medic-1', note: null
+    });
+    const draft = buildDraft(incident);
+    // Sanity: the draft carries a not_obtained uncertainty for the clinical temperature.
+    expect(draft.uncertainties.some(u => u.state === 'not_obtained')).toBe(true);
+
+    const html = renderToStaticMarkup(<HandoffDocument draft={draft} incident={incident} meta={DRAFT_META} />);
+    expect(html).toContain('Unresolved (');
+    expect(html).toContain('Clinical temperature');
+    expect(html).toContain('Not performed');
+  });
+
+  it('lists the attached sources in the legend and marks empty sections "Not documented"', async () => {
+    const { incident } = await captureFlow();
+    const draft = buildDraft(incident);
+    const html = renderToStaticMarkup(<HandoffDocument draft={draft} incident={incident} meta={DRAFT_META} />);
+
+    // Sources legend exists and contains at least one captured source entry.
     expect(html).toContain('<h2>Sources</h2>');
-    expect(html).toContain('Captured:');
-    expect(html).toContain('Event time:');
-    // At least one source anchor is rendered for the appendix.
+    expect(html).toContain('captured');
+    expect(html).toContain('event time');
+    // At least one source anchor is rendered for the legend.
     expect(html).toContain('id="hd-src-');
     // Empty sections render the "Not documented" marker.
     expect(html).toContain('Not documented');
@@ -105,14 +144,23 @@ describe('HandoffDocument', () => {
     expect(html).toContain('Grouped by the website because the platform draft endpoint is unavailable.');
   });
 
+  it('renders the signature lines and the non-clinical footer', async () => {
+    const { incident } = await captureFlow();
+    const draft = buildDraft(incident);
+    const html = renderToStaticMarkup(<HandoffDocument draft={draft} incident={incident} meta={DRAFT_META} />);
+    expect(html).toContain('Reviewed by ______');
+    expect(html).toContain('Time ______');
+    expect(html).toContain('Generated from a synthetic demonstration incident. Not for clinical use.');
+  });
+
   it('produces a complete standalone HTML file', async () => {
     const { incident } = await captureFlow();
     const draft = buildDraft(incident);
-    const file = handoffHtml({ draft, incident, meta: META });
+    const file = handoffHtml({ draft, incident, meta: DRAFT_META });
     expect(file.startsWith('<!doctype html>')).toBe(true);
     expect(file).toContain('<meta charset="utf-8">');
     expect(file).toContain('<title>');
-    expect(file).toContain('SYNTHETIC DEMO');
+    expect(file).toContain('SYNTHETIC DEMO — NOT A REAL PATIENT');
   });
 });
 

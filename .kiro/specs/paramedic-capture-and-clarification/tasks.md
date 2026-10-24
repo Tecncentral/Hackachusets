@@ -16,3 +16,14 @@ Reused from `feat/paramedic-capture` checkpoint 5fe4f77: `clock()`/source labels
 - [x] 12. Tests: adapters, draft, rendering of key states
 - [x] 13. Browser check phone/desktop, keyboard, reduced motion; screenshots
 - [x] 14. Handoff doc `docs/handoffs/emt-website.md`, `npm run check`, commit, push, draft PR
+
+## Design integration (Trauma Llama)
+- [x] 15. Tokens and base controls in `style.css`; Trauma Llama display name (header, title, print)
+- [x] 16. Remove the patient-match gate (dev adapter + UI); scope patient-linked context until matched (`platform/scope.ts`)
+- [x] 17. Header save status, three-column layout, phone tab bar + vitals strip
+- [x] 18. Summary column with status chips and legend; timeline/wearable disclosures
+- [x] 19. Capture state machine (record/stop-and-transcribe/cancel/transcribing/review/saving/error)
+- [x] 20. Observation cards with attached feedback, stale re-check, defer/dismiss/clarify outcomes
+- [x] 21. Care & reassessment readings (Initial/Latest, cooling phase), inline forms, handoff card with unresolved list
+- [x] 22. Review view + approval states; print layout
+- [x] 23. Browser verification at 390/360/1280 px, keyboard, failure states, print

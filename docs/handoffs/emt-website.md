@@ -1,10 +1,13 @@
-# Handoff — EMT website (EHS)
+# Handoff — EMT website (EHS) · display name "Trauma Llama"
 
 - Branch: `feat/emt-website-ehs` · Worktree: `.scenebrief-worktrees/scenebrief-emt-website`
 - Base: `origin/main` @ `2f622d4c419f43408428564029d427d88cb511ee`
-- Superseded work: `feat/paramedic-capture` @ `5fe4f77` (local checkpoint, not pushed). Reused: time formatting, source list, association step, scoped-CSS approach, real-store test states.
-- Spec: `.kiro/specs/paramedic-capture-and-clarification/` (requirements R1–R10, design, tasks)
 - PR (draft): https://github.com/Tecncentral/Hackachusets/pull/3
+- Superseded work: `feat/paramedic-capture` @ `5fe4f77` (local checkpoint, not pushed).
+- Spec: `.kiro/specs/paramedic-capture-and-clarification/` (R1–R11; R11 = design integration)
+- Design reference: `/Users/justin/Desktop/Projects/hackachusetts/project/*.dc.html` (outside the repo; translated to React, no prototype runtime or demo data copied)
+
+Only user-facing strings were renamed to Trauma Llama (header, document title, print/export). Packages, folders, schemas and the repo keep the SceneBrief names.
 
 ## Run
 
@@ -16,78 +19,91 @@ npm run dev                      # API :3001, web :5173
 # Receiving view:                      …#er        Patient sharing toggle: …#patient
 ```
 
-On a shared machine use other ports without editing committed config, e.g. a local, uncommitted Vite script with `server.port` and a proxy to your API port (this session used API 3011 / web 5181).
+On a shared machine, use different ports through a local, uncommitted Vite script (this session used API 3011 / web 5181).
 
-## Main flow (development adapter shows the full scenario)
+## Main journey (development adapter shows all of it)
 
-1. Patient sharing → enable. EMT workspace → Use demo code → Confirm.
-2. Capture → Observation: record voice (real `MediaRecorder`) or type; or open "Example transcripts (for testing — not recordings)". Save observation. Add the witness account, the skin-temperature inference, and the sweating inference.
-3. Assistant feedback → Check record. Each item shows the original statement, evidence sources, reference (title, URL, version, passage, review status), suggested question, Play/Stop/Mute. Clarify (text) / Dismiss (optional reason) / Defer.
-4. Key time → discovery 10:43 "reported"; collapse stays Unknown (always shown separately).
-5. Measurement → temperature, value, unit, method/site, time, before/during/after cooling. Care event → cooling with start/stop and response. Repeat temperature after cooling; mental status reassessment.
-6. Handoff → full draft → "I reviewed this draft (revision N)" → Approve. Any change in between clears the confirmation; a 409 shows the error and the refreshed draft.
-7. Receiving view → reviewed version, amendment notice, Print, Download HTML.
-8. Dev bar → untick "Assistant available": evaluation shows "unavailable"; capture and handoff still work.
+1. **A · Capture.** The workspace opens for an **unidentified patient**: capture and handoff work immediately. "Record observation" (real `MediaRecorder`) → "Stop and transcribe" → editable transcript → "Save observation". Alternatively, "DEMO · Load example transcript", or type. Witness account, skin-temperature inference, and sweating inference.
+2. **Identify patient (optional).** Patient & context → "Identify patient (optional)" → demo code → confirm. This adds the profile and wearable background; it never blocks documentation.
+3. **B · Clarification.** Each saved observation triggers an evaluation of that revision. Feedback appears under its observation: chip, explanation, suggested question, Clarify / Defer / Dismiss, Patient evidence and Clinical reference disclosures, Play feedback / Mute. After any new information the feedback is marked stale with both revisions, and actions are hidden until "Re-check current revision".
+4. **C · Care & vitals.** Add a rectal temperature before cooling, a cooling care event with start/stop, and a later temperature. Readings show BEFORE COOLING / AFTER COOLING with method, time and source tag. Phase comes from the crew entry, or is placed from documented cooling times and labeled "(from cooling times)".
+5. **Handoff.** The card always lists unresolved items. Review full handoff → complete document → "I reviewed the complete draft, including N unresolved items." → Approve reviewed handoff (rev N). Print handoff / Download HTML. The receiving view shows the approved version and an amendment notice.
+6. Dev bar → untick "Assistant available": "Assistant feedback unavailable…". Capture, care and handoff keep working.
 
-## Implemented vs. simulated
+## Implemented vs. simulated vs. dependent
 
-| Area | Status |
-|---|---|
-| Single network adapter | `apps/web/src/platform/` — `http.ts` (default) and `dev.ts` (opt-in), same `Platform` interface; shell, workspace, ER, patient views use only it |
-| Observations | Platform: `POST /observations`; falls back to existing `POST /transcripts` (really saves; UI states category/observed time/revision check were not stored) |
-| Measurements, care events, key times | UI complete. Platform routes not on main → explicit "Not available on this platform yet" error, entry kept for retry. Work fully in dev adapter |
-| Voice | Real `getUserMedia` + `MediaRecorder`, 60 s cap, stop/cancel/discard, permission denied / no device / insecure / unsupported / empty / transcription failure messages. Upload → `POST /audio/transcriptions` (multipart `audio`, `requestId`); transcript goes into the editable box; save is explicit. **No transcription provider is wired**: on main it returns unavailable; dev adapter also returns unavailable (it never fakes a transcript) |
-| Assistant feedback | Platform `POST /evaluations` + `/feedback/:id/resolutions` (unavailable on main). Dev adapter uses `devAssistant.ts`, a **deterministic phrase-rule stub**, labeled "Development stub" on every item |
-| Knowledge references | 3 NATA 2015 position statement passages (Rec. 8, 22, 25), verified against nata.org PDF on 2026-10-24; marked "Not clinically reviewed". Consensus background, not local protocol. CDC page returned 403; ACSM verified at abstract level only and not used |
-| Spoken feedback | `speechSynthesis`, on demand only; Play/Stop per item, global Stop and Mute; text always shown; recording start cancels speech |
-| Handoff draft | `GET /handoff-draft`; when unavailable, `draft.ts` groups stored records and the document says "Grouped by the website…" |
-| Approval | `POST /handoffs` `{ revision, reviewedBy }` (existing). On main the stored text is the platform's legacy text; ER shows it verbatim, labeled |
-| ER view / export | Reviewed version, amendment notice, sources appendix, Print (print CSS), standalone HTML download |
-| Patient context | Shown only after match; age/history/allergies/meds render "Not documented" when the platform provides `patient.context` but leaves fields empty |
+| Area | Website | Current platform (main @ 2f622d4) |
+|---|---|---|
+| Unidentified-patient documentation | No match gate in the UI or dev adapter; patient-linked context hidden until matched (`platform/scope.ts`) | **Gap:** `/transcripts` returns 403 "Confirm the patient association first." before a match; the UI shows this as a platform dependency and keeps the text |
+| Observations | `POST /observations` | Falls back to `POST /transcripts` (really saves; category, observed time and revision check are not stored, and the UI says so). Verified in browser + API |
+| Measurements, care events, key times | Forms, readings, phase labels | **Not available**: explicit "this platform does not accept … yet", entry kept |
+| Assistant evaluation / resolutions | Per-revision evaluation, stale handling, clarify/defer/dismiss | **Not available** on platform; works only with the dev adapter's labeled **deterministic stub** (`devAssistant.ts`) |
+| Transcription | Recording, cancel, stop-and-transcribe, review | **Not available** in either mode; no provider is connected. Shows "Transcription unavailable. Recording was not saved…" and never fakes a transcript |
+| References | Title, URL, version, passage, review status per item; placeholder when none | 3 NATA 2015 passages in the dev stub only, marked "Not clinically reviewed" |
+| Handoff draft | `GET /handoff-draft`; otherwise website grouping labeled "Grouped by the website…" | Not available; approval uses existing `POST /handoffs`. Platform stores its legacy text (ER view shows it verbatim, labeled) |
+| Spoken feedback | `speechSynthesis`, on demand; stops before recording | Browser only |
+| Reopen dismissed feedback | Not shown | No resolution action for it in the boundary |
 
-## Interface delta for the platform owner (proposal; UI schemas in `apps/web/src/platform/boundary.ts`)
+## Interface delta for the platform and assistant owners
 
-All new collections are optional on `GET /api/incidents/:id`, so today's response validates unchanged. Requests:
+UI schemas: `apps/web/src/platform/boundary.ts`. All new incident collections are optional, so today's response validates unchanged.
 
 ```json
-POST /observations      { "requestId": "…", "baseRevision": 3, "text": "…", "observedAt": null, "category": "mental_status", "inputMode": "typed" }
-POST /measurements      { "requestId", "baseRevision", "kind": "temperature", "status": "obtained", "value": 40.6, "value2": null, "unit": "°C",
-                          "method": "rectal", "eventTime": "2026-10-24T15:01:00Z", "coolingPhase": "before", "sourceKind": "manual",
-                          "device": null, "recordedBy": "crew", "note": null }
-POST /care-events       { "requestId", "baseRevision", "category": "cooling", "action": "…", "startedAt": "…", "endedAt": null, "note": null, "recordedBy": "crew" }
-POST /timeline-events   { "requestId", "baseRevision", "kind": "discovery", "time": "2026-10-24T14:43:00Z", "certainty": "reported", "note": "Per friend" }
-POST /evaluations       { "requestId", "baseRevision" }  → full incident with feedback[] (each carries `revision`)
-POST /feedback/:id/resolutions { "requestId", "baseRevision", "action": "clarify|dismiss|defer", "clarificationText"? }
-                          dismiss uses clarificationText as the optional reason
+POST /observations      { "requestId", "baseRevision", "text", "observedAt": null, "category": "mental_status", "inputMode": "typed|voice-reviewed|example" }
+POST /measurements      { "requestId", "baseRevision", "kind": "temperature", "status": "obtained|not_obtained", "value": 41.2, "value2": null, "unit": "°C",
+                          "method": "rectal", "eventTime": "…Z", "coolingPhase": "before|during|after|unknown", "sourceKind": "manual", "device": null, "recordedBy": "crew", "note": null }
+POST /care-events       { "requestId", "baseRevision", "category": "cooling", "action", "startedAt", "endedAt", "note", "recordedBy" }
+POST /timeline-events   { "requestId", "baseRevision", "kind": "discovery|collapse|…", "time": null, "certainty": "recorded|reported|estimated|unknown", "note" }
+POST /evaluations       { "requestId", "baseRevision" } → incident with feedback[] (each carries "revision")
+POST /feedback/:id/resolutions { "requestId", "baseRevision", "action": "clarify|dismiss|defer", "clarificationText"? }   (dismiss: optional reason)
 GET  /handoff-draft     { "revision", "sections": [{ "id", "title", "items": [{ "text", "sourceIds", "note" }] }], "sourceIds", "uncertainties": [{ "label", "state": "unknown|not_documented|not_obtained|unresolved", "detail" }] }
-POST /audio/transcriptions  multipart: audio, requestId → { "transcript", "mode", "warnings" }
+POST /audio/transcriptions  multipart audio + requestId → { "transcript", "mode", "warnings" }
 ```
 
-Incident additions the UI reads: `observations[]` (`status: active|clarified`, `inputMode`, `sourceId`), `measurements[]`, `careEvents[]`, `timelineEvents[]` (kinds incl. `activityStart`, `deviceFall`, `discovery`, `collapse`), `feedback[]` (logical shape + `revision`, `mode`, `status`, `resolution`), `knowledgeReferences[]`, `observationCorrections[]`, `handoffs[].draft?`, `patient.context?`, source `type` adds `crew` and `reference`. Errors: 404 `{ "error": "Unknown endpoint" }`, 501 or 503 = unavailable; 409 = conflict/stale. Mutations return the full incident. If canonical names differ, only `boundary.ts`/`http.ts`/`legacy.ts` need changes.
-
-Dev-adapter semantics worth matching: evaluation does not bump revision; clarify bumps it (new observation + correction, original kept as `clarified`); dismiss/defer do not; late evaluation for an older revision is rejected (409).
+Needed semantics:
+- **Platform:** allow observations, measurements, care and review **without a confirmed match**, and gate only patient-linked data. Re-evaluating should refresh still-applicable open/deferred items to the new revision, which the dev adapter does; otherwise stale items cannot be re-checked. Clarify bumps the revision and links a correction while keeping the original. Dismiss and defer do not bump it. Return 409 for stale baseRevision or approval, and 404 `Unknown endpoint` / 501 / 503 for unavailable routes.
+- **Platform draft:** use section ids `summary, times, measurements, care, observations, exertion, history, device`, with the unresolved list in `uncertainties`. Preferably the platform computes cooling-phase grouping. `not_obtained` renders as "Not performed".
+- **Assistant:** `/transcribe` and server-side provider credentials for live audio; `/evaluate` feedback items with `observationIds` so they attach to the right card.
 
 ## Shared files changed
 
-- `apps/web/package.json` + `package-lock.json`: added `zod@^4.6.7` to `@scenebrief/web` (same version the contracts package already uses; installed with `npm install -w`, lockfile not hand-edited).
-- `apps/web/src/main.tsx`, `style.css` (shell, owned by this scope); removed `apps/web/src/api.ts` and `types.ts` (replaced by `platform/`).
-- No changes to `apps/api`, `packages/*`, CI, or root config.
+- `apps/web/package.json` + `package-lock.json`: `zod@^4.6.7` for `@scenebrief/web` (same version as contracts; via `npm install -w`).
+- `apps/web/index.html` title; `main.tsx`, `style.css` (shell owned by this scope). No changes to `apps/api`, `packages/*`, CI, or root config.
 
 ## Checks run (this session)
 
-- `npm run check` → typecheck clean, 9 files / 67 tests pass, web build OK.
-- Tests: `platform/{dev,http,draft,time}.test.ts` (adapter idempotency, revision conflicts, late evaluation, assistant off, resolutions, approval versions, http unavailable/compat/network mapping, legacy normalization against the real API store, pre/post-cooling and unknown/not-documented/not-obtained draft states), `features/er/HandoffDocument.test.tsx`, `features/paramedic/components/RecordPanel.test.tsx`, `features/paramedic/Workspace.test.tsx`.
-- Browser (Playwright driving installed Chrome, fake mic device): full dev-adapter scenario at 360, 390, 1280 px (360 with reduced motion) — no horizontal overflow, no visible control < 44 px, no page errors; real recording → stop → transcription unavailable message; denied permission message; clarify/dismiss/defer states; stale tag after new info; review confirmation clears on change; approval → ER shows before/after cooling. Platform-API mode at 1280 px: note saved via `/transcripts` (verified in API), measurement and evaluation show "unavailable", stale approval 409 shown, then approval succeeded; ER print media hides shell controls.
-- Not verified: real transcription (no provider), screen readers, Safari/Firefox MediaRecorder formats, speech synthesis audio output (headless).
+- `npm run check` → typecheck clean, **11 files / 83 tests pass**, build OK.
+- Tests cover the adapters (idempotency, revision conflicts, late evaluation, assistant off, resolutions, approval versions, unidentified-patient documentation), http unavailable/compat/network mapping, legacy normalization against the real API store, draft states and `phaseOf`, summary/readings/handoff card/review/print document rendering, and workspace stale feedback.
+- Browser (Playwright + installed Chrome, fake mic) at **1280, 390, and 360 px (reduced motion)**:
+  - Full A→B→C journey for an unidentified patient, then matching; no horizontal overflow, no target under 44 px, no page errors.
+  - Recording: cancel during the permission prompt now closes the mic. This was a real bug, found and fixed in this pass.
+  - Stop and transcribe → transcription unavailable.
+  - Stale feedback → re-check; clarify, defer, dismiss with reason.
+  - Before/after-cooling readings; approve; changed-after-approval notice.
+  - Print media hides all controls. The PDF shows banner, sections, Unresolved box, sources, signature lines and footer.
+  - Keyboard Tab reaches all controls with a visible 3px focus ring.
+- Platform mode (1280 px):
+  - Microphone denied.
+  - Unidentified save → 403 platform dependency shown, text kept; after matching, Retry save succeeds.
+  - Evaluation unavailable; measurement unavailable.
+  - Approval version conflict → "Reload latest draft" → approve.
+- Phone, platform mode, with network aborted:
+  - Save failure keeps the text; retry stores exactly once.
+  - Approval connection failure keeps the review; retry succeeds.
+- Not verified: real transcription, screen readers, Safari/Firefox recording formats, audible speech output.
+
+Screenshots (actual implementation): `docs/handoffs/emt-website-screenshots/`.
+
+## Design elements not integrated (and why)
+
+- Prototype controls bar: demo only. Its equivalent is the dev adapter bar ("Assistant available").
+- Design demo data (INC-DEMO-0412, 41.2 °C at 14:20, etc.): all data comes from the platform fixture and crew entries.
+- Atkinson Hyperlegible fonts: named first in the font stack but not loaded (no font dependency); system-ui renders.
+- "Reopen feedback": no platform action exists.
+- Care-event types "Cooling started / Cooling ended": modeled as one cooling event with start/stop times, which the platform prompt asks for.
+- One clinical reference "placeholder" panel: shown only when an item has no references; the dev stub supplies verified NATA passages labeled not clinically reviewed.
+- Working concern text ("Suspected exertional heat stroke — not established") is a scenario constant in `model.ts` until the platform provides a field.
 
 ## Kiro work
 
-Spec rewritten for the EHS scope before implementation; tasks tracked in `tasks.md`. Kiro sub-agents built the ER view/export, the platform test suite, and the status/record panels in parallel from written briefs; outputs were reviewed and integrated in this session. The existing `.kiro/hooks/scenario-check.mjs` watches API/contracts paths only, not `apps/web`.
-
-## Known limitations / blockers
-
-- Live audio needs the assistant service's `/transcribe` and the platform's forwarding route plus provider credentials (server-side).
-- Measurements/care/key times/evaluations persist only in the dev adapter until the platform routes land.
-- Dev adapter: per-browser localStorage; cross-tab writes are not locked.
-- Reviewer name is fixed ("Crew (demo)"); there is no authentication.
-- Screenshots: `docs/handoffs/emt-website-screenshots/` (actual implementation, dev adapter + platform ER view).
+The spec was updated before each pass. Sub-agents built the summary column, care column/handoff card, and review/print view in parallel from written briefs. This session integrated and reviewed them, and wrote the platform adapters, capture state machine, observation/feedback cards, layout and shell. The `.kiro/hooks/scenario-check.mjs` hook watches API/contracts only, not `apps/web`.

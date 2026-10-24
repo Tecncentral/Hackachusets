@@ -17,25 +17,26 @@ export function CareForm({ incident, onSaved }: { incident: WorkspaceIncident; o
   const [start, setStart] = useState('');
   const [end, setEnd] = useState('');
   const [note, setNote] = useState('');
+  const [revision, setRevision] = useState<number | null>(null);
   const date = incidentDate(incident);
 
   const submit = async () => {
     const body = { category, action: action.trim(), startedAt: start ? zoneTimeToIso(date, start) : null, endedAt: end ? zoneTimeToIso(date, end) : null, note: note.trim() || null, recordedBy: 'crew' };
-    const ok = await save.run(() => platform.addCareEvent({ ...body, requestId: req.forContent(JSON.stringify(body)), baseRevision: incident.revision }));
-    if (ok) { req.done(); setAction(''); setStart(''); setEnd(''); setNote(''); onSaved?.(); }
+    const result = await save.run(() => platform.addCareEvent({ ...body, requestId: req.forContent(JSON.stringify(body)), baseRevision: incident.revision }));
+    if (result) { setRevision(result.revision); req.done(); setAction(''); setStart(''); setEnd(''); setNote(''); onSaved?.(); }
   };
 
   return <form className="ws-form" aria-label="Add care event" onSubmit={e => { e.preventDefault(); void submit(); }}>
     <div className="ws-row">
       <div className="ws-field">
         <label htmlFor="ws-c-cat">Type</label>
-        <select id="ws-c-cat" value={category} onChange={e => setCategory(e.target.value as CareEvent['category'])}>
+        <select id="ws-c-cat" className="field" value={category} onChange={e => setCategory(e.target.value as CareEvent['category'])}>
           {Object.entries(CARE_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
         </select>
       </div>
       <div className="ws-field">
         <label htmlFor="ws-c-action">Action performed</label>
-        <input id="ws-c-action" value={action} onChange={e => setAction(e.target.value)} autoComplete="off" aria-describedby="ws-c-action-hint" />
+        <input id="ws-c-action" className="field" value={action} onChange={e => setAction(e.target.value)} autoComplete="off" aria-describedby="ws-c-action-hint" />
         <p id="ws-c-action-hint" className="ws-hint">Describe what was done{category === 'cooling' ? ', including cooling method' : ''}.</p>
       </div>
     </div>
@@ -45,10 +46,10 @@ export function CareForm({ incident, onSaved }: { incident: WorkspaceIncident; o
     </div>
     <div className="ws-field">
       <label htmlFor="ws-c-note">Observed response (optional)</label>
-      <input id="ws-c-note" value={note} onChange={e => setNote(e.target.value)} autoComplete="off" />
+      <input id="ws-c-note" className="field" value={note} onChange={e => setNote(e.target.value)} autoComplete="off" />
     </div>
     <div className="ws-actions"><button type="submit" className="btn" disabled={save.pending || !action.trim()}>{save.state === 'error' ? 'Retry save' : 'Save care event'}</button></div>
-    <SaveStatus state={save.state} error={save.error} saved="Care event added. Add a repeat measurement to document the reassessment." />
+    <SaveStatus state={save.state} error={save.error} saved="Care event added. Add a repeat measurement to document the reassessment." revision={revision} thing="care events" />
   </form>;
 }
 
@@ -63,19 +64,20 @@ export function TimeForm({ incident, onSaved }: { incident: WorkspaceIncident; o
   const [time, setTime] = useState('');
   const [certainty, setCertainty] = useState<TimelineEvent['certainty']>('reported');
   const [note, setNote] = useState('');
+  const [revision, setRevision] = useState<number | null>(null);
 
   const submit = async () => {
     const iso = time ? zoneTimeToIso(incidentDate(incident), time) : null;
     const body = { kind, time: iso, certainty: iso ? certainty : 'unknown' as const, note: note.trim() || null };
-    const ok = await save.run(() => platform.addTimelineEvent({ ...body, requestId: req.forContent(JSON.stringify(body)), baseRevision: incident.revision }));
-    if (ok) { req.done(); setTime(''); setNote(''); onSaved?.(); }
+    const result = await save.run(() => platform.addTimelineEvent({ ...body, requestId: req.forContent(JSON.stringify(body)), baseRevision: incident.revision }));
+    if (result) { setRevision(result.revision); req.done(); setTime(''); setNote(''); onSaved?.(); }
   };
 
   return <form className="ws-form" aria-label="Add key time" onSubmit={e => { e.preventDefault(); void submit(); }}>
     <div className="ws-row">
       <div className="ws-field">
         <label htmlFor="ws-t-kind">Event</label>
-        <select id="ws-t-kind" value={kind} onChange={e => setKind(e.target.value as TimelineEvent['kind'])}>
+        <select id="ws-t-kind" className="field" value={kind} onChange={e => setKind(e.target.value as TimelineEvent['kind'])}>
           {KEY_TIMES.filter(k => k !== 'deviceFall').map(k => <option key={k} value={k}>{TIME_LABEL[k]}</option>)}
         </select>
       </div>
@@ -86,9 +88,9 @@ export function TimeForm({ incident, onSaved }: { incident: WorkspaceIncident; o
     </fieldset>}
     <div className="ws-field">
       <label htmlFor="ws-t-note">Source / note</label>
-      <input id="ws-t-note" value={note} onChange={e => setNote(e.target.value)} placeholder="e.g. per friend; did not witness collapse" autoComplete="off" />
+      <input id="ws-t-note" className="field" value={note} onChange={e => setNote(e.target.value)} placeholder="e.g. per friend; did not witness collapse" autoComplete="off" />
     </div>
     <div className="ws-actions"><button type="submit" className="btn" disabled={save.pending}>{save.state === 'error' ? 'Retry save' : time ? 'Save time' : 'Record as unknown'}</button></div>
-    <SaveStatus state={save.state} error={save.error} saved="Time recorded." />
+    <SaveStatus state={save.state} error={save.error} saved="Time recorded." revision={revision} thing="key times" />
   </form>;
 }

@@ -11,7 +11,12 @@ interface IncidentState {
   loadError: PlatformError | null;
   apply: (next: WorkspaceIncident) => void;
   refresh: () => Promise<void>;
+  /** Global save status for the header: the most recent mutation's outcome. */
+  save: SaveIndicator;
+  reportSave: (s: SaveIndicator) => void;
 }
+
+export type SaveIndicator = { state: 'idle' } | { state: 'saving' } | { state: 'saved' } | { state: 'error'; message: string };
 
 const Ctx = createContext<IncidentState | null>(null);
 
@@ -28,12 +33,13 @@ export function IncidentProvider({ platform, children, pollMs = 2000 }: { platfo
     } catch (e) { setLoadError(e instanceof PlatformError ? e : new PlatformError('network', String(e), 'incident')); }
   }, [platform]);
   const apply = useCallback((next: WorkspaceIncident) => { seq.current++; setIncident(next); }, []);
+  const [save, reportSave] = useState<SaveIndicator>({ state: 'idle' });
   useEffect(() => {
     void refresh();
     const t = setInterval(() => void refresh(), pollMs);
     return () => clearInterval(t);
   }, [refresh, pollMs]);
-  return <Ctx.Provider value={{ platform, incident, loadError, apply, refresh }}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{ platform, incident, loadError, apply, refresh, save, reportSave }}>{children}</Ctx.Provider>;
 }
 
 export function useIncidentState(): IncidentState {
@@ -45,23 +51,27 @@ export function useIncidentState(): IncidentState {
 export type ActionState = 'idle' | 'pending' | 'done' | 'error';
 
 /** Runs one platform mutation with explicit pending/done/error state. Conflicts trigger a refresh so the latest record is shown. */
-export function useAction() {
-  const { apply, refresh } = useIncidentState();
+export function useAction(opts: { reportsSave?: boolean } = {}) {
+  const { apply, refresh, reportSave } = useIncidentState();
+  const reports = opts.reportsSave ?? true;
   const [state, setState] = useState<ActionState>('idle');
   const [error, setError] = useState<PlatformError | null>(null);
   const run = useCallback(async <T,>(fn: () => Promise<T>, pick: (result: T) => WorkspaceIncident = r => r as unknown as WorkspaceIncident): Promise<T | null> => {
     setState('pending'); setError(null);
+    if (reports) reportSave({ state: 'saving' });
     try {
       const result = await fn();
       apply(pick(result)); setState('done');
+      if (reports) reportSave({ state: 'saved' });
       return result;
     } catch (e) {
       const err = e instanceof PlatformError ? e : new PlatformError('server', e instanceof Error ? e.message : String(e), 'unknown');
       setError(err); setState('error');
+      if (reports) reportSave({ state: 'error', message: err.message });
       if (err.kind === 'conflict') void refresh();
       return null;
     }
-  }, [apply, refresh]);
+  }, [apply, refresh, reportSave, reports]);
   const clear = useCallback(() => { setState('idle'); setError(null); }, []);
   return { state, error, run, clear, pending: state === 'pending' };
 }

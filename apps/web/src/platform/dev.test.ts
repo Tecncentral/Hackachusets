@@ -41,9 +41,11 @@ const obsInput = (over: Partial<ObservationInput> = {}): ObservationInput => ({
 beforeEach(() => { counter = 0; });
 
 describe('dev adapter — mutation guard', () => {
-  it('rejects mutations with "forbidden" before the patient is matched', async () => {
+  it('documents an unidentified patient: saving does not require a confirmed match', async () => {
     const { platform } = make();
-    await expect(platform.addObservation(obsInput())).rejects.toMatchObject({ kind: 'forbidden' });
+    const { incident } = await platform.addObservation(obsInput());
+    expect(incident.patient.matched).toBe(false);
+    expect(incident.observations).toHaveLength(1);
   });
 
   it('persists an observation with a new source and bumps the revision', async () => {
