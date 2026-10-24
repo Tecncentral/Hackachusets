@@ -4,7 +4,8 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/server.ts"
+    "dev": "tsx watch src/server.ts",
+    "sample:handoff": "tsx scripts/sample-handoff.ts"
   },
   "dependencies": {
     "@scenebrief/ai": "^0.1.0",
