@@ -1,0 +1,16 @@
+{
+  "name": "@scenebrief/api",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts"
+  },
+  "dependencies": {
+    "@scenebrief/ai": "^0.1.0",
+    "@scenebrief/contracts": "^0.1.0",
+    "@scenebrief/fixtures": "^0.1.0",
+    "express": "^5.3.0",
+    "zod": "^4.6.7"
+  }
+}
