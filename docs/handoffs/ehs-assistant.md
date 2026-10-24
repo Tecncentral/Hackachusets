@@ -3,11 +3,22 @@
 | | |
 |---|---|
 | Session | 2 of 3 (assistant). Session 1 = EMT website, Session 3 = core platform |
-| Branch | `feat/ehs-correction-assistant` |
+| Branch | **`session-2`** — [view on GitHub](https://github.com/Tecncentral/Hackachusets/tree/session-2). Same code as `feat/ehs-correction-assistant` |
+| Get it | `git fetch origin && git checkout session-2 && npm ci && npm run check` |
 | Base SHA | `2f622d4c419f43408428564029d427d88cb511ee` (origin/main) |
 | Owns | `packages/ai/`, `apps/assistant/` |
 | Does not touch | `apps/api`, `apps/web`, `packages/contracts` |
 | Checks | `npm run check` → typecheck clean, 7 files / 54 tests pass, web build OK |
+| Merge | Not merged into `main`. Open a PR from `session-2` when the team is ready |
+
+## Start here (for whoever receives this)
+
+1. Check out `session-2` and run `npm ci` then `npm run check`. All checks should pass.
+2. Read "What it does" below to see what the assistant catches.
+3. **If you own the platform (Session 3):** follow "For the platform owner". One function to call, one audio route to forward.
+4. **If you own the website (Session 1):** nothing is required. Read "For the website owner".
+5. Example inputs and outputs are in `packages/ai/examples/`.
+6. Open items needing a person are under "Sources" and "Known limits".
 
 ## What it does
 
