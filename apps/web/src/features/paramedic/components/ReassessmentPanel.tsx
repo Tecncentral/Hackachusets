@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import type { CareEvent, Measurement, WorkspaceIncident } from '../../../platform';
-import { formatValue, type PhaseLabel } from '../../../platform/draft';
+import type { CareEvent, Incident, Measurement } from '../../../platform';
+import { CARE_LABEL, SITE_LABEL, current, describeCare, formatValue, type PhaseLabel } from '../../../platform/labels';
 import { clock } from '../../../platform/time';
 import { initialMentalStatus, latestMentalStatus, readings, undocumentedKinds, type ReadingRow } from '../model';
 import { MeasurementForm } from './MeasurementForm';
@@ -11,28 +11,28 @@ type FormKind = 'measurement' | 'care' | 'time';
 
 /** Short, human-readable source id (first segment), e.g. "a1b2c3d4". */
 function shortId(id: string): string {
-  return id.slice(0, 8);
+  return id.replace(/^src-/, '').slice(0, 8);
 }
 
 /** Column caption: for before/after readings use the cooling phase; otherwise the Initial/Latest role. */
 function caption(role: 'Initial' | 'Latest', phase: PhaseLabel | null): string {
-  if (phase?.phase === 'before') return 'Before cooling';
-  if (phase?.phase === 'after') return 'After cooling';
+  if (phase?.phase === 'before_cooling') return 'Before cooling';
+  if (phase?.phase === 'after_cooling') return 'After cooling';
   return role;
 }
 
 function ReadingCell({ m, phase }: { m: Measurement; phase: PhaseLabel | null }) {
-  const method = m.kind === 'temperature'
-    ? (m.method
-        ? <span className="ws-care-meta">{m.method}</span>
-        : <span className="chip chip-notdoc">Method not documented</span>)
+  const method = m.kind === 'body_temperature' && m.site
+    ? (m.site !== 'unknown'
+        ? <span className="ws-care-meta">{SITE_LABEL[m.site]}</span>
+        : <span className="chip chip-unknown">Site/method unknown</span>)
     : null;
   return <div className="ws-care-cell">
     <div className="mono ws-care-val">{formatValue(m)}</div>
     {method && <div>{method}</div>}
-    <div className="ws-care-meta">{m.eventTime ? <span className="mono">{clock(m.eventTime)}</span> : 'Time not documented'}</div>
+    <div className="ws-care-meta">{m.measuredAt ? <span className="mono">{clock(m.measuredAt)}</span> : 'Time unknown'}{m.device ? ` · ${m.device}` : ''}</div>
     {phase && <div className="ws-care-phase">{phase.label}</div>}
-    <div className="ws-care-src">[{shortId(m.sourceId)}]</div>
+    <div className="ws-care-src">[{shortId(m.sourceIds[0] ?? '')}]</div>
   </div>;
 }
 
@@ -54,7 +54,7 @@ function ReadingBlock({ row }: { row: ReadingRow }) {
   </div>;
 }
 
-function MentalStatusPair({ incident }: { incident: WorkspaceIncident }) {
+function MentalStatusPair({ incident }: { incident: Incident }) {
   const initial = initialMentalStatus(incident);
   const latest = latestMentalStatus(incident);
   if (!initial && !latest) return null;
@@ -74,31 +74,30 @@ function MentalStatusPair({ incident }: { incident: WorkspaceIncident }) {
 }
 
 function CarePerformed({ events }: { events: CareEvent[] }) {
-  const sorted = [...events].sort((a, b) => (a.startedAt ?? '9999').localeCompare(b.startedAt ?? '9999'));
+  const sorted = current(events).sort((a, b) => (a.startedAt ?? '9999').localeCompare(b.startedAt ?? '9999'));
   return <div className="ws-care-performed">
     <p className="caps">Care performed</p>
     <ol className="ws-care-list">
-      {sorted.map(c => {
-        const span = c.startedAt ? `${clock(c.startedAt)}–${c.endedAt ? clock(c.endedAt) : 'ongoing / stop not documented'}` : 'start not documented';
-        return <li key={c.id} className="ws-care-item">
-          <span className="mono ws-care-item-time">{c.startedAt ? clock(c.startedAt) : '—'}</span>
-          <span>
-            <strong>{c.action}</strong> <span className="ws-care-meta">({span})</span>
-            {c.note ? <span className="ws-care-meta"> · {c.note}</span> : null}
-          </span>
-        </li>;
-      })}
+      {sorted.map(c => <li key={c.id} className="ws-care-item">
+        <span className="mono ws-care-item-time">{c.startedAt ? clock(c.startedAt) : '—'}</span>
+        <span>
+          <strong>{CARE_LABEL[c.kind]}</strong> <span className="ws-care-meta">{describeCare(c)}</span>
+          {c.performedBy ? <span className="ws-care-meta"> · by {c.performedBy}</span> : null}
+          <span className="ws-care-meta"> · {c.response ? `Response: ${c.response}` : 'Response not documented'}</span>
+        </span>
+      </li>)}
     </ol>
   </div>;
 }
 
 /** Right-column care and reassessment card: readings, mental status, care performed, and inline entry forms. */
-export function ReassessmentPanel({ incident }: { incident: WorkspaceIncident }) {
+export function ReassessmentPanel({ incident }: { incident: Incident }) {
   const [open, setOpen] = useState<FormKind | null>(null);
   const rows = readings(incident);
   const undocumented = undocumentedKinds(incident);
   const hasMentalStatus = !!(initialMentalStatus(incident) || latestMentalStatus(incident));
-  const isEmpty = rows.length === 0 && !hasMentalStatus && incident.careEvents.length === 0;
+  const careEvents = current(incident.careEvents);
+  const isEmpty = rows.length === 0 && !hasMentalStatus && careEvents.length === 0;
   const toggle = (k: FormKind) => setOpen(prev => (prev === k ? null : k));
 
   return <section className="card ws-care" aria-labelledby="ws-care-h">
@@ -115,7 +114,7 @@ export function ReassessmentPanel({ incident }: { incident: WorkspaceIncident })
             <MentalStatusPair incident={incident} />
           </div>
           {undocumented.length > 0 && <p className="ws-care-meta">Not documented: {undocumented.join(', ')}.</p>}
-          {incident.careEvents.length > 0 && <CarePerformed events={incident.careEvents} />}
+          {careEvents.length > 0 && <CarePerformed events={careEvents} />}
         </>}
 
     <div className="ws-care-actions">

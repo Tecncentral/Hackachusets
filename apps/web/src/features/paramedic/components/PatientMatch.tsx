@@ -1,11 +1,11 @@
 import { useId, useState } from 'react';
-import { useAction, useIncidentState, type WorkspaceIncident } from '../../../platform';
+import { useAction, useIncidentState, type Incident } from '../../../platform';
 
 /**
  * Optional patient association. Matching only adds profile and wearable context; it is never
  * required to document or hand off. Shown as a disclosure so it stays out of the way until needed.
  */
-export function PatientMatch({ incident }: { incident: WorkspaceIncident }) {
+export function PatientMatch({ incident }: { incident: Incident }) {
   const { platform } = useIncidentState();
   const match = useAction();
   const [open, setOpen] = useState(false);

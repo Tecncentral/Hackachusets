@@ -1,12 +1,9 @@
-// HTTP adapter for the core platform. Routes follow the shared logical boundary. Where the current
-// platform does not implement a route, the adapter raises PlatformError('unavailable') — it never
-// pretends a save succeeded. The only compatibility path is POST /transcripts, which the current
-// platform does implement and which genuinely stores the note.
-import { IncidentId } from '@scenebrief/contracts';
-import { HandoffDraftSchema, PlatformError, TranscriptionSchema, type HandoffDraft, type WorkspaceIncident } from './boundary';
-import { normalizeIncident } from './legacy';
-import { buildDraft } from './draft';
-import { patientScoped } from './scope';
+// HTTP adapter for the core platform (docs/core-api-contract.md). Every response is validated against
+// the canonical schemas. Routes the platform does not implement raise PlatformError('unavailable') —
+// the adapter never pretends a save succeeded and has no compatibility fallbacks.
+import type { z } from 'zod';
+import { IncidentId, IncidentSchema, HandoffDraftSchema } from '@scenebrief/contracts';
+import { AssistantStatusSchema, PlatformError, TranscriptionSchema, type Incident } from './boundary';
 import type { Platform } from './types';
 
 const base = `/api/incidents/${IncidentId}`;
@@ -19,48 +16,51 @@ async function call(endpoint: string, init?: RequestInit): Promise<unknown> {
   if (response.ok) return data;
   const message = typeof data?.error === 'string' ? data.error : `Request failed (${response.status})`;
   if (response.status === 404 && (message === 'Unknown endpoint' || data === null)) throw new PlatformError('unavailable', `Not available on this platform yet (${endpoint.replace(base, '…')}).`, endpoint, 404);
-  if (response.status === 501) throw new PlatformError('unavailable', message, endpoint, 501);
-  if (response.status === 503) throw new PlatformError('unavailable', message, endpoint, 503);
+  if (response.status === 501 || response.status === 503) throw new PlatformError('unavailable', message, endpoint, response.status);
+  if (response.status >= 500 && message.startsWith('Request failed')) throw new PlatformError('network', 'The platform did not respond correctly. Check that the API is running.', endpoint, response.status);
   const kind = response.status === 409 ? 'conflict' : response.status === 403 ? 'forbidden' : response.status === 400 || response.status === 413 || response.status === 415 ? 'invalid' : response.status === 404 ? 'not_found' : 'server';
-  if (response.status >= 500 && response.status !== 503 && message.startsWith('Request failed')) throw new PlatformError('network', 'The platform did not respond correctly. Check that the API is running.', endpoint, response.status);
   throw new PlatformError(kind, message, endpoint, response.status);
 }
 
 const post = (endpoint: string, body: unknown) => call(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-const incident = async (p: Promise<unknown>) => normalizeIncident(await p);
+
+/** A response that does not match the canonical contract is a platform error, not data to display. */
+function parse<T>(schema: z.ZodType<T>, endpoint: string, value: unknown): T {
+  const r = schema.safeParse(value);
+  if (r.success) return r.data;
+  const first = r.error.issues[0];
+  throw new PlatformError('server', `The platform response did not match the shared contract (${first ? `${first.path.join('.')}: ${first.message}` : 'invalid'}).`, endpoint);
+}
+const incident = async (endpoint: string, p: Promise<unknown>): Promise<Incident> => parse(IncidentSchema, endpoint, await p);
+const send = (path: string, body: unknown) => incident(`${base}${path}`, post(`${base}${path}`, body));
 
 export function createHttpPlatform(): Platform {
   return {
     info: { kind: 'http', label: 'Platform API', description: 'Connected to the local SceneBrief platform (synthetic data).' },
-    getIncident: () => incident(call(base)),
-    reset: () => incident(post('/api/demo/reset', {})),
-    setSharing: sharing => incident(post(`${base}/sharing`, { sharing })),
-    match: patientId => incident(post(`${base}/match`, { patientId, confirmed: true })),
-    async addObservation(input) {
-      try {
-        return { incident: await incident(post(`${base}/observations`, input)), compatibility: null };
-      } catch (e) {
-        if (!(e instanceof PlatformError && e.kind === 'unavailable')) throw e;
-        // Compatibility: the current platform stores notes through /transcripts (no category, observed time, or revision check).
-        const saved = await incident(post(`${base}/transcripts`, { requestId: input.requestId, text: input.text }));
-        return { incident: saved, compatibility: 'Saved through the platform’s transcript route: category and observed time were not stored, and no revision check was applied.' };
-      }
-    },
-    addMeasurement: input => incident(post(`${base}/measurements`, input)),
-    addCareEvent: input => incident(post(`${base}/care-events`, input)),
-    addTimelineEvent: input => incident(post(`${base}/timeline-events`, input)),
+    getIncident: () => incident(base, call(base)),
+    reset: variant => incident('/api/demo/reset', post('/api/demo/reset', variant ? { variant } : {})),
+    setSharing: sharing => send('/sharing', { sharing }),
+    match: patientId => send('/match', { patientId, confirmed: true }),
+    addObservation: input => send('/observations', input),
+    addMeasurement: input => send('/measurements', input),
+    addCareEvent: input => send('/care-events', input),
+    addTimelineEvent: input => send('/timeline-events', input),
+    addEnvironmentReading: input => send('/environment-readings', input),
     async transcribe(audio, requestId) {
       const form = new FormData();
       form.append('requestId', requestId);
       form.append('audio', audio, `recording.${audio.type.includes('mp4') ? 'mp4' : audio.type.includes('ogg') ? 'ogg' : 'webm'}`);
-      return TranscriptionSchema.parse(await call(`${base}/audio/transcriptions`, { method: 'POST', body: form }));
+      const endpoint = `${base}/audio/transcriptions`;
+      return parse(TranscriptionSchema, endpoint, await call(endpoint, { method: 'POST', body: form }));
     },
-    evaluate: input => incident(post(`${base}/evaluations`, input)),
-    resolveFeedback: ({ feedbackId, ...body }) => incident(post(`${base}/feedback/${encodeURIComponent(feedbackId)}/resolutions`, body)),
-    async getHandoffDraft(current: WorkspaceIncident): Promise<HandoffDraft> {
-      try { return HandoffDraftSchema.parse(await call(`${base}/handoff-draft`)); }
-      catch (e) { if (e instanceof PlatformError && e.kind === 'unavailable') return buildDraft(patientScoped(current)); throw e; }
+    evaluate: input => send('/evaluations', input),
+    resolveFeedback: ({ feedbackId, ...body }) => send(`/feedback/${encodeURIComponent(feedbackId)}/resolutions`, body),
+    async getHandoffDraft() { const endpoint = `${base}/handoff-draft`; return parse(HandoffDraftSchema, endpoint, await call(endpoint)); },
+    approveHandoff: input => send('/handoffs', input),
+    async assistantStatus() {
+      const health = await call('/api/health') as { assistant?: unknown } | null;
+      return parse(AssistantStatusSchema, '/api/health', health?.assistant);
     },
-    approveHandoff: input => incident(post(`${base}/handoffs`, input))
+    async setAssistantEnabled(enabled) { return parse(AssistantStatusSchema, '/api/demo/assistant', await post('/api/demo/assistant', { enabled })); }
   };
 }

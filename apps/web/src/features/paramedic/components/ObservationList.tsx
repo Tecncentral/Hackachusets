@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { useAction, useIncidentState, type Feedback, type Observation, type PlatformError, type WorkspaceIncident } from '../../../platform';
-import { OBS_LABEL } from '../../../platform/draft';
+import { useAction, useIncidentState, type Feedback, type Incident, type Observation, type PlatformError } from '../../../platform';
+import { OBS_LABEL, REPORTED_BY_LABEL } from '../../../platform/labels';
 import { clock } from '../../../platform/time';
-import { changes, feedbackFor, isStale, partitionObservations, recordFeedback } from '../model';
+import { changes, feedbackFor, isBehind, isStale, partitionObservations, recordFeedback, resolutionOf } from '../model';
 import { setMuted, speak, stopSpeech, useSpeechState } from '../speech';
 import { SourceList } from './SourceList';
 import { useRequestId } from './fields';
@@ -10,9 +10,10 @@ import { useRequestId } from './fields';
 export interface EvaluationState { status: 'idle' | 'checking' | 'done' | 'error'; revision: number | null; error: PlatformError | null }
 
 const KIND_LABEL: Record<Feedback['kind'], string> = { conflict: 'Records differ', missing_context: 'Missing context', unsupported_inference: 'Finding does not support the conclusion' };
-const MODE_LABEL: Record<Observation['inputMode'], string> = { typed: 'Typed', 'voice-reviewed': 'Voice transcript, reviewed', example: 'Example transcript (demo)', legacy: 'Platform transcript route' };
+const MODE_LABEL: Record<Observation['inputMode'], string> = { typed: 'Typed', transcribed: 'Transcribed, crew-reviewed' };
+const MODE_CHIP: Record<Feedback['mode'], string> = { mock: 'Mock assistant · fixture replay', deterministic: 'Rule check', model: 'Model', hybrid: 'Rules + model' };
 
-interface ListProps { incident: WorkspaceIncident; evaluation: EvaluationState; onRecheck: () => void; headingRef?: React.Ref<HTMLHeadingElement> }
+interface ListProps { incident: Incident; evaluation: EvaluationState; onRecheck: () => void; headingRef?: React.Ref<HTMLHeadingElement> }
 
 /** Observations needing attention, each with its attached assistant panel; everything else one tap away. */
 export function ObservationList({ incident, evaluation, onRecheck, headingRef }: ListProps) {
@@ -50,7 +51,7 @@ export function ObservationList({ incident, evaluation, onRecheck, headingRef }:
   </section>;
 }
 
-function EvaluationNotice({ incident, evaluation, onRecheck }: { incident: WorkspaceIncident; evaluation: EvaluationState; onRecheck: () => void }) {
+function EvaluationNotice({ incident, evaluation, onRecheck }: { incident: Incident; evaluation: EvaluationState; onRecheck: () => void }) {
   if (evaluation.status === 'checking') return <p role="status" aria-live="polite" className="alert alert-info">Checking the latest observation against the incident record (revision <span className="mono">{evaluation.revision}</span>)…</p>;
   if (evaluation.status === 'error' && evaluation.error) {
     const unavailable = evaluation.error.kind === 'unavailable';
@@ -64,23 +65,24 @@ function EvaluationNotice({ incident, evaluation, onRecheck }: { incident: Works
   return null;
 }
 
-function ObservationCard({ incident, o, evaluation, onRecheck, compact }: { incident: WorkspaceIncident; o: Observation; evaluation: EvaluationState; onRecheck: () => void; compact?: boolean }) {
+function ObservationCard({ incident, o, evaluation, onRecheck, compact }: { incident: Incident; o: Observation; evaluation: EvaluationState; onRecheck: () => void; compact?: boolean }) {
   const fb = feedbackFor(incident, o.id);
   const clarification = changes(incident).find(c => c.original.id === o.id);
   const clarifies = changes(incident).find(c => c.replacement.id === o.id);
-  const checkedThis = evaluation.status === 'done' && evaluation.revision !== null && (o.baseRevision === null || evaluation.revision > o.baseRevision);
+  const checkedThis = evaluation.status === 'done' && evaluation.revision !== null && evaluation.revision >= o.addedAtRevision;
   return <article className={`card ws-obs-card${compact ? ' ws-obs-compact' : ''}`} aria-labelledby={`obs-${o.id}`}>
     <p className="ws-obs-meta">
       <span className="chip">{OBS_LABEL[o.category]}</span>
-      <span className="mono">{o.observedAt ? `observed ${clock(o.observedAt)}` : `recorded ${clock(o.capturedAt)}`}</span>
-      <span>· {MODE_LABEL[o.inputMode]}</span>
-      <span className="mono ws-hint">[{o.sourceId.slice(0, 8)}]</span>
+      <span className="mono">{o.observedAt ? `observed ${clock(o.observedAt)}` : `recorded ${clock(o.recordedAt)}`}</span>
+      <span>· {REPORTED_BY_LABEL[o.reportedBy]} · {MODE_LABEL[o.inputMode]}</span>
+      {o.status === 'superseded' && <span className="chip">Superseded — kept in record</span>}
+      <span className="mono ws-hint">[{(o.sourceIds[0] ?? '').replace(/^src-/, '').slice(0, 8)}]</span>
     </p>
     {clarification && <p className="caps">Original statement — kept in record</p>}
     <blockquote id={`obs-${o.id}`} className="ws-statement">“{o.text}”</blockquote>
     {clarifies && <p className="ws-hint">Clarifies an earlier statement: “{clarifies.original.text}”</p>}
     {clarification && <div className="alert alert-ok ws-clar">
-      <p><strong>Clarification added by EMT · <span className="mono">{clock(clarification.recordedAt)}</span> · saved</strong></p>
+      <p><strong>Clarification added by {clarification.correction.author} · <span className="mono">{clock(clarification.correction.recordedAt)}</span> · saved</strong></p>
       <p>“{clarification.replacement.text}”</p>
     </div>}
     {fb.filter(f => f.status !== 'clarified').map(f => <FeedbackBlock key={f.id} incident={incident} f={f} onRecheck={onRecheck} checking={evaluation.status === 'checking'} />)}
@@ -88,7 +90,7 @@ function ObservationCard({ incident, o, evaluation, onRecheck, compact }: { inci
   </article>;
 }
 
-function FeedbackBlock({ incident, f, onRecheck, checking }: { incident: WorkspaceIncident; f: Feedback; onRecheck: () => void; checking: boolean }) {
+function FeedbackBlock({ incident, f, onRecheck, checking }: { incident: Incident; f: Feedback; onRecheck: () => void; checking: boolean }) {
   const { platform } = useIncidentState();
   const act = useAction();
   const req = useRequestId();
@@ -99,7 +101,9 @@ function FeedbackBlock({ incident, f, onRecheck, checking }: { incident: Workspa
   const [text, setText] = useState('');
   const [evOpen, setEvOpen] = useState(false);
   const [refOpen, setRefOpen] = useState(false);
-  const stale = isStale(f, incident);
+  const stale = isStale(f);
+  const behind = isBehind(f, incident);
+  const resolution = resolutionOf(incident, f);
   const evidence = incident.sources.filter(s => f.evidenceSourceIds.includes(s.id));
   const refs = incident.knowledgeReferences.filter(r => f.knowledgeReferenceIds.includes(r.id));
   const missingRefs = f.knowledgeReferenceIds.filter(id => !refs.some(r => r.id === id));
@@ -107,7 +111,9 @@ function FeedbackBlock({ incident, f, onRecheck, checking }: { incident: Workspa
   const actionLabel = { clarify: 'Clarification', dismiss: 'Dismiss', defer: 'Defer' } as const;
 
   const resolve = async (action: 'clarify' | 'dismiss' | 'defer') => {
-    const body = { feedbackId: f.id, action, ...(text.trim() && action !== 'defer' ? { clarificationText: text.trim() } : {}) };
+    // Contract: clarificationText only with clarify; a dismissal reason goes in note.
+    const t = text.trim();
+    const body = { feedbackId: f.id, action, ...(action === 'clarify' && t ? { clarificationText: t } : {}), ...(action === 'dismiss' && t ? { note: t.slice(0, 500) } : {}) };
     setPendingAction(action);
     const r = await act.run(() => platform.resolveFeedback({ ...body, requestId: req.forContent(JSON.stringify(body)), baseRevision: incident.revision }));
     if (r) { req.done(); setMode('none'); setText(''); setReviewing(false); }
@@ -115,7 +121,7 @@ function FeedbackBlock({ incident, f, onRecheck, checking }: { incident: Workspa
 
   if (f.status === 'dismissed') return <div className="ws-fb ws-fb-done">
     <p><span className="chip">Feedback dismissed</span> Statement kept as recorded.</p>
-    <p className="ws-hint">Dismissed by {f.resolution?.author ?? 'crew'} at <span className="mono">{clock(f.resolution?.recordedAt)}</span>{f.resolution?.text ? ` — “${f.resolution.text}”` : ''}. Reopening is not supported by the platform yet.</p>
+    <p className="ws-hint">Dismissed by {resolution?.resolvedBy ?? 'crew'} at <span className="mono">{clock(resolution?.resolvedAt)}</span>{resolution?.note ? ` — “${resolution.note}”` : ''}. Dismissal is final on the platform.</p>
   </div>;
 
   const deferredView = f.status === 'deferred' && !reviewing;
@@ -125,14 +131,16 @@ function FeedbackBlock({ incident, f, onRecheck, checking }: { incident: Workspa
     <p className="caps">Assistant · about this observation</p>
     <p className="ws-fb-tags">
       {f.status === 'open' && <span className="chip chip-attn">Clarification needed</span>}
-      {f.status === 'deferred' && <span className="chip chip-attn">◷ Deferred · <span className="mono">{clock(f.resolution?.recordedAt)}</span></span>}
+      {f.status === 'deferred' && <span className="chip chip-attn">◷ Deferred · <span className="mono">{clock(resolution?.resolvedAt)}</span></span>}
+      {f.status === 'stale' && <span className="chip chip-notdoc">Not applied — out of date</span>}
       <span className="chip">{KIND_LABEL[f.kind]}</span>
-      {f.mode === 'development-stub' && <span className="chip chip-demo">Development stub</span>}
+      <span className={`chip${f.mode === 'mock' ? ' chip-demo' : ''}`}>{MODE_CHIP[f.mode]}</span>
     </p>
     {stale && <div className="alert alert-attn" role="status">
-      <strong>Feedback may be out of date.</strong> It was generated for revision <span className="mono">{f.revision}</span>; the incident is now at revision <span className="mono">{incident.revision}</span>. Clarify / Defer / Dismiss are hidden until re-checked.
+      <strong>Feedback is out of date and was not applied.</strong> It was generated for revision <span className="mono">{f.revision}</span>, but the record changed while the check ran (now revision <span className="mono">{incident.revision}</span>). It cannot be resolved; re-check the current revision.
       <div className="ws-actions"><button type="button" className="btn btn-secondary" disabled={checking} onClick={onRecheck}>{checking ? 'Checking…' : 'Re-check current revision'}</button></div>
     </div>}
+    {behind && <p className="alert alert-info" role="status">Generated for revision <span className="mono">{f.revision}</span>; the record is now at revision <span className="mono">{incident.revision}</span>. Read it against the current record before acting.</p>}
     <p className="ws-fb-msg">{f.message}</p>
     {f.suggestedQuestion && <div className="ws-fb-question"><p className="caps">Suggested question</p><p className="ws-question">{f.suggestedQuestion}</p></div>}
     {deferredView && <div className="ws-hint">Listed as unresolved in the ER handoff until reviewed. <button type="button" className="btn btn-quiet" onClick={() => setReviewing(true)}>Review now</button></div>}
@@ -166,9 +174,9 @@ function FeedbackBlock({ incident, f, onRecheck, checking }: { incident: Workspa
     {evOpen && (evidence.length ? <SourceList sources={evidence} /> : <p className="ws-hint">No patient record sources are linked to this feedback.</p>)}
     {refOpen && <div className="ws-refs">
       {refs.map(r => <div key={r.id} className="ws-ref">
-        <p><a href={r.url} target="_blank" rel="noreferrer">{r.title}</a> <span className="ws-hint">({r.version})</span></p>
-        <blockquote className="ws-quote">{r.passage}</blockquote>
-        <p className="ws-hint">{r.applicability} · <strong>{r.reviewStatus}</strong></p>
+        <p><a href={r.url} target="_blank" rel="noreferrer">{r.title}</a> <span className="ws-hint">({[r.versionDate, r.section].filter(Boolean).join(' · ') || 'version not stated'})</span></p>
+        {r.passage && <blockquote className="ws-quote">{r.passage}</blockquote>}
+        <p className="ws-hint">{r.applicability} · <strong>{r.reviewStatus === 'clinician_reviewed' ? 'Clinician reviewed' : 'Not clinically reviewed'}</strong></p>
       </div>)}
       {refs.length === 0 && missingRefs.length === 0 && <p className="alert alert-info chip-demo-box">No verified clinical reference is attached to this feedback.</p>}
       {missingRefs.length > 0 && <p className="text-error">Reference not found in the record: {missingRefs.join(', ')}.</p>}

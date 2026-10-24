@@ -2,14 +2,14 @@
 // This is a view cache of the platform response, not a separate store: every value comes from the
 // adapter, and every mutation result replaces it.
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
-import { PlatformError, type WorkspaceIncident } from './boundary';
+import { PlatformError, type Incident } from './boundary';
 import type { Platform } from './types';
 
 interface IncidentState {
   platform: Platform;
-  incident: WorkspaceIncident | null;
+  incident: Incident | null;
   loadError: PlatformError | null;
-  apply: (next: WorkspaceIncident) => void;
+  apply: (next: Incident) => void;
   refresh: () => Promise<void>;
   /** Global save status for the header: the most recent mutation's outcome. */
   save: SaveIndicator;
@@ -21,7 +21,7 @@ export type SaveIndicator = { state: 'idle' } | { state: 'saving' } | { state: '
 const Ctx = createContext<IncidentState | null>(null);
 
 export function IncidentProvider({ platform, children, pollMs = 2000 }: { platform: Platform; children: ReactNode; pollMs?: number }) {
-  const [incident, setIncident] = useState<WorkspaceIncident | null>(null);
+  const [incident, setIncident] = useState<Incident | null>(null);
   const [loadError, setLoadError] = useState<PlatformError | null>(null);
   // Bumped on every applied mutation so an older in-flight poll cannot overwrite a newer result.
   const seq = useRef(0);
@@ -32,7 +32,7 @@ export function IncidentProvider({ platform, children, pollMs = 2000 }: { platfo
       if (at === seq.current) { setIncident(data); setLoadError(null); }
     } catch (e) { setLoadError(e instanceof PlatformError ? e : new PlatformError('network', String(e), 'incident')); }
   }, [platform]);
-  const apply = useCallback((next: WorkspaceIncident) => { seq.current++; setIncident(next); }, []);
+  const apply = useCallback((next: Incident) => { seq.current++; setIncident(next); }, []);
   const [save, reportSave] = useState<SaveIndicator>({ state: 'idle' });
   useEffect(() => {
     void refresh();
@@ -56,7 +56,7 @@ export function useAction(opts: { reportsSave?: boolean } = {}) {
   const reports = opts.reportsSave ?? true;
   const [state, setState] = useState<ActionState>('idle');
   const [error, setError] = useState<PlatformError | null>(null);
-  const run = useCallback(async <T,>(fn: () => Promise<T>, pick: (result: T) => WorkspaceIncident = r => r as unknown as WorkspaceIncident): Promise<T | null> => {
+  const run = useCallback(async <T,>(fn: () => Promise<T>, pick: (result: T) => Incident = r => r as unknown as Incident): Promise<T | null> => {
     setState('pending'); setError(null);
     if (reports) reportSave({ state: 'saving' });
     try {

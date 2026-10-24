@@ -1,5 +1,5 @@
-import type { WorkspaceIncident } from '../../../platform';
-import { formatValue } from '../../../platform/draft';
+import type { Incident } from '../../../platform';
+import { formatValue } from '../../../platform/labels';
 import { clock } from '../../../platform/time';
 import { latestMentalStatus, temperatureSummary } from '../model';
 import { collapseEvent } from './IncidentSummary';
@@ -8,7 +8,7 @@ import { collapseEvent } from './IncidentSummary';
  * Phone-only one-line vitals strip (hidden ≥721px). Mirrors the summary's three headline facts —
  * mental status, clinical temperature, collapse time — each with a value or an explicit status chip.
  */
-export function VitalsStrip({ incident }: { incident: WorkspaceIncident }) {
+export function VitalsStrip({ incident }: { incident: Incident }) {
   const mental = latestMentalStatus(incident);
   const temp = temperatureSummary(incident);
   const collapse = collapseEvent(incident);
@@ -25,9 +25,7 @@ export function VitalsStrip({ incident }: { incident: WorkspaceIncident }) {
       <span className="ws-strip-label">Clinical temp</span>{' '}
       {temp.latest
         ? <strong className="mono">{formatValue(temp.latest)}</strong>
-        : temp.notObtained
-          ? <span className="chip chip-notperf">Not performed</span>
-          : <span className="chip chip-unknown">Not yet measured</span>}
+        : <span className="chip chip-unknown">Not yet measured</span>}
     </span>
     <span className="ws-strip-sep" aria-hidden="true">·</span>
     <span className="ws-strip-item">

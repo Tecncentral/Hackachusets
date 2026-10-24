@@ -1,16 +1,10 @@
-// Patient-linked context (profile, wearable records and the events derived from them) is shown only
-// after the crew confirms the patient association. Crew documentation is never hidden or blocked.
-import type { WorkspaceIncident } from './boundary';
+// Patient-linked context (profile and wearable sources, and records that rely only on them) is shown
+// only after the crew confirms the patient association. This is the platform's own rule
+// (apps/api/src/visibility.ts), reused so the workspace shows exactly what the handoff and the
+// assistant see. Crew documentation is never hidden or blocked.
+import { visibleRecord } from '../../../api/src/visibility';
+import type { Incident } from './boundary';
 
-export function patientScoped(incident: WorkspaceIncident): WorkspaceIncident {
-  if (incident.patient.matched) return incident;
-  const hidden = new Set(incident.sources.filter(s => s.type === 'wearable').map(s => s.id));
-  return {
-    ...incident,
-    patient: { ...incident.patient, context: undefined },
-    sources: incident.sources.filter(s => !hidden.has(s.id)),
-    measurements: incident.measurements.filter(m => m.sourceKind !== 'wearable' && !hidden.has(m.sourceId)),
-    timelineEvents: incident.timelineEvents.filter(t => !t.sourceIds.some(id => hidden.has(id))),
-    feedback: incident.feedback.map(f => ({ ...f, evidenceSourceIds: f.evidenceSourceIds.filter(id => !hidden.has(id)) }))
-  };
+export function patientScoped(incident: Incident): Incident {
+  return visibleRecord(incident);
 }

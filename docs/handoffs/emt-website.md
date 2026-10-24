@@ -1,7 +1,7 @@
 # Handoff — EMT website (EHS) · display name "Trauma Llama"
 
 - Branch: `feat/emt-website-ehs` · Worktree: `.scenebrief-worktrees/scenebrief-emt-website`
-- Base: `origin/main` @ `2f622d4c419f43408428564029d427d88cb511ee`
+- Base: `origin/main` @ `22eebdf` (core platform, PR #5), merged in `e9fd1d0`; the web app was then migrated to the canonical contracts (see "Canonical contract migration").
 - PR (draft): https://github.com/Tecncentral/Hackachusets/pull/3
 - Superseded work: `feat/paramedic-capture` @ `5fe4f77` (local checkpoint, not pushed).
 - Spec: `.kiro/specs/paramedic-capture-and-clarification/` (R1–R11; R11 = design integration)
@@ -14,94 +14,77 @@ Only user-facing strings were renamed to Trauma Llama (header, document title, p
 ```bash
 npm ci
 npm run dev                      # API :3001, web :5173
-# Platform API mode (default):        http://127.0.0.1:5173/#paramedic
-# Development adapter (labeled):       http://127.0.0.1:5173/?adapter=dev#paramedic
-# Receiving view:                      …#er        Patient sharing toggle: …#patient
+# Platform API (default):          http://127.0.0.1:5173/#paramedic
+# Development adapter (labeled):   http://127.0.0.1:5173/?adapter=dev#paramedic
+# Receiving view: …#er · Patient sharing toggle: …#patient
+# Second checkout beside a teammate's:
+SCENEBRIEF_API_PORT=3101 npx tsx apps/api/src/server.ts
+(cd apps/web && SCENEBRIEF_API_PORT=3101 SCENEBRIEF_WEB_PORT=5273 npx vite --host 127.0.0.1)
 ```
 
-On a shared machine, use different ports through a local, uncommitted Vite script (this session used API 3011 / web 5181).
+## Canonical contract migration (after merging main @ 22eebdf)
 
-## Main journey (development adapter shows all of it)
+- `platform/boundary.ts` now only re-exports `@scenebrief/contracts` types and the canonical request inputs. The website's own record schemas (observation/measurement/care/timeline/feedback/draft) are gone, as are `legacy.ts` (normalizer for the old scaffold), `draft.ts` (website handoff grouping) and `devAssistant.ts` (website feedback stub).
+- `http.ts` validates every response with `IncidentSchema` / `HandoffDraftSchema`. A response that does not match the contract is an error, not data. No compatibility fallbacks remain (`/transcripts` fallback removed: the platform now has `/observations`). Adds `/environment-readings`, `GET /api/health` and `POST /api/demo/assistant`.
+- `dev.ts` runs the platform's own `IncidentStore` in the tab (Vite aliases `node:crypto` to `crypto-shim.ts`). Same validation, idempotency, revision rules, visibility, deterministic handoff and labeled mock assistant as the API. Memory only; reload resets.
+- `scope.ts` reuses `apps/api/src/visibility.ts`, so the workspace hides exactly what the handoff and assistant exclude before matching.
+- The handoff draft always comes from `GET /handoff-draft`; preview, approval and the receiving view render the same canonical `sections` / `uncertainties` / `sourceIds` with one `HandoffDocument`.
+- UI wording lives in `platform/labels.ts` (labels only; no clinical rules). Canonical values used throughout: `body_temperature` + `site`, `skin_temperature` (never shown as clinical temperature), `before_cooling…`, `neurological`, `reportedBy`, `transcribed`, `status: current|superseded`, `corrections`, `resolutions`, `evaluations`.
+- Feedback states: platform `stale` (changed during evaluation) cannot be resolved and asks for a re-check; open/deferred feedback from an earlier revision stays resolvable and is labeled "Generated for revision N; the record is now at revision M".
+- Evaluation outcomes come from the stored `Evaluation` (`completed / unavailable / failed / stale`). The "Assistant available" demo switch now works in both adapters through `POST /api/demo/assistant`.
 
-1. **A · Capture.** The workspace opens for an **unidentified patient**: capture and handoff work immediately. "Record observation" (real `MediaRecorder`) → "Stop and transcribe" → editable transcript → "Save observation". Alternatively, "DEMO · Load example transcript", or type. Witness account, skin-temperature inference, and sweating inference.
-2. **Identify patient (optional).** Patient & context → "Identify patient (optional)" → demo code → confirm. This adds the profile and wearable background; it never blocks documentation.
-3. **B · Clarification.** Each saved observation triggers an evaluation of that revision. Feedback appears under its observation: chip, explanation, suggested question, Clarify / Defer / Dismiss, Patient evidence and Clinical reference disclosures, Play feedback / Mute. After any new information the feedback is marked stale with both revisions, and actions are hidden until "Re-check current revision".
-4. **C · Care & vitals.** Add a rectal temperature before cooling, a cooling care event with start/stop, and a later temperature. Readings show BEFORE COOLING / AFTER COOLING with method, time and source tag. Phase comes from the crew entry, or is placed from documented cooling times and labeled "(from cooling times)".
-5. **Handoff.** The card always lists unresolved items. Review full handoff → complete document → "I reviewed the complete draft, including N unresolved items." → Approve reviewed handoff (rev N). Print handoff / Download HTML. The receiving view shows the approved version and an amendment notice.
-6. Dev bar → untick "Assistant available": "Assistant feedback unavailable…". Capture, care and handoff keep working.
+## Approval binding (fix)
 
-## Implemented vs. simulated vs. dependent
+`platform/approval.ts`. Ticking "I reviewed…" stores the exact draft on screen.
 
-| Area | Website | Current platform (main @ 2f622d4) |
-|---|---|---|
-| Unidentified-patient documentation | No match gate in the UI or dev adapter; patient-linked context hidden until matched (`platform/scope.ts`) | **Gap:** `/transcripts` returns 403 "Confirm the patient association first." before a match; the UI shows this as a platform dependency and keeps the text |
-| Observations | `POST /observations` | Falls back to `POST /transcripts` (really saves; category, observed time and revision check are not stored, and the UI says so). Verified in browser + API |
-| Measurements, care events, key times | Forms, readings, phase labels | **Not available**: explicit "this platform does not accept … yet", entry kept |
-| Assistant evaluation / resolutions | Per-revision evaluation, stale handling, clarify/defer/dismiss | **Not available** on platform; works only with the dev adapter's labeled **deterministic stub** (`devAssistant.ts`) |
-| Transcription | Recording, cancel, stop-and-transcribe, review | **Not available** in either mode; no provider is connected. Shows "Transcription unavailable. Recording was not saved…" and never fakes a transcript |
-| References | Title, URL, version, passage, review status per item; placeholder when none | 3 NATA 2015 passages in the dev stub only, marked "Not clinically reviewed" |
-| Handoff draft | `GET /handoff-draft`; otherwise website grouping labeled "Grouped by the website…" | Not available; approval uses existing `POST /handoffs`. Platform stores its legacy text (ER view shows it verbatim, labeled) |
-| Spoken feedback | `speechSynthesis`, on demand; stops before recording | Browser only |
-| Reopen dismissed feedback | Not shown | No resolution action for it in the boundary |
+- Approve and Retry send that stored draft. `approveReviewed` re-reads `GET /handoff-draft` first; if its content fingerprint (revision, patientMatched, sections, uncertainties, sourceIds) differs, nothing is sent and the crew is asked to review again.
+- After the platform answers, the frozen version is compared with the reviewed draft. A mismatch is shown as an error, never as "approved".
+- Any different draft arriving on screen (new revision, a patient match — which does not bump the revision — or a reset) clears the confirmation and withdraws Retry.
+- "Crew approved" is shown only when a shared version has the same content as the current draft (`sharedVersionFor`), not merely the same revision.
+- Retry after a lost response returns the existing version (platform idempotency on revision); no duplicate.
 
-## Interface delta for the platform and assistant owners
+Remaining platform gap: `POST /handoffs` takes only `{ revision, reviewedBy }`, so a non-revision change landing between the pre-check and the POST is caught after the fact (mismatch error), not prevented. Proposal for the platform: accept an optional content hash or `patientMatched` in `ReviewRequest` and 409 on mismatch.
 
-UI schemas: `apps/web/src/platform/boundary.ts`. All new incident collections are optional, so today's response validates unchanged.
+## Implemented vs. dependent
 
-```json
-POST /observations      { "requestId", "baseRevision", "text", "observedAt": null, "category": "mental_status", "inputMode": "typed|voice-reviewed|example" }
-POST /measurements      { "requestId", "baseRevision", "kind": "temperature", "status": "obtained|not_obtained", "value": 41.2, "value2": null, "unit": "°C",
-                          "method": "rectal", "eventTime": "…Z", "coolingPhase": "before|during|after|unknown", "sourceKind": "manual", "device": null, "recordedBy": "crew", "note": null }
-POST /care-events       { "requestId", "baseRevision", "category": "cooling", "action", "startedAt", "endedAt", "note", "recordedBy" }
-POST /timeline-events   { "requestId", "baseRevision", "kind": "discovery|collapse|…", "time": null, "certainty": "recorded|reported|estimated|unknown", "note" }
-POST /evaluations       { "requestId", "baseRevision" } → incident with feedback[] (each carries "revision")
-POST /feedback/:id/resolutions { "requestId", "baseRevision", "action": "clarify|dismiss|defer", "clarificationText"? }   (dismiss: optional reason)
-GET  /handoff-draft     { "revision", "sections": [{ "id", "title", "items": [{ "text", "sourceIds", "note" }] }], "sourceIds", "uncertainties": [{ "label", "state": "unknown|not_documented|not_obtained|unresolved", "detail" }] }
-POST /audio/transcriptions  multipart audio + requestId → { "transcript", "mode", "warnings" }
-```
-
-Needed semantics:
-- **Platform:** allow observations, measurements, care and review **without a confirmed match**, and gate only patient-linked data. Re-evaluating should refresh still-applicable open/deferred items to the new revision, which the dev adapter does; otherwise stale items cannot be re-checked. Clarify bumps the revision and links a correction while keeping the original. Dismiss and defer do not bump it. Return 409 for stale baseRevision or approval, and 404 `Unknown endpoint` / 501 / 503 for unavailable routes.
-- **Platform draft:** use section ids `summary, times, measurements, care, observations, exertion, history, device`, with the unresolved list in `uncertainties`. Preferably the platform computes cooling-phase grouping. `not_obtained` renders as "Not performed".
-- **Assistant:** `/transcribe` and server-side provider credentials for live audio; `/evaluate` feedback items with `observationIds` so they attach to the right card.
+| Area | Status on the platform (main @ 22eebdf) |
+|---|---|
+| Unidentified documentation, measurements, care, key times, environment | Implemented on the platform and wired. Verified against the running API |
+| Evaluation / clarify / defer / dismiss | Implemented; feedback from the platform's **mock** assistant (fixture replay, labeled "Mock assistant · fixture replay"). A real assistant needs `SCENEBRIEF_ASSISTANT_MODE=http` + workstream 02 service; not available in this session |
+| Transcription | **Not on the platform** (`POST /audio/transcriptions` → 404 → "Transcription unavailable…"). No provider or credentials connected |
+| "Not obtained" measurement | No canonical field. The form says to note it as an observation; no "Not performed" state is invented |
+| Example transcripts | Saved as typed entries; the "example" origin is not stored (no field) |
+| Reopen dismissed feedback | Platform: dismissal is final |
 
 ## Shared files changed
 
-- `apps/web/package.json` + `package-lock.json`: `zod@^4.6.7` for `@scenebrief/web` (same version as contracts; via `npm install -w`).
-- `apps/web/index.html` title; `main.tsx`, `style.css` (shell owned by this scope). No changes to `apps/api`, `packages/*`, CI, or root config.
+- `apps/web/package.json` + `package-lock.json`: workspace deps `@scenebrief/fixtures`, `@scenebrief/ai` (needed by the dev adapter's in-browser store). No external dependencies added.
+- `apps/web/vite.config.ts`: `node:crypto` alias; ports from `SCENEBRIEF_API_PORT` / `SCENEBRIEF_WEB_PORT` (defaults unchanged).
+- No changes to `apps/api`, `packages/*`, CI or root config.
 
-## Checks run (this session)
+## Checks run (integration repair)
 
-- `npm run check` → typecheck clean, **11 files / 83 tests pass**, build OK.
-- Tests cover the adapters (idempotency, revision conflicts, late evaluation, assistant off, resolutions, approval versions, unidentified-patient documentation), http unavailable/compat/network mapping, legacy normalization against the real API store, draft states and `phaseOf`, summary/readings/handoff card/review/print document rendering, and workspace stale feedback.
-- Browser (Playwright + installed Chrome, fake mic) at **1280, 390, and 360 px (reduced motion)**:
-  - Full A→B→C journey for an unidentified patient, then matching; no horizontal overflow, no target under 44 px, no page errors.
-  - Recording: cancel during the permission prompt now closes the mic. This was a real bug, found and fixed in this pass.
-  - Stop and transcribe → transcription unavailable.
-  - Stale feedback → re-check; clarify, defer, dismiss with reason.
-  - Before/after-cooling readings; approve; changed-after-approval notice.
-  - Print media hides all controls. The PDF shows banner, sections, Unresolved box, sources, signature lines and footer.
-  - Keyboard Tab reaches all controls with a visible 3px focus ring.
-- Platform mode (1280 px):
-  - Microphone denied.
-  - Unidentified save → 403 platform dependency shown, text kept; after matching, Retry save succeeds.
-  - Evaluation unavailable; measurement unavailable.
-  - Approval version conflict → "Reload latest draft" → approve.
-- Phone, platform mode, with network aborted:
-  - Save failure keeps the text; retry stores exactly once.
-  - Approval connection failure keeps the review; retry succeeds.
-- Not verified: real transcription, screen readers, Safari/Firefox recording formats, audible speech output.
-
-Screenshots (actual implementation): `docs/handoffs/emt-website-screenshots/`.
+- `npm run check` → typecheck clean, **13 files / 97 tests pass** (API suites unchanged), build OK (Vite chunk-size warning: the dev adapter bundles zod + store).
+- New/updated web tests: http (error mapping, contract rejection, route shapes, assistant toggle, transcription unavailable), dev adapter (idempotency, append rules, matching gate, mock feedback, assistant unavailable, clarify/defer/dismiss, amendments, unmatched draft exclusion), approval binding (newer revision, match after review, retry after failure, lost response, newer draft during retry), and component rendering of canonical records.
+- **Real platform** (API :3101 with mock assistant, web :5273, http adapter, Playwright + Chrome), 14/14:
+  - Unidentified patient shown, no profile; witness example saved without matching; mock feedback attached.
+  - Clarification stored as a crew observation; original superseded with a correction.
+  - Rectal 41.2 °C before cooling → cold-water immersion 11:04–11:18 → 38.9 °C after cooling, shown with site and phase.
+  - Assistant switched off: observation saved, evaluation recorded `unavailable`, message shown.
+  - Review → another client adds an observation → confirmation cleared → review → v1 equals the platform draft.
+  - Approval connection failure keeps the review and offers Retry; a newer draft then withdraws Retry and nothing is shared; retry of the same draft shares v2 (amendment) once; receiving view shows v2.
+  - 390 px: no horizontal scroll; no console errors.
+- Screenshots: `docs/handoffs/emt-website-screenshots/platform-*.png` (earlier `*.jpg` are from before the migration).
+- Not verified: real transcription, an HTTP assistant service, screen readers, Safari/Firefox.
 
 ## Design elements not integrated (and why)
 
-- Prototype controls bar: demo only. Its equivalent is the dev adapter bar ("Assistant available").
+- Prototype controls bar: demo only. Its equivalent is the demo bar ("Assistant available").
 - Design demo data (INC-DEMO-0412, 41.2 °C at 14:20, etc.): all data comes from the platform fixture and crew entries.
 - Atkinson Hyperlegible fonts: named first in the font stack but not loaded (no font dependency); system-ui renders.
 - "Reopen feedback": no platform action exists.
 - Care-event types "Cooling started / Cooling ended": modeled as one cooling event with start/stop times, which the platform prompt asks for.
-- One clinical reference "placeholder" panel: shown only when an item has no references; the dev stub supplies verified NATA passages labeled not clinically reviewed.
+- One clinical reference "placeholder" panel: shown only when an item has no references; the mock assistant supplies NATA passages labeled not clinically reviewed.
 - Working concern text ("Suspected exertional heat stroke — not established") is a scenario constant in `model.ts` until the platform provides a field.
 
 ## Kiro work

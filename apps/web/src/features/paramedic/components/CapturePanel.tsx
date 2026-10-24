@@ -1,18 +1,22 @@
 import { useEffect, useState, type Ref } from 'react';
-import { DemoInitial } from '@scenebrief/contracts';
-import { errorMessage, useAction, useIncidentState, type Observation, type WorkspaceIncident } from '../../../platform';
-import { OBS_LABEL } from '../../../platform/draft';
+import { ExampleStatements } from '@scenebrief/fixtures';
+import { errorMessage, useAction, useIncidentState, type Incident, type Observation } from '../../../platform';
+import { OBS_LABEL, REPORTED_BY_LABEL } from '../../../platform/labels';
 import { clock, zoneTimeToIso } from '../../../platform/time';
 import { incidentDate } from '../model';
 import { MAX_SECONDS, recorderSupport, useRecorder } from '../recorder';
 import { useSpeechState } from '../speech';
 import { TimeField, useRequestId } from './fields';
 
-/** Scenario examples. Loading one is labeled as an example, never as a recording. */
-export const EXAMPLES: Array<{ label: string; text: string; category: Observation['category'] }> = [
-  { label: 'Witness account', text: DemoInitial, category: 'account' },
-  { label: 'Skin-temperature inference', text: 'The wearable skin temperature is elevated, so core temperature is confirmed high.', category: 'general' },
-  { label: 'Sweating inference', text: 'He is sweating, so this cannot be heat stroke.', category: 'skin' }
+/**
+ * Scenario examples from the shared fixture (the platform's mock assistant replays feedback for these
+ * exact statements). Loading one is labeled as an example, never as a recording; once saved it is the
+ * crew's typed entry.
+ */
+export const EXAMPLES: Array<{ label: string; text: string; category: Observation['category']; reportedBy: Observation['reportedBy'] }> = [
+  { label: 'Witness account', text: ExampleStatements.witnessAccount, category: 'account', reportedBy: 'witness' },
+  { label: 'Skin-temperature inference', text: ExampleStatements.skinTemperatureInference, category: 'general', reportedBy: 'crew' },
+  { label: 'Sweating inference', text: ExampleStatements.sweatingInference, category: 'skin', reportedBy: 'crew' }
 ];
 
 type Origin = 'typed' | 'voice' | 'example';
@@ -23,7 +27,7 @@ const mmss = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, 
  * Typed input is always available. Nothing is saved until "Save observation", and only shown as
  * saved after the platform returns it. Text is never cleared on failure.
  */
-export function CapturePanel({ incident, onSaved, headingRef }: { incident: WorkspaceIncident; onSaved: (revision: number) => void; headingRef?: Ref<HTMLHeadingElement> }) {
+export function CapturePanel({ incident, onSaved, headingRef }: { incident: Incident; onSaved: (revision: number) => void; headingRef?: Ref<HTMLHeadingElement> }) {
   const { platform } = useIncidentState();
   const save = useAction();
   const req = useRequestId();
@@ -33,10 +37,11 @@ export function CapturePanel({ incident, onSaved, headingRef }: { incident: Work
   const [text, setText] = useState('');
   const [origin, setOrigin] = useState<Origin>('typed');
   const [category, setCategory] = useState<Observation['category']>('general');
+  const [reportedBy, setReportedBy] = useState<Observation['reportedBy']>('crew');
   const [observed, setObserved] = useState('');
   const [notice, setNotice] = useState<string | null>(null);
   const [tx, setTx] = useState<{ state: 'idle' | 'pending' | 'error'; message?: string; warnings?: string[]; mode?: string }>({ state: 'idle' });
-  const [saved, setSaved] = useState<{ at: string; revision: number; compat: string | null } | null>(null);
+  const [saved, setSaved] = useState<{ at: string; revision: number } | null>(null);
   const [examplesOpen, setExamplesOpen] = useState(false);
   const support = recorderSupport();
   const recording = rec.state.phase === 'recording' || rec.state.phase === 'requesting';
@@ -69,13 +74,14 @@ export function CapturePanel({ incident, onSaved, headingRef }: { incident: Work
   const discard = () => { setText(''); setOrigin('typed'); setTx({ state: 'idle' }); setNotice('Draft discarded. Nothing was saved.'); save.clear(); };
 
   const submit = async () => {
-    const body = { text: text.trim(), category, observedAt: observed ? zoneTimeToIso(incidentDate(incident), observed) : null, inputMode: origin === 'voice' ? 'voice-reviewed' as const : origin };
-    const result = await save.run(() => platform.addObservation({ ...body, requestId: req.forContent(JSON.stringify(body)), baseRevision: incident.revision }), r => r.incident);
+    // inputMode "transcribed" = assistant transcript reviewed by the crew (contract). Examples are typed entries.
+    const body = { text: text.trim(), category, reportedBy, observedAt: observed ? zoneTimeToIso(incidentDate(incident), observed) : null, inputMode: origin === 'voice' ? 'transcribed' as const : 'typed' as const };
+    const result = await save.run(() => platform.addObservation({ ...body, requestId: req.forContent(JSON.stringify(body)), baseRevision: incident.revision }));
     if (result) {
       req.done();
-      setSaved({ at: new Date().toISOString(), revision: result.incident.revision, compat: result.compatibility });
-      setText(''); setObserved(''); setOrigin('typed'); setNotice(null); setTx({ state: 'idle' });
-      onSaved(result.incident.revision);
+      setSaved({ at: new Date().toISOString(), revision: result.revision });
+      setText(''); setObserved(''); setOrigin('typed'); setReportedBy('crew'); setNotice(null); setTx({ state: 'idle' });
+      onSaved(result.revision);
     }
   };
 
@@ -96,7 +102,7 @@ export function CapturePanel({ incident, onSaved, headingRef }: { incident: Work
       </button>
     </div>}
     {examplesOpen && !recording && <div className="ws-examples" role="group" aria-label="Example transcripts (demo, not recorded)">
-      {EXAMPLES.map(x => <button key={x.label} type="button" className="btn btn-demo" onClick={() => { setText(x.text); setCategory(x.category); setOrigin('example'); setExamplesOpen(false); save.clear(); setSaved(null); }}>{x.label}</button>)}
+      {EXAMPLES.map(x => <button key={x.label} type="button" className="btn btn-demo" onClick={() => { setText(x.text); setCategory(x.category); setReportedBy(x.reportedBy); setOrigin('example'); setExamplesOpen(false); save.clear(); setSaved(null); }}>{x.label}</button>)}
     </div>}
 
     {recording && <div className="ws-recording">
@@ -121,17 +127,23 @@ export function CapturePanel({ incident, onSaved, headingRef }: { incident: Work
       <label htmlFor="ws-note" className="ws-field-label">{label}</label>
       <textarea id="ws-note" className="field ws-textarea" rows={3} value={text} maxLength={5000} disabled={recording || saving}
         onChange={e => { setText(e.target.value); if (!e.target.value) setOrigin('typed'); setSaved(null); }} />
-      {origin === 'voice' && tx.mode && <p className="ws-hint">Transcribed ({tx.mode}){tx.warnings?.length ? ` · ${tx.warnings.join('; ')}` : ''}. Source will be recorded as a reviewed voice transcript.</p>}
-      {origin === 'example' && <p className="ws-hint"><span className="chip chip-demo">Example</span> Source will be recorded as an example transcript, not a recording.</p>}
+      {origin === 'voice' && tx.mode && <p className="ws-hint">Transcribed ({tx.mode}){tx.warnings?.length ? ` · ${tx.warnings.join('; ')}` : ''}. Saved as a transcribed, crew-reviewed entry.</p>}
+      {origin === 'example' && <p className="ws-hint"><span className="chip chip-demo">Example</span> Demo text, not a recording. Saved as your typed entry once you save it.</p>}
       {recording && <p className="ws-hint">Typing paused while recording.</p>}
 
       <details className="ws-cap-more">
-        <summary>Category and observed time <span className="ws-hint">({OBS_LABEL[category]}{observed ? ` · ${observed}` : ''})</span></summary>
+        <summary>Category, reported by and observed time <span className="ws-hint">({OBS_LABEL[category]} · {REPORTED_BY_LABEL[reportedBy]}{observed ? ` · ${observed}` : ''})</span></summary>
         <div className="ws-row">
           <div className="ws-field">
             <label htmlFor="ws-note-cat">Category</label>
             <select id="ws-note-cat" className="field" value={category} onChange={e => setCategory(e.target.value as Observation['category'])}>
               {Object.entries(OBS_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+            </select>
+          </div>
+          <div className="ws-field">
+            <label htmlFor="ws-note-by">Reported by</label>
+            <select id="ws-note-by" className="field" value={reportedBy} onChange={e => setReportedBy(e.target.value as Observation['reportedBy'])}>
+              {Object.entries(REPORTED_BY_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
             </select>
           </div>
           <TimeField id="ws-note-time" label="Observed at (optional)" value={observed} onChange={setObserved} />
@@ -146,9 +158,9 @@ export function CapturePanel({ incident, onSaved, headingRef }: { incident: Work
 
     <div aria-live="polite">
       {save.state === 'error' && save.error && <div role="alert" className="alert alert-crit">
-        <strong>Observation not saved.</strong> Your text is kept above. {save.error.kind === 'unavailable' ? 'This platform does not accept observations yet.' : save.error.kind === 'network' ? 'Check connection and retry.' : save.error.kind === 'forbidden' && !incident.patient.matched ? `The connected platform still requires a confirmed patient match before saving (${save.error.message}). Identifying the patient is optional in this website; this is a platform dependency.` : save.error.message}
+        <strong>Observation not saved.</strong> Your text is kept above. {save.error.kind === 'unavailable' ? 'This platform does not accept observations yet.' : save.error.kind === 'network' ? 'Check connection and retry.' : save.error.message}
       </div>}
-      {saved && <p className="alert alert-ok">Observation saved at <span className="mono">{clock(saved.at)}</span> · revision <span className="mono">{saved.revision}</span>.{saved.compat ? <span className="ws-hint"> {saved.compat}</span> : null}</p>}
+      {saved && <p className="alert alert-ok">Observation saved at <span className="mono">{clock(saved.at)}</span> · revision <span className="mono">{saved.revision}</span>.</p>}
     </div>
   </section>;
 }

@@ -1,116 +1,71 @@
-// Tests the crew review view. Rendered with renderToStaticMarkup inside the real IncidentProvider
-// (pollMs set very high so no polling fires during the static render). The draft is built from the
-// same capture flow used elsewhere so the uncertainty count is realistic.
+// Crew review view, rendered with renderToStaticMarkup inside the real IncidentProvider (pollMs very
+// high so no polling fires). Interaction-level approval binding is covered in platform/approval.test.ts.
 import { describe, expect, it } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { createDevPlatform, type DevStorage } from '../../../platform/dev';
-import { buildDraft } from '../../../platform/draft';
-import { normalizeIncident } from '../../../platform/legacy';
-import { IncidentProvider, type HandoffDraft, type WorkspaceIncident } from '../../../platform';
-import { createDemoIncident } from '../../../../../../packages/fixtures/src/index';
+import { IncidentProvider, type HandoffDraft, type Incident, type Platform } from '../../../platform';
+import { makePlatform, matched, obs, temp } from '../../../test-helpers';
 import { HandoffReview } from './HandoffReview';
 
-function memoryStorage(): DevStorage {
-  const map = new Map<string, string>();
-  return {
-    get: k => (map.has(k) ? map.get(k)! : null),
-    set: (k, v) => void map.set(k, v),
-    remove: k => void map.delete(k)
-  };
+async function captureFlow() {
+  const { platform, incident } = await matched();
+  let inc = await platform.addObservation(obs(incident, 'Friend says he went down about ten minutes ago on the trail.', { category: 'account', reportedBy: 'witness' }));
+  inc = await platform.addMeasurement(temp(inc, 40.6, '2026-10-24T14:58:00Z', 'before_cooling'));
+  return { platform, incident: inc };
 }
 
-function makePlatform() {
-  return createDevPlatform({
-    storage: memoryStorage(),
-    seed: async () => normalizeIncident(createDemoIncident()),
-    evaluationDelayMs: 0
-  });
-}
-
-async function captureFlow(): Promise<{ platform: ReturnType<typeof makePlatform>; incident: WorkspaceIncident }> {
-  const platform = makePlatform();
-  await platform.setSharing(true);
-  let incident = await platform.match('patient-demo-01');
-
-  incident = (await platform.addObservation({
-    requestId: 'r-obs-1', baseRevision: incident.revision,
-    text: 'Friend says he went down about ten minutes ago on the trail.',
-    observedAt: null, category: 'account', inputMode: 'typed'
-  })).incident;
-
-  incident = await platform.addMeasurement({
-    requestId: 'r-temp-1', baseRevision: incident.revision,
-    kind: 'temperature', status: 'obtained', value: 40.6, value2: null, unit: '°C',
-    method: 'rectal', eventTime: '2026-10-24T14:50:00Z', coolingPhase: 'before',
-    sourceKind: 'manual', device: null, recordedBy: 'medic-1', note: null
-  });
-
-  incident = await platform.addTimelineEvent({
-    requestId: 'r-time-1', baseRevision: incident.revision,
-    kind: 'collapse', time: null, certainty: 'unknown', note: 'Collapse not witnessed.'
-  });
-
-  return { platform, incident };
-}
-
-function render(platform: ReturnType<typeof makePlatform>, incident: WorkspaceIncident, draft: HandoffDraft | null) {
-  return renderToStaticMarkup(
-    <IncidentProvider platform={platform} pollMs={1e9}>
-      <HandoffReview incident={incident} draft={draft} draftError={null} onBack={() => {}} />
-    </IncidentProvider>
-  );
-}
+const render = (platform: Platform, incident: Incident, draft: HandoffDraft | null) => renderToStaticMarkup(
+  <IncidentProvider platform={platform} pollMs={1e9}>
+    <HandoffReview incident={incident} draft={draft} draftError={null} onBack={() => {}} />
+  </IncidentProvider>
+);
 
 describe('HandoffReview', () => {
-  it('renders the review checkbox with the unresolved count and a disabled approve button', async () => {
+  it('renders the review checkbox with the platform unresolved count and a disabled approve button', async () => {
     const { platform, incident } = await captureFlow();
-    const draft = buildDraft(incident);
-    const n = draft.uncertainties.length;
-    expect(n).toBeGreaterThan(0);
-
+    const draft = await platform.getHandoffDraft();
     const html = render(platform, incident, draft);
-    expect(html).toContain(`I reviewed the complete draft, including ${n} unresolved items.`);
-    expect(html).toContain(`Approve reviewed handoff (rev ${draft.revision})`);
-    // The approve button starts disabled (checkbox unchecked on a fresh render).
-    expect(html).toMatch(/Approve reviewed handoff \(rev \d+\)<\/button>/);
-    const approveIdx = html.indexOf('Approve reviewed handoff');
-    const buttonStart = html.lastIndexOf('<button', approveIdx);
-    expect(html.slice(buttonStart, approveIdx)).toContain('disabled');
-    // Review-only disclaimer.
+    expect(html).toContain(`I reviewed the complete draft, including ${draft.uncertainties.length} unresolved items.`);
+    const approveIdx = html.indexOf(`Approve reviewed handoff (rev ${draft.revision})`);
+    expect(approveIdx).toBeGreaterThan(0);
+    expect(html.slice(html.lastIndexOf('<button', approveIdx), approveIdx)).toContain('disabled');
     expect(html).toContain('Approval confirms review. It does not clinically verify reported information.');
   });
 
-  it('shows "Fresh review required" after approval when a new observation changes the incident', async () => {
+  it('shows "Crew approved" for the draft whose content was shared, with no approve button', async () => {
     const { platform, incident } = await captureFlow();
-    const draft = buildDraft(incident);
-
-    // Crew approves the current revision (shares the handoff).
     const approved = await platform.approveHandoff({ revision: incident.revision, reviewedBy: 'Crew (demo)' });
+    const html = render(platform, approved, await platform.getHandoffDraft());
+    expect(html).toContain(`CREW APPROVED · revision ${approved.revision}`);
+    expect(html).not.toContain('Approve reviewed handoff');
+  });
 
-    // A new observation is recorded after approval, moving the incident ahead of the shared handoff.
-    const after = (await platform.addObservation({
-      requestId: 'r-obs-2', baseRevision: approved.revision,
-      text: 'Still confused and not following commands.',
-      observedAt: null, category: 'mental_status', inputMode: 'typed'
-    })).incident;
+  it('requires fresh review when a new observation follows approval', async () => {
+    const { platform, incident } = await captureFlow();
+    const approved = await platform.approveHandoff({ revision: incident.revision, reviewedBy: 'Crew (demo)' });
+    const after = await platform.addObservation(obs(approved, 'Still confused and not following commands.', { category: 'neurological' }));
+    const html = render(platform, after, await platform.getHandoffDraft());
+    expect(html).toContain(`Fresh review required. The draft changed after version 1 was approved (approved revision ${approved.revision}, current draft revision ${after.revision}).`);
+    expect(html).toContain('DRAFT — NOT CREW APPROVED');
+  });
 
-    // The stale draft (at the approved revision) is still what the view was showing.
-    expect(after.handoffs.at(-1)!.revision).toBeLessThan(after.revision);
-    const html = render(platform, after, draft);
-    expect(html).toContain('Fresh review required. The incident changed after approval');
-    expect(html).toContain(`approved revision ${after.handoffs.at(-1)!.revision}, now ${after.revision}`);
+  it('a match after approval (same revision, more context) is not shown as approved', async () => {
+    const { platform } = makePlatform();
+    const inc = await platform.getIncident();
+    const approved = await platform.approveHandoff({ revision: inc.revision, reviewedBy: 'Crew (demo)' });
+    await platform.setSharing(true);
+    const now = await platform.match('patient-demo-01');
+    expect(now.revision).toBe(approved.revision);
+    const html = render(platform, now, await platform.getHandoffDraft());
+    expect(html).toContain('Fresh review required');
+    expect(html).toContain('Approve reviewed handoff');
   });
 
   it('renders the document column and the draft-loading state', async () => {
     const { platform, incident } = await captureFlow();
-    const loading = render(platform, incident, null);
-    expect(loading).toContain('Loading draft…');
-
-    const draft = buildDraft(incident);
-    const withDoc = render(platform, incident, draft);
-    expect(withDoc).toContain('ER handoff — Trauma Llama');
-    expect(withDoc).toContain('Crew review');
-    expect(withDoc).toContain('Print handoff');
-    expect(withDoc).toContain('Back to workspace');
+    expect(render(platform, incident, null)).toContain('Loading draft…');
+    const html = render(platform, incident, await platform.getHandoffDraft());
+    expect(html).toContain('ER handoff — Trauma Llama');
+    expect(html).toContain('Print handoff');
+    expect(html).toContain('Back to workspace');
   });
 });

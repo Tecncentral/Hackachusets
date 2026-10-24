@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { IncidentProvider, selectPlatform, useAction, useIncidentState } from './platform';
-import { devAssistantEnabled, setDevAssistantEnabled } from './platform/dev';
+import { IncidentProvider, errorMessage, selectPlatform, useAction, useIncidentState, type AssistantStatus } from './platform';
 import { Workspace } from './features/paramedic/Workspace';
 import { ErPage } from './features/er/ErPage';
 import { PatientPage } from './features/patient/PatientPage';
@@ -22,7 +21,11 @@ function Shell() {
   const [view, setView] = useState<View>(viewFromHash);
   const reset = useAction({ reportsSave: false });
   useEffect(() => { const on = () => setView(viewFromHash()); window.addEventListener('hashchange', on); return () => window.removeEventListener('hashchange', on); }, []);
-  const [assistantOn, setAssistantOn] = useState(() => platform.info.kind === 'dev' ? devAssistantEnabled() : true);
+  // Demo control for "assistant unavailable" (POST /api/demo/assistant). Available on both adapters.
+  const [assistant, setAssistant] = useState<AssistantStatus | null>(null);
+  const [assistantError, setAssistantError] = useState<string | null>(null);
+  useEffect(() => { platform.assistantStatus().then(setAssistant, e => setAssistantError(errorMessage(e))); }, [platform]);
+  const toggleAssistant = (enabled: boolean) => platform.setAssistantEnabled(enabled).then(a => { setAssistant(a); setAssistantError(null); }, e => setAssistantError(errorMessage(e)));
   const href = (id: string) => `${location.search}#${id}`;
 
   return <div className="app">
@@ -41,10 +44,11 @@ function Shell() {
         {VIEWS.map(v => <a key={v.id} href={href(v.id)} aria-current={view === v.id ? 'page' : undefined}>{v.label}</a>)}
       </nav>
     </header>
-    {platform.info.kind === 'dev' && <div className="app-devbar no-print" role="note">
-      <p><strong>Development adapter.</strong> {platform.info.description}</p>
-      <label className="app-switch"><input type="checkbox" checked={assistantOn} onChange={e => { setDevAssistantEnabled(e.target.checked); setAssistantOn(e.target.checked); }} /> Assistant available</label>
-    </div>}
+    <div className="app-devbar no-print" role="note">
+      <p>{platform.info.kind === 'dev' ? <><strong>Development adapter.</strong> {platform.info.description}</> : <>Demo controls{assistant ? <> · assistant mode <code>{assistant.effectiveMode}</code></> : null}</>}</p>
+      <label className="app-switch"><input type="checkbox" checked={assistant?.enabled ?? false} disabled={!assistant} onChange={e => void toggleAssistant(e.target.checked)} /> Assistant available</label>
+      {assistantError && <span className="text-error" role="alert">Assistant status unavailable: {assistantError}</span>}
+    </div>
     {loadError && <p role="alert" className="app-alert no-print">{loadError.message}</p>}
     <main className="app-main">
       {!incident ? <p className="app-loading">{loadError ? 'Waiting for the platform…' : 'Loading incident…'}</p>

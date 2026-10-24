@@ -1,164 +1,172 @@
 // Crew review view (Trauma Llama "review view" from Main.dc.html + Phone-Review). The document the
-// crew reviews is shown in full on the left; the right-hand "Crew review" aside carries the review
-// checkbox, approval button, and the distinct approval states (saving / success / connection
-// failure / version conflict / changed-after-approval). Approval confirms review only; it never
-// clinically verifies reported information. Printing is available before approval — an unapproved
-// printout shows the DRAFT banner. Only the document prints (the aside is .no-print).
+// crew reviews is shown in full on the left; the "Crew review" aside carries the review checkbox,
+// approval button and the distinct approval states (saving / success / connection failure / newer
+// draft / changed after approval). Approval confirms review only; it never clinically verifies
+// reported information. Printing is available before approval — an unapproved printout shows the
+// DRAFT banner. Only the document prints (the aside is .no-print).
+//
+// Binding: ticking the checkbox stores the exact draft on screen. Approve and Retry both send that
+// stored draft (approveReviewed re-reads the platform draft first and refuses if it differs). If a
+// different draft arrives — new revision, patient match, reset — the confirmation is cleared and the
+// crew must review again.
 import { useEffect, useState } from 'react';
 import { clock } from '../../../platform/time';
-import { useAction, useIncidentState, type HandoffDraft, type WorkspaceIncident } from '../../../platform';
+import {
+  PlatformError, approveReviewed, handoffFingerprint, sameContent, sharedVersionFor, useIncidentState,
+  type Handoff, type HandoffDraft, type Incident
+} from '../../../platform';
 import { HandoffDocument, downloadHandoff, type HandoffMeta } from '../../er/HandoffDocument';
 
-export function HandoffReview({
-  incident,
-  draft,
-  draftError,
-  onBack
-}: {
-  incident: WorkspaceIncident;
+type Approval =
+  | { state: 'idle' }
+  | { state: 'pending' }
+  | { state: 'approved'; handoff: Handoff }
+  | { state: 'failed'; message: string }
+  /** The platform has a newer draft (or 409). Nothing from the earlier review was shared. */
+  | { state: 'changed'; message: string }
+  | { state: 'mismatch'; handoff: Handoff };
+
+export const REVIEWER = 'Crew (demo)';
+
+export function HandoffReview({ incident, draft, draftError, onDraft, onBack }: {
+  incident: Incident;
   draft: HandoffDraft | null;
   draftError: string | null;
+  /** Replace the displayed draft (when the platform reports a newer one during approval). */
+  onDraft?: (d: HandoffDraft) => void;
   onBack: () => void;
 }) {
-  const { platform, refresh } = useIncidentState();
-  const approve = useAction();
+  const { platform, apply, refresh, reportSave } = useIncidentState();
+  const [reviewed, setReviewed] = useState<HandoffDraft | null>(null);
+  const [approval, setApproval] = useState<Approval>({ state: 'idle' });
+  const draftKey = draft ? handoffFingerprint(draft) : null;
 
-  // Review confirmation is bound to the draft revision. It resets whenever the draft revision
-  // changes (a new draft) or after an approval attempt (success or failure).
-  const [reviewedRevision, setReviewedRevision] = useState<number | null>(null);
-
+  // A different draft on screen invalidates an earlier review, including one kept for retry.
   useEffect(() => {
-    setReviewedRevision(null);
-    // Reset the checkbox whenever the draft revision changes. A conflict alert stays until the crew
-    // chooses "Reload latest draft", so the reason for the fresh review stays visible.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [draft?.revision]);
+    if (reviewed && draft && !sameContent(reviewed, draft)) {
+      setReviewed(null);
+      setApproval(a => (a.state === 'failed' || a.state === 'idle' ? { state: 'changed', message: 'A newer draft replaced the one you reviewed. Nothing was shared. Review this draft before approving.' } : a));
+    }
+  }, [draftKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const latest = incident.handoffs.at(-1);
-  // The document represents the draft revision; it is "approved" only when the latest shared
-  // handoff is for this exact draft revision.
-  const approvedForDraft = draft !== null && latest !== undefined && latest.revision === draft.revision;
-  // The incident changed after the last approval: there is an approved handoff but it is behind.
-  const changedAfterApproval = latest !== undefined && latest.revision < incident.revision;
-  const draftCurrent = draft !== null && draft.revision === incident.revision;
-  const checked = draft !== null && reviewedRevision === draft.revision;
+  const shared = draft ? sharedVersionFor(incident, draft) : undefined;
+  const changedAfterApproval = latest !== undefined && !shared && draft !== null;
+  const draftCurrent = draft !== null && draft.revision === incident.revision && draft.patientMatched === incident.patient.matched;
+  const checked = reviewed !== null && draft !== null && sameContent(reviewed, draft);
+  const pending = approval.state === 'pending';
 
-  const meta: HandoffMeta = draft
-    ? {
-        title: 'ER handoff — Trauma Llama',
-        status: approvedForDraft ? 'Crew approved' : 'Draft — not crew approved',
-        reviewedBy: latest?.reviewedBy,
-        reviewedAt: latest?.reviewedAt,
-        version: latest?.version,
-        approval: latest ? { approved: true, revision: latest.revision, at: latest.reviewedAt } : undefined
+  const meta: HandoffMeta = {
+    title: 'ER handoff — Trauma Llama',
+    status: shared ? 'Crew approved' : 'Draft — not crew approved',
+    reviewedBy: shared?.reviewedBy, reviewedAt: shared?.reviewedAt, version: shared?.version,
+    approval: shared ? { approved: true, revision: shared.revision, at: shared.reviewedAt } : undefined
+  };
+
+  /** Approve exactly `target` — the draft the crew confirmed. Retry passes the same object. */
+  const runApprove = async (target: HandoffDraft) => {
+    setApproval({ state: 'pending' }); reportSave({ state: 'saving' });
+    try {
+      const outcome = await approveReviewed(platform, target, REVIEWER);
+      if (outcome.status === 'changed') {
+        setReviewed(null); onDraft?.(outcome.latest); void refresh();
+        setApproval({ state: 'changed', message: 'The platform has a newer draft than the one you reviewed. Nothing was shared. Review the updated draft before approving.' });
+        reportSave({ state: 'idle' });
+        return;
       }
-    : { title: 'ER handoff — Trauma Llama', status: 'Draft' };
-
-  const runApprove = async () => {
-    if (!draft) return;
-    const ok = await approve.run(() => platform.approveHandoff({ revision: draft.revision, reviewedBy: 'Crew (demo)' }));
-    // Keep the review confirmation on a connection failure; clear it on success or conflict.
-    setReviewedRevision(r => (ok ? null : r));
+      apply(outcome.incident); setReviewed(null);
+      if (outcome.status === 'mismatch') { setApproval({ state: 'mismatch', handoff: outcome.handoff }); reportSave({ state: 'error', message: 'Shared version differs from the reviewed draft.' }); return; }
+      setApproval({ state: 'approved', handoff: outcome.handoff }); reportSave({ state: 'saved' });
+    } catch (e) {
+      const err = e instanceof PlatformError ? e : new PlatformError('server', String(e), 'handoffs');
+      if (err.kind === 'conflict') {
+        setReviewed(null); void refresh();
+        setApproval({ state: 'changed', message: `${err.message} Nothing from your review was shared. Review the latest draft before approving.` });
+        reportSave({ state: 'idle' });
+      } else {
+        // Keep the reviewed draft: Retry re-sends this exact draft, and only while it is still current.
+        setApproval({ state: 'failed', message: err.message });
+        reportSave({ state: 'error', message: err.message });
+      }
+    }
   };
-
-  const reloadDraft = () => {
-    approve.clear();
-    setReviewedRevision(null);
-    void refresh();
-  };
-
-  const conflict = approve.error?.kind === 'conflict';
-  const networkFailure = approve.error !== null && !conflict;
 
   return (
     <div className="hr">
       <div className="hr-doc">
         {draftError ? (
-          <div className="card">
-            <p role="alert" className="text-error">Draft not available: {draftError}</p>
-          </div>
+          <div className="card"><p role="alert" className="text-error">Draft not available: {draftError}</p></div>
         ) : !draft ? (
-          <div className="card">
-            <p className="hr-loading">Loading draft…</p>
-          </div>
+          <div className="card"><p className="hr-loading">Loading draft…</p></div>
         ) : (
-          <HandoffDocument draft={draft} incident={incident} meta={meta} />
+          <HandoffDocument doc={shared ?? draft} incidentId={incident.id} sources={incident.sources} meta={meta} />
         )}
       </div>
 
       <aside className="hr-aside card no-print" aria-label="Crew review">
         <h2>Crew review</h2>
 
-        {approve.state === 'done' && approvedForDraft && (
-          <p className="alert alert-ok" role="status">
-            ✓ Crew approved · revision {latest!.revision}
-            {latest?.reviewedAt ? ` at ${clock(latest.reviewedAt)}` : ''}
+        {approval.state === 'approved' && shared && (
+          <p className="alert alert-ok" role="status">✓ Crew approved · version {shared.version} · revision {shared.revision} at {clock(shared.reviewedAt)}</p>
+        )}
+
+        {approval.state === 'failed' && (
+          <>
+            <p className="alert alert-crit" role="alert">
+              Approval not saved: {approval.message} {checked ? 'Your review of this draft is kept — retry.' : ''}
+            </p>
+            {checked && reviewed && (
+              <button type="button" className="btn" onClick={() => void runApprove(reviewed)} disabled={pending}>
+                Retry approval (rev {reviewed.revision})
+              </button>
+            )}
+          </>
+        )}
+
+        {approval.state === 'changed' && (
+          <p className="alert alert-crit" role="alert">{approval.message}</p>
+        )}
+
+        {approval.state === 'mismatch' && (
+          <p className="alert alert-crit" role="alert">
+            The platform shared version {approval.handoff.version} with content that differs from the draft you reviewed (the record changed during approval). Review the current draft and share an amendment.
           </p>
         )}
 
-        {networkFailure && (
-          <>
-            <p className="alert alert-crit" role="alert">
-              Approval not saved. Connection problem. Your review is kept — retry.
-            </p>
-            <button type="button" className="btn" onClick={() => void runApprove()} disabled={approve.pending}>
-              Retry approval
-            </button>
-          </>
-        )}
-
-        {conflict && (
-          <>
-            <p className="alert alert-crit" role="alert">
-              This draft is out of date. A newer revision exists. Reload the draft and review it again before approving.
-            </p>
-            <button type="button" className="btn btn-secondary" onClick={reloadDraft}>
-              Reload latest draft
-            </button>
-          </>
-        )}
-
-        {changedAfterApproval && !conflict && !networkFailure && (
+        {changedAfterApproval && approval.state !== 'changed' && approval.state !== 'mismatch' && (
           <p className="alert alert-attn" role="status">
-            Fresh review required. The incident changed after approval (approved revision {latest!.revision}, now {incident.revision}).
+            Fresh review required. The draft changed after version {latest!.version} was approved (approved revision {latest!.revision}, current draft revision {draft!.revision}).
           </p>
         )}
 
-        {!networkFailure && !conflict && !(approve.state === 'done' && approvedForDraft) && (
-          <p className="hr-status" role="status">
-            {approve.pending
-              ? 'Saving approval…'
-              : approvedForDraft
-                ? 'Crew approved'
-                : 'Not yet reviewed'}
-          </p>
+        {approval.state !== 'failed' && approval.state !== 'approved' && (
+          <p className="hr-status" role="status">{pending ? 'Saving approval…' : shared ? 'Crew approved' : 'Not yet reviewed'}</p>
         )}
 
-        {draft && !approvedForDraft && (
+        {draft && !shared && (
           <label className="hr-review-check">
             <input
               type="checkbox"
               checked={checked}
-              disabled={approve.pending}
-              onChange={e => setReviewedRevision(e.target.checked ? draft.revision : null)}
+              disabled={pending || !draftCurrent}
+              onChange={e => { setReviewed(e.target.checked ? draft : null); if (approval.state !== 'pending') setApproval({ state: 'idle' }); }}
             />
             I reviewed the complete draft, including {draft.uncertainties.length} unresolved items.
           </label>
         )}
 
         <div className="hr-approve-row">
-          {!approvedForDraft && <button
-            type="button"
-            className="btn"
-            disabled={!draft || !checked || !draftCurrent || approve.pending || conflict}
-            onClick={() => void runApprove()}
-          >
-            {approve.pending ? 'Saving approval…' : `Approve reviewed handoff (rev ${draft?.revision ?? incident.revision})`}
-          </button>}
-
-          <button type="button" className="btn btn-secondary" onClick={() => window.print()}>
-            Print handoff
-          </button>
+          {!shared && approval.state !== 'failed' && (
+            <button
+              type="button"
+              className="btn"
+              disabled={!draft || !checked || !draftCurrent || pending}
+              onClick={() => { if (reviewed) void runApprove(reviewed); }}
+            >
+              {pending ? 'Saving approval…' : `Approve reviewed handoff (rev ${draft?.revision ?? incident.revision})`}
+            </button>
+          )}
+          <button type="button" className="btn btn-secondary" onClick={() => window.print()}>Print handoff</button>
         </div>
 
         <div className="hr-actions hr-secondary-actions">
@@ -166,16 +174,12 @@ export function HandoffReview({
             <button
               type="button"
               className="btn btn-secondary"
-              onClick={() =>
-                downloadHandoff({ draft, incident, meta }, `trauma-llama-handoff-r${draft.revision}.html`)
-              }
+              onClick={() => downloadHandoff({ doc: shared ?? draft, incidentId: incident.id, sources: incident.sources, meta }, `trauma-llama-handoff-r${draft.revision}.html`)}
             >
               Download HTML
             </button>
           )}
-          <button type="button" className="btn btn-quiet" onClick={onBack}>
-            Back to workspace
-          </button>
+          <button type="button" className="btn btn-quiet" onClick={onBack}>Back to workspace</button>
         </div>
 
         <p className="hr-note hr-secondary-actions">Approval confirms review. It does not clinically verify reported information.</p>

@@ -1,13 +1,14 @@
 // Receiving (ER) view. This is a simulated handoff display: no hospital system is connected. It
-// shows only the handoff the crew has reviewed and shared. New information recorded after that
-// review is surfaced as an amendment notice, not silently merged. No fetching happens here — the
-// shell polls the platform and passes the latest incident in through props.
-import type { WorkspaceHandoff, WorkspaceIncident, WorkspaceSource } from '../../platform';
+// shows only the handoff the crew reviewed and shared — the platform's frozen snapshot, rendered with
+// the same document component as the crew's review. New information recorded after that review is
+// surfaced as an amendment notice, not silently merged. No fetching happens here — the shell polls
+// the platform and passes the latest incident in through props.
+import type { Handoff, Incident } from '../../platform';
 import { clock } from '../../platform/time';
-import { HandoffDocument, downloadHandoff, downloadTextHandoff, type HandoffMeta } from './HandoffDocument';
+import { HandoffDocument, downloadHandoff, type HandoffMeta } from './HandoffDocument';
 import './er.css';
 
-function handoffMeta(handoff: WorkspaceHandoff): HandoffMeta {
+function handoffMeta(handoff: Handoff): HandoffMeta {
   return {
     title: `Crew-reviewed handoff — version ${handoff.version}`,
     status: 'Reviewed and shared',
@@ -19,20 +20,7 @@ function handoffMeta(handoff: WorkspaceHandoff): HandoffMeta {
   };
 }
 
-/** Sources relevant to a text-only handoff: those referenced by id in the text, plus wearables. */
-function textSources(incident: WorkspaceIncident, text: string): WorkspaceSource[] {
-  const out: WorkspaceSource[] = [];
-  const seen = new Set<string>();
-  for (const s of incident.sources) {
-    if ((text.includes(s.id) || s.type === 'wearable') && !seen.has(s.id)) {
-      seen.add(s.id);
-      out.push(s);
-    }
-  }
-  return out;
-}
-
-export function ErPage({ incident }: { incident: WorkspaceIncident }) {
+export function ErPage({ incident }: { incident: Incident }) {
   const latest = incident.handoffs.at(-1);
   const earlier = incident.handoffs.slice(0, -1);
 
@@ -50,7 +38,7 @@ export function ErPage({ incident }: { incident: WorkspaceIncident }) {
       ) : (
         <article className="card">
           <p className="er-meta no-print">
-            Version {latest.version} · reviewed by {latest.reviewedBy} at {clock(latest.reviewedAt)}
+            Version {latest.version}{latest.kind === 'amendment' ? ` (amends v${latest.amendsVersion})` : ''} · reviewed by {latest.reviewedBy} at {clock(latest.reviewedAt)} · revision {latest.revision}
           </p>
 
           {latest.revision !== incident.revision && (
@@ -61,55 +49,22 @@ export function ErPage({ incident }: { incident: WorkspaceIncident }) {
 
           <div className="er-actions no-print">
             <button type="button" className="btn btn-secondary" onClick={() => window.print()}>Print</button>
-            {latest.draft ? (
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => downloadHandoff(
-                  { draft: latest.draft!, incident, meta: handoffMeta(latest) },
-                  `handoff-v${latest.version}.html`
-                )}
-              >
-                Download HTML
-              </button>
-            ) : (
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => downloadTextHandoff(
-                  `Crew-reviewed handoff — version ${latest.version}`,
-                  latest.text,
-                  `handoff-v${latest.version}.html`
-                )}
-              >
-                Download HTML
-              </button>
-            )}
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => downloadHandoff({ doc: latest, incidentId: incident.id, sources: incident.sources, meta: handoffMeta(latest) }, `handoff-v${latest.version}.html`)}
+            >
+              Download HTML
+            </button>
           </div>
 
-          {latest.draft ? (
-            <HandoffDocument draft={latest.draft} incident={incident} meta={handoffMeta(latest)} />
-          ) : (
-            <div>
-              <p className="er-textnote">Platform-generated text (structured sections not provided by this platform version)</p>
-              <pre>{latest.text}</pre>
-              <h2>Sources</h2>
-              <ul className="er-srclist">
-                {textSources(incident, latest.text).map(s => (
-                  <li key={s.id}>
-                    <strong>{s.label}</strong>
-                    {s.eventTime ? ` · ${clock(s.eventTime)}` : ''}: {s.text}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+          <HandoffDocument doc={latest} incidentId={incident.id} sources={incident.sources} meta={handoffMeta(latest)} />
 
           {earlier.length > 0 && (
             <details className="er-earlier no-print">
               <summary>Earlier reviewed versions ({earlier.length})</summary>
               {earlier.map(h => (
-                <pre key={h.version}>Version {h.version} · reviewed by {h.reviewedBy} at {clock(h.reviewedAt)}{'\n\n'}{h.text}</pre>
+                <pre key={h.version}>{h.text}</pre>
               ))}
             </details>
           )}

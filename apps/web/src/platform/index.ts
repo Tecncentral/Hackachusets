@@ -11,5 +11,6 @@ export function selectPlatform(search = typeof location === 'undefined' ? '' : l
 
 export * from './boundary';
 export { patientScoped } from './scope';
+export { approveReviewed, handoffFingerprint, sameContent, sharedVersionFor, type ApprovalOutcome, type HandoffContent } from './approval';
 export type { Platform, AdapterInfo } from './types';
 export { IncidentProvider, useIncidentState, useAction, type ActionState, type SaveIndicator } from './store';

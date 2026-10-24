@@ -1,105 +1,82 @@
-// Behaviour tests for the HTTP adapter (http.ts). fetch is stubbed per-test so we can assert how the
-// adapter maps platform responses to PlatformError kinds, falls back to compatibility routes when an
-// endpoint is unavailable, and shapes its requests (JSON vs multipart). No real network is used.
+// Behaviour tests for the HTTP adapter (http.ts). fetch is stubbed per test (responses come from the
+// platform's own fixture) so we can assert error mapping, contract validation and request shapes.
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { createIncidentFixture } from '@scenebrief/fixtures';
+import { IncidentStore } from '../../../api/src/store';
 import { createHttpPlatform } from './http';
-import { PlatformError } from './boundary';
-import { createDemoIncident } from '@scenebrief/fixtures';
 
 const BASE = '/api/incidents/runner-found-down';
-// A legacy-shaped incident (no observations collection) so normalizeIncident runs.
-const demoIncident = JSON.parse(JSON.stringify(createDemoIncident()));
-
-function jsonResponse(body: unknown, status = 200): Response {
-  return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
-}
+const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
+const measurement = { requestId: 'm1', baseRevision: 0, kind: 'body_temperature' as const, value: 41, unit: '°C' as const, site: 'rectal' as const, measuredAt: null, coolingPhase: 'before_cooling' as const };
 
 afterEach(() => { vi.unstubAllGlobals(); });
 
 describe('http adapter — error mapping', () => {
-  it('maps a 404 {error:"Unknown endpoint"} to PlatformError kind "unavailable"', async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => jsonResponse({ error: 'Unknown endpoint' }, 404)));
-    const platform = createHttpPlatform();
-    await expect(platform.addMeasurement({
-      requestId: 'm1', baseRevision: 0, kind: 'temperature', status: 'obtained', value: 41, value2: null,
-      unit: '°C', method: 'rectal', eventTime: null, coolingPhase: 'before', sourceKind: 'manual',
-      device: null, recordedBy: 'crew', note: null
-    })).rejects.toMatchObject({ kind: 'unavailable' });
+  it('maps a 404 {error:"Unknown endpoint"} to "unavailable"', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => json({ error: 'Unknown endpoint' }, 404)));
+    await expect(createHttpPlatform().addMeasurement(measurement)).rejects.toMatchObject({ kind: 'unavailable' });
   });
 
-  it('maps a 409 to PlatformError kind "conflict"', async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => jsonResponse({ error: 'Incident changed.' }, 409)));
-    const platform = createHttpPlatform();
-    await expect(platform.addMeasurement({
-      requestId: 'm1', baseRevision: 0, kind: 'temperature', status: 'obtained', value: 41, value2: null,
-      unit: '°C', method: 'rectal', eventTime: null, coolingPhase: 'before', sourceKind: 'manual',
-      device: null, recordedBy: 'crew', note: null
-    })).rejects.toMatchObject({ kind: 'conflict' });
+  it('maps 409 to "conflict" and 400 to "invalid" with the platform message', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => json({ error: 'Incident changed.' }, 409)));
+    await expect(createHttpPlatform().addMeasurement(measurement)).rejects.toMatchObject({ kind: 'conflict', message: 'Incident changed.' });
+    vi.stubGlobal('fetch', vi.fn(async () => json({ error: '✖ Value 104 °C is outside the plausible range' }, 400)));
+    await expect(createHttpPlatform().addMeasurement(measurement)).rejects.toMatchObject({ kind: 'invalid' });
   });
 
-  it('maps a fetch rejection to PlatformError kind "network"', async () => {
+  it('maps a fetch rejection to "network"', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => { throw new TypeError('Failed to fetch'); }));
-    const platform = createHttpPlatform();
-    await expect(platform.getIncident()).rejects.toMatchObject({ kind: 'network' });
+    await expect(createHttpPlatform().getIncident()).rejects.toMatchObject({ kind: 'network' });
+  });
+
+  it('rejects a response that does not match the canonical Incident schema', async () => {
+    const legacy = { ...createIncidentFixture(), observations: undefined };
+    vi.stubGlobal('fetch', vi.fn(async () => json(legacy)));
+    await expect(createHttpPlatform().getIncident()).rejects.toMatchObject({ kind: 'server', message: expect.stringMatching(/shared contract/) });
   });
 });
 
-describe('http adapter — addObservation compatibility fallback', () => {
-  it('falls back to POST /transcripts with only {requestId,text} and returns a compatibility message', async () => {
-    const fetchMock = vi.fn(async (url: string | URL, init?: RequestInit) => {
-      const u = String(url);
-      if (u === `${BASE}/observations`) return jsonResponse({ error: 'Unknown endpoint' }, 404);
-      if (u === `${BASE}/transcripts`) {
-        const body = JSON.parse(String(init?.body));
-        // Only the compatibility fields are sent.
-        expect(Object.keys(body).sort()).toEqual(['requestId', 'text']);
-        return jsonResponse(demoIncident, 200);
-      }
-      throw new Error(`unexpected url ${u}`);
-    });
+describe('http adapter — routes', () => {
+  it('posts the canonical body to each capture route and validates the returned incident', async () => {
+    const fixture = createIncidentFixture();
+    const calls: Array<[string, unknown]> = [];
+    vi.stubGlobal('fetch', vi.fn(async (url: string, init?: RequestInit) => { calls.push([url, init?.body ? JSON.parse(String(init.body)) : null]); return json(fixture); }));
+    const p = createHttpPlatform();
+    await p.addMeasurement(measurement);
+    await p.addEnvironmentReading({ requestId: 'e', baseRevision: 0, kind: 'ambient_temperature', value: 88, unit: '°F', measuredAt: null });
+    await p.resolveFeedback({ feedbackId: 'fb 1', requestId: 'r', baseRevision: 0, action: 'defer' });
+    await p.approveHandoff({ revision: 0, reviewedBy: 'Crew (demo)' });
+    expect(calls.map(c => c[0])).toEqual([`${BASE}/measurements`, `${BASE}/environment-readings`, `${BASE}/feedback/fb%201/resolutions`, `${BASE}/handoffs`]);
+    expect(calls[0][1]).toEqual(measurement);
+    expect(calls[2][1]).toEqual({ requestId: 'r', baseRevision: 0, action: 'defer' });
+  });
+
+  it('reads the handoff draft from the platform and validates it', async () => {
+    const draft = new IncidentStore().handoffDraft();
+    vi.stubGlobal('fetch', vi.fn(async () => json(draft)));
+    expect((await createHttpPlatform().getHandoffDraft()).sections.map(s => s.id)).toEqual(draft.sections.map(s => s.id));
+    vi.stubGlobal('fetch', vi.fn(async () => json({ error: 'Unknown endpoint' }, 404)));
+    await expect(createHttpPlatform().getHandoffDraft()).rejects.toMatchObject({ kind: 'unavailable' });
+  });
+
+  it('reads and sets assistant availability through the demo routes', async () => {
+    const status = { configuredMode: 'mock', enabled: false, effectiveMode: 'unavailable', baseUrl: null };
+    const fetchMock = vi.fn(async (url: string) => json(url === '/api/health' ? { ok: true, mode: 'synthetic-demo', assistant: status } : status));
     vi.stubGlobal('fetch', fetchMock);
-    const platform = createHttpPlatform();
-    const result = await platform.addObservation({
-      requestId: 'obs-1', baseRevision: 0, text: 'Patient is confused.', observedAt: null,
-      category: 'mental_status', inputMode: 'typed'
-    });
-    expect(result.compatibility).toBeTruthy();
-    expect(result.incident.id).toBe('runner-found-down');
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    const p = createHttpPlatform();
+    expect(await p.assistantStatus()).toEqual(status);
+    expect(await p.setAssistantEnabled(false)).toEqual(status);
+    expect(fetchMock).toHaveBeenLastCalledWith('/api/demo/assistant', expect.objectContaining({ method: 'POST', body: '{"enabled":false}' }));
   });
-});
 
-describe('http adapter — getHandoffDraft fallback', () => {
-  it('falls back to buildDraft with mode "website-grouped" when the endpoint is unavailable', async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => jsonResponse({ error: 'Unknown endpoint' }, 404)));
-    const platform = createHttpPlatform();
-    // normalizeIncident gives a WorkspaceIncident shape to hand buildDraft.
-    const incident = await (async () => {
-      vi.stubGlobal('fetch', vi.fn(async () => jsonResponse(demoIncident, 200)));
-      const got = await platform.getIncident();
-      vi.stubGlobal('fetch', vi.fn(async () => jsonResponse({ error: 'Unknown endpoint' }, 404)));
-      return got;
-    })();
-    const draft = await platform.getHandoffDraft(incident);
-    expect(draft.mode).toBe('website-grouped');
-    expect(draft.revision).toBe(incident.revision);
-  });
-});
-
-describe('http adapter — transcribe', () => {
-  it('posts a multipart FormData body carrying "audio" and "requestId"', async () => {
-    let captured: FormData | null = null;
-    vi.stubGlobal('fetch', vi.fn(async (_url: string | URL, init?: RequestInit) => {
-      captured = init?.body as FormData;
-      return jsonResponse({ transcript: 'reviewed text', mode: 'demo', warnings: [] }, 200);
-    }));
-    const platform = createHttpPlatform();
-    const blob = new Blob(['audio-bytes'], { type: 'audio/webm' });
-    const result = await platform.transcribe(blob, 'req-audio');
-    expect(result.transcript).toBe('reviewed text');
-    expect(captured).toBeInstanceOf(FormData);
-    expect(captured!.get('requestId')).toBe('req-audio');
-    const audio = captured!.get('audio');
-    expect(audio).toBeInstanceOf(Blob);
+  it('transcribe posts multipart audio + requestId, and reports the missing route as unavailable', async () => {
+    const fetchMock = vi.fn(async (_url: string, _init?: RequestInit) => json({ error: 'Unknown endpoint' }, 404));
+    vi.stubGlobal('fetch', fetchMock);
+    await expect(createHttpPlatform().transcribe(new Blob(['x'], { type: 'audio/webm' }), 'a1')).rejects.toMatchObject({ kind: 'unavailable' });
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe(`${BASE}/audio/transcriptions`);
+    const form = init!.body as FormData;
+    expect(form.get('requestId')).toBe('a1');
+    expect(form.get('audio')).toBeInstanceOf(Blob);
   });
 });

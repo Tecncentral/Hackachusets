@@ -1,7 +1,7 @@
-import { useAction, useIncidentState, type WorkspaceIncident } from '../../platform';
+import { useAction, useIncidentState, type Incident } from '../../platform';
 
 /** Preserved demo sharing toggle. The patient portal is not a priority for the EMT website. */
-export function PatientPage({ incident }: { incident: WorkspaceIncident }) {
+export function PatientPage({ incident }: { incident: Incident }) {
   const { platform } = useIncidentState();
   const sharing = useAction();
   return <section className="card" style={{ maxWidth: 640 }}>
