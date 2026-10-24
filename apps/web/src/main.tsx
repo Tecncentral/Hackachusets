@@ -6,7 +6,7 @@ import { ErPage } from './features/er/ErPage';
 import { PatientPage } from './features/patient/PatientPage';
 import './style.css';
 
-const VIEWS = [{ id: 'paramedic', label: 'EMT workspace' }, { id: 'er', label: 'Receiving view' }, { id: 'patient', label: 'Patient sharing (demo)' }] as const;
+const VIEWS = [{ id: 'paramedic', label: 'EMT workspace' }, { id: 'er', label: 'Receiving view' }, { id: 'patient', label: 'Patient companion (demo)' }] as const;
 type View = typeof VIEWS[number]['id'];
 const viewFromHash = (): View => (VIEWS.find(v => v.id === location.hash.slice(1))?.id ?? 'paramedic');
 
@@ -35,6 +35,7 @@ function Shell() {
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ color: 'var(--primary)' }}><path d="M4 12h3l2-5 4 10 2-5h5" /></svg>
           Trauma Llama
         </a>
+        {view === 'patient' && <span className="app-subtitle">Emergency profile</span>}
         <span className="demo-label">SYNTHETIC DEMO — NOT A REAL PATIENT</span>
         {platform.info.kind === 'dev' && <span className="chip chip-demo" title={platform.info.description}>Development adapter</span>}
         <span className="app-spacer" />

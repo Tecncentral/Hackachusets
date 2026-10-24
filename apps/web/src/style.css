@@ -50,6 +50,7 @@ code { overflow-wrap: anywhere; }
 .app-incident { display: flex; flex-direction: column; min-width: 0; font-size: 14px; color: var(--ink-2); }
 .app-incident strong { color: var(--ink); font-size: 16px; }
 .app-spacer { flex: 1 1 auto; }
+.app-subtitle { font-size: 15px; color: var(--ink-2); border-left: 1px solid var(--line); padding-left: 10px; margin-left: -6px; }
 .demo-label { display: inline-block; font-size: 13px; font-weight: 700; letter-spacing: .04em; color: var(--demo-ink); background: var(--demo-bg); border: 1px solid var(--demo); border-radius: 6px; padding: 3px 8px; }
 .save-status { font-size: 14px; font-weight: 600; color: var(--ink-2); }
 .save-status[data-state=error] { color: var(--crit-ink); }
