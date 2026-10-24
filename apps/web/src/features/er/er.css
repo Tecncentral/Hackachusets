@@ -1,0 +1,84 @@
+/* Receiving (ER) view + handoff review + printable handoff document.
+   Selectors scoped under .er, .hr (handoff review) or .hd (document). Colours use the shared
+   tokens from style.css; near-black ink in the document for grayscale-legible print. */
+
+/* ---- Receiving view ---- */
+.er { max-width: 900px; }
+.er-head { margin: 0 0 14px; }
+.er-head h1 { margin: 0 0 4px; font-size: 1.35rem; }
+.er-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 14px; }
+.er-amendment { margin: 0 0 14px; }
+.er-empty { color: var(--ink-2); }
+.er-meta { color: var(--ink-2); margin: 0 0 10px; }
+.er-textnote { color: var(--ink-2); font-style: italic; margin: 0 0 8px; }
+.er pre { white-space: pre-wrap; overflow-wrap: anywhere; background: var(--surface-sunken); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; margin: 0 0 12px; font: 14px/1.5 var(--mono); color: var(--ink); }
+.er-earlier { margin-top: 10px; }
+.er-earlier summary { cursor: pointer; font-weight: 650; color: var(--primary); min-height: var(--target); display: flex; align-items: center; }
+.er-srclist { margin: 6px 0 0; padding-left: 20px; }
+.er-srclist li { margin: 4px 0; }
+
+/* ---- Handoff review (crew review view) ---- */
+.hr { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; max-width: 1280px; }
+.hr-doc { flex: 999 1 600px; min-width: 0; }
+.hr-aside { flex: 1 1 300px; min-width: 0; display: flex; flex-direction: column; gap: 14px; position: sticky; top: 16px; }
+.hr-aside h2 { margin: 0; font-size: 1.25rem; }
+.hr-status { padding: 10px 12px; border-radius: 8px; font-weight: 600; background: var(--surface-muted); color: var(--ink); border: 1px solid var(--line); }
+.hr-review-check { display: flex; gap: 10px; align-items: flex-start; font-weight: 600; cursor: pointer; }
+.hr-review-check input { flex: 0 0 auto; margin: 2px 0 0; }
+.hr-note { font-size: 14px; color: var(--ink-2); margin: 0; }
+.hr-actions { display: flex; flex-direction: column; gap: 8px; }
+.hr-actions .btn { width: 100%; }
+.hr-loading { color: var(--ink-2); }
+
+/* Phone: aside becomes a fixed bottom footer with checkbox + Approve (2fr) + Print (1fr). */
+@media (max-width: 720px) {
+  .hr { gap: 12px; }
+  .hr-aside { position: fixed; top: auto; left: 0; right: 0; bottom: 0; margin: 0; z-index: 20; flex: none; width: 100%; max-height: 60vh; overflow: auto;
+    background: var(--surface); border-top: 1px solid var(--line); border-radius: 0; padding: 10px 12px 14px;
+    gap: 8px; box-shadow: 0 -2px 8px rgba(0,0,0,.08); }
+  .hr-aside h2, .hr-secondary-actions { display: none; }
+  .hr-aside .hr-status { padding: 6px 10px; }
+  .hr-approve-row { display: grid; grid-template-columns: 2fr 1fr; gap: 8px; }
+  .hr-approve-row .btn { width: 100%; }
+  .hr-doc { padding-bottom: 240px; }
+}
+
+/* ---- Handoff document (print-friendly, near-black ink) ---- */
+.hd { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 32px; color: var(--ink); line-height: 1.5; }
+.hd-banner { border: 2px solid var(--ink); padding: 6px 10px; font-weight: 700; font-size: 13px; letter-spacing: .04em; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.hd-title { margin: 20px 0 4px; font-size: 28px; line-height: 1.2; }
+.hd-meta { margin: 0 0 4px; font-size: 14px; color: var(--ink-2); }
+.hd-section h2, .hd-unresolved h2 { font-size: 19px; }
+.hd h2 { margin: 24px 0 6px; border-bottom: 1px solid var(--ink); padding-bottom: 4px; }
+.hd-list { margin: 4px 0 0; padding-left: 20px; }
+.hd-list li { margin: 6px 0; }
+.hd-note { color: var(--ink-2); }
+.hd-empty { color: var(--ink-2); font-style: italic; }
+.hd-refs { margin-left: 4px; }
+.hd-ref { font-size: .85rem; font-weight: 600; text-decoration: none; color: var(--ink); margin-left: 4px; white-space: nowrap; }
+.hd-ref:hover { color: var(--ink); text-decoration: underline; }
+.hd-unresolved { border: 2px solid var(--ink); padding: 12px 14px; margin-top: 24px; }
+.hd-unresolved h2 { margin: 0 0 6px; border: none; padding: 0; }
+.hd-unc { margin: 0; padding-left: 20px; }
+.hd-unc li { margin: 4px 0; }
+.hd-unc-label { font-weight: 600; }
+.hd-state { font-weight: 700; color: var(--ink); }
+.hd-sources { display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
+.hd-source { display: grid; grid-template-columns: 70px 1fr; gap: 12px; }
+.hd-src-id { font-weight: 700; }
+.hd-grouped { margin: 10px 0 0; padding: 8px 12px; border: 1px solid var(--ink); color: var(--ink); font-size: 14px; }
+.hd-sign { margin-top: 28px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; font-size: 14px; }
+.hd-sign-line { border-bottom: 1px solid var(--ink); padding-top: 28px; }
+.hd-footer { margin: 20px 0 0; font-size: 12px; color: var(--ink-2); }
+
+@media print {
+  /* Only the document should print. Everything with .no-print is hidden globally (style.css). */
+  @page { margin: 0.75in; }
+  .er, .hr { max-width: none; }
+  .hr-doc { flex: 1 1 100%; padding-bottom: 0; }
+  .hd { border: none; border-radius: 0; padding: 0; }
+  .hd h2 { break-after: avoid; }
+  .hd-list li, .hd-source, .hd-unresolved { break-inside: avoid; }
+  .hd-ref { color: var(--ink); text-decoration: none; }
+  a[href^="#"]::after { content: ""; }
+}

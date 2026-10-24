@@ -1,0 +1,64 @@
+/* Right-column care/reassessment + handoff card + shared inline forms. Scoped to the three roots
+   below; all colour comes from style.css tokens. No web font loaded. */
+
+/* ---- Care & reassessment card ---- */
+.ws-care { display: flex; flex-direction: column; gap: 14px; }
+.ws-care-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; }
+.ws-care-head h2 { margin: 0; font-size: 1.25rem; }
+.ws-care-readings { display: flex; flex-direction: column; gap: 10px; }
+.ws-care-reading { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+.ws-care-reading-label { font-weight: 700; font-size: 0.95rem; }
+.ws-care-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 6px; }
+.ws-care-col { min-width: 0; }
+.ws-care-colcap { margin: 0 0 2px; font-size: 11px; }
+.ws-care-cell { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.ws-care-val { font-size: 1.1rem; font-weight: 600; }
+.ws-care-meta { font-size: 0.82rem; color: var(--ink-2); }
+.ws-care-phase { font-size: 0.82rem; font-weight: 600; color: var(--ink-2); }
+.ws-care-src { font-family: var(--mono); font-size: 0.78rem; color: var(--ink-2); }
+
+.ws-care-performed { margin-top: 2px; }
+.ws-care-list { margin: 6px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.ws-care-item { display: grid; grid-template-columns: 56px 1fr; gap: 8px; font-size: 0.95rem; }
+.ws-care-item-time { color: var(--ink-2); }
+
+.ws-care-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.ws-care-actions .btn { min-height: var(--target); }
+.ws-care-note { font-size: 0.82rem; color: var(--ink-2); margin: 0; }
+
+@media (max-width: 720px) {
+  .ws-care-cols { grid-template-columns: 1fr; }
+}
+
+/* ---- ER handoff card ---- */
+.ws-hcard { display: flex; flex-direction: column; gap: 12px; }
+.ws-hcard-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px; }
+.ws-hcard-head h2 { margin: 0; font-size: 1.25rem; }
+.ws-hcard-status { min-height: 1.5em; }
+.ws-hcard-list { margin: 6px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.ws-hcard-item { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; font-size: 0.95rem; }
+.ws-hcard-item-label { font-weight: 600; }
+.ws-hcard-item-detail { color: var(--ink-2); flex: 1 1 100%; }
+.ws-hcard-actions { display: flex; }
+.ws-hcard-actions .btn { min-height: var(--target); }
+.ws-hcard-note { font-size: 0.82rem; color: var(--ink-2); margin: 0; }
+
+/* ---- Shared inline forms (.ws-form) ---- */
+.ws-form { display: flex; flex-direction: column; gap: 4px; border: 1px solid var(--line); border-radius: 8px; padding: 14px; background: var(--surface-sunken); margin-top: 4px; }
+.ws-form label { font-weight: 650; }
+.ws-form .ws-hint { font-size: 0.82rem; color: var(--ink-2); margin: 2px 0; }
+.ws-form .ws-row { display: flex; flex-wrap: wrap; gap: 0 12px; }
+.ws-form .ws-field { margin: 6px 0; min-width: 0; flex: 1 1 180px; }
+.ws-form .ws-field-narrow { flex: 0 1 130px; }
+.ws-form .ws-field label { display: block; }
+.ws-form .field { margin-top: 4px; }
+.ws-form .ws-time { display: flex; gap: 6px; align-items: center; margin-top: 4px; }
+.ws-form .ws-time .field { flex: 1 1 auto; margin-top: 0; }
+.ws-form .ws-fieldset { border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px 8px; margin: 6px 0; display: flex; flex-wrap: wrap; gap: 0 16px; }
+.ws-form .ws-fieldset legend { font-weight: 650; padding: 0 4px; }
+.ws-form .ws-radio { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-weight: 500; }
+.ws-form .ws-radio input { width: 24px; height: 24px; }
+.ws-form .app-switch { min-height: 44px; }
+.ws-form .ws-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 8px 0 4px; }
+.ws-form .ws-status { min-height: 1.5em; }
+.ws-form .ws-status .alert { margin: 4px 0 0; }
