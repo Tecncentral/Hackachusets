@@ -1,0 +1,104 @@
+{
+  "incidentId": "runner-found-down",
+  "revision": 4,
+  "mode": "rules-only",
+  "feedback": [
+    {
+      "kind": "missing_context",
+      "message": "The account mentions timing but does not say whether the collapse was seen. Collapse time stays unknown until someone reports it.",
+      "suggestedQuestion": "Did anyone see him collapse, or was he found afterward? About what time?",
+      "observationIds": [
+        "obs-1"
+      ],
+      "evidenceSourceIds": [
+        "src-obs-1"
+      ],
+      "knowledgeReferenceIds": [],
+      "spokenSummary": "Ask if the collapse was seen, or if he was found later.",
+      "id": "fb-missing_context0-obs-1",
+      "revision": 4,
+      "mode": "rules-only",
+      "status": "open",
+      "resolution": null
+    },
+    {
+      "kind": "unsupported_inference",
+      "message": "A consumer skin-temperature reading cannot establish core body temperature. Core temperature needs a clinical core method.",
+      "suggestedQuestion": "What was the core temperature by a clinical method (e.g., rectal), and at what time?",
+      "observationIds": [
+        "obs-2"
+      ],
+      "evidenceSourceIds": [],
+      "spokenSummary": "Skin temperature is not core temperature.",
+      "knowledgeReferenceIds": [
+        "nata-2015-rec8-temperature-method",
+        "acsm-2023-ehi-consensus"
+      ],
+      "id": "fb-unsupported_inference1-obs-2",
+      "revision": 4,
+      "mode": "rules-only",
+      "status": "open",
+      "resolution": null
+    },
+    {
+      "kind": "unsupported_inference",
+      "message": "Sweating does not rule out exertional heat stroke; EHS can occur with intact sweating. This is a background-evidence point, not a diagnosis.",
+      "suggestedQuestion": "Can we document the core temperature (with method and time) and mental status rather than using sweating to exclude EHS?",
+      "observationIds": [
+        "obs-3"
+      ],
+      "evidenceSourceIds": [],
+      "spokenSummary": "Sweating alone does not rule out heat stroke.",
+      "knowledgeReferenceIds": [
+        "nata-2015-rec25-sweating",
+        "nata-2015-ehi-position",
+        "acsm-2023-ehi-consensus"
+      ],
+      "id": "fb-unsupported_inference2-obs-3",
+      "revision": 4,
+      "mode": "rules-only",
+      "status": "open",
+      "resolution": null
+    }
+  ],
+  "knowledgeReferences": [
+    {
+      "id": "nata-2015-rec8-temperature-method",
+      "title": "NATA Position Statement: Exertional Heat Illnesses (2015) — Recommendation 8",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4639891/",
+      "version": "2015-09-01 (registry 2026-10-24.2)",
+      "passage": "The assessment of rectal temperature is the clinical gold standard for obtaining core body temperature of patients with EHS … No other field-expedient methods … are valid or reliable after intense exercise in the heat.",
+      "applicability": "Consensus background; the measurement method under local protocol is the crew’s decision.",
+      "reviewStatus": "background-evidence — passage not machine-verified; clinical review required"
+    },
+    {
+      "id": "acsm-2023-ehi-consensus",
+      "title": "ACSM Expert Consensus Statement on Exertional Heat Illness: Recognition, Management, and Return to Activity",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/37036463/",
+      "version": "2023-04-01 (registry 2026-10-24.2)",
+      "passage": "Exertional heat stroke is a true medical emergency with potential for organ injury and death. Identifying the athlete with suspected exertional heat stroke early in the course, stopping activity (body heat generation), and providing rapid total body cooling are essential for survival ... outcomes are likely related to the duration of severe hyperthermia.",
+      "applicability": "National expert consensus (background evidence). Supports: EHS is a time-critical emergency; rapid cooling and early recognition drive outcome. Not a local EMS protocol.",
+      "reviewStatus": "background-evidence; clinical review required"
+    },
+    {
+      "id": "nata-2015-rec25-sweating",
+      "title": "NATA Position Statement: Exertional Heat Illnesses (2015) — Recommendation 25",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4639891/",
+      "version": "2015-09-01 (registry 2026-10-24.2)",
+      "passage": "Most patients with EHS have hot, sweaty skin as opposed to those with the classical type of heat stroke … who present with dry skin.",
+      "applicability": "Consensus background for athletic trainers; not the responder’s local EMS protocol.",
+      "reviewStatus": "background-evidence — passage not machine-verified; clinical review required"
+    },
+    {
+      "id": "nata-2015-ehi-position",
+      "title": "National Athletic Trainers' Association Position Statement: Exertional Heat Illnesses",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4639891/",
+      "version": "2015-09-01 (registry 2026-10-24.2)",
+      "passage": "Best-practice recommendations for the prevention, recognition, and treatment of exertional heat illnesses (EHIs) ... exertional heat stroke remains one of the leading causes of sudden death during sport. Recommendations provide an integrated scientific and clinically applicable approach to the prevention, recognition, treatment of, and return-to-activity guidelines for EHIs.",
+      "applicability": "Position statement (background evidence). Supports: structured recognition and treatment of EHI; EHS is a leading cause of exertional sudden death. Not a local EMS protocol.",
+      "reviewStatus": "background-evidence; clinical review required"
+    }
+  ],
+  "knowledgeVersion": "2026-10-24.2",
+  "warnings": []
+}

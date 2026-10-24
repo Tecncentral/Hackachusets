@@ -1,0 +1,24 @@
+{
+  "incidentId": "runner-found-down",
+  "revision": 2,
+  "mode": "rules-only",
+  "feedback": [
+    {
+      "kind": "unsupported_inference",
+      "message": "Sweating does not rule out exertional heat stroke; EHS can occur with intact sweating. This is a background-evidence point, not a diagnosis.",
+      "suggestedQuestion": "Can we document the core temperature (with method and time) and mental status rather than using sweating to exclude EHS?",
+      "observationIds": [
+        "obs-sweating"
+      ],
+      "evidenceSourceIds": [],
+      "spokenSummary": "Sweating alone does not rule out heat stroke.",
+      "knowledgeReferenceIds": [
+        "nata-2015-rec25-sweating",
+        "nata-2015-ehi-position",
+        "acsm-2023-ehi-consensus"
+      ],
+      "id": "fb-unsupported_inference0-obs-sweating"
+    }
+  ],
+  "warnings": []
+}

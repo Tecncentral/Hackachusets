@@ -1,0 +1,15 @@
+{
+  "incidentId": "runner-found-down",
+  "revision": 2,
+  "observations": [
+    {
+      "id": "obs-sweating",
+      "text": "He is sweating, so this cannot be heat stroke.",
+      "observedAt": "2026-10-24T15:05:00Z",
+      "sourceIds": []
+    }
+  ],
+  "measurements": [],
+  "sources": [],
+  "careEvents": []
+}

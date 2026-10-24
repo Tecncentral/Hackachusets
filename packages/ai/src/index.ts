@@ -1,4 +1,6 @@
 import { DemoInitial, DemoClarification, type Incident, type Claim } from '@scenebrief/contracts';
+
+// --- Existing scaffold adapter (unchanged behavior; API store depends on it) ---
 export interface Extraction { field: Claim['field']; value: string; clarifiesInitial: boolean }
 export interface EvidenceAdapter { extract(text: string): Promise<Extraction>; draft(incident: Incident): string }
 // Deliberately scripted. This adapter neither transcribes audio nor provides clinical reasoning.
@@ -19,3 +21,26 @@ export const demoAdapter: EvidenceAdapter = {
  }
 };
 export { DemoInitial };
+
+// --- EHS correction assistant (Member 2 revised scope) ---
+export * from './knowledge.js';
+export * from './evaluate.types.js';
+export { evaluateRules } from './evaluate.js';
+export { evaluateHybrid, type LanguageModel, type HybridOptions } from './hybrid.js';
+export {
+  transcribe,
+  transcriptionAvailability,
+  TRANSCRIPTION_KEY_ENV,
+  TRANSCRIPTION_PROVIDER_ENV,
+  type TranscriptionMode,
+  type TranscriptionResult,
+  type TranscriptionProvider,
+  type TranscriptionConfig,
+  type AudioInput,
+  openAiTranscriptionProvider,
+  providerFromEnv,
+  TRANSCRIPTION_MODEL_ENV,
+  TRANSCRIPTION_BASE_URL_ENV,
+} from './transcribe.js';
+export * from './fixtures.js';
+export * from './bridge.js';

@@ -1,0 +1,43 @@
+{
+  "incidentId": "runner-found-down",
+  "revision": 3,
+  "observations": [
+    {
+      "id": "obs-postcool",
+      "text": "We started cold-water cooling and the temperature now reads 38.1 C.",
+      "observedAt": "2026-10-24T15:20:00Z",
+      "sourceIds": [
+        "src-temp-post"
+      ]
+    }
+  ],
+  "measurements": [
+    {
+      "id": "m-temp-post",
+      "kind": "temperature",
+      "value": "38.1",
+      "unit": "C",
+      "method": "rectal",
+      "site": "rectal",
+      "eventTime": "2026-10-24T15:20:00Z",
+      "beforeCooling": false,
+      "sourceId": "src-temp-post"
+    }
+  ],
+  "sources": [
+    {
+      "id": "src-temp-post",
+      "type": "clinical",
+      "label": "Rectal temperature (synthetic)",
+      "text": "38.1 C after cooling."
+    }
+  ],
+  "careEvents": [
+    {
+      "id": "care-cooling",
+      "action": "Cold-water cooling",
+      "startedAt": "2026-10-24T15:12:00Z",
+      "stoppedAt": null
+    }
+  ]
+}

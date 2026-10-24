@@ -1,0 +1,11 @@
+{
+  "incidentId": "runner-found-down",
+  "revision": 4,
+  "mode": "unavailable",
+  "feedback": [],
+  "knowledgeReferences": [],
+  "knowledgeVersion": "2026-10-24.2",
+  "warnings": [
+    "Assistant is turned off. Records and handoff are unaffected."
+  ]
+}

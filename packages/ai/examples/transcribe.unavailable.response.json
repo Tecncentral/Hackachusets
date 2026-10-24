@@ -1,0 +1,7 @@
+{
+  "transcript": "",
+  "mode": "unavailable",
+  "warnings": [
+    "Audio transcription is not configured. Set SCENEBRIEF_TRANSCRIBE_API_KEY (and optionally SCENEBRIEF_TRANSCRIBE_PROVIDER) server-side to enable live audio. Text entry still works."
+  ]
+}
