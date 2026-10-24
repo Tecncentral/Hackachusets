@@ -25,7 +25,8 @@ const MAX_FEEDBACK = 6;
 
 /** Lowercased, punctuation-normalized text for cue matching. */
 function norm(text: string): string {
-  return ` ${text.toLowerCase().replace(/[^a-z0-9%.\s]/g, ' ').replace(/\s+/g, ' ').trim()} `;
+  // Drop apostrophes first so contractions match the cue lists ("can't" -> "cant", "isn't" -> "isnt").
+  return ` ${text.toLowerCase().replace(/['\u2019]/g, '').replace(/[^a-z0-9%.\s]/g, ' ').replace(/\s+/g, ' ').trim()} `;
 }
 
 function hasAny(haystack: string, cues: string[]): boolean {

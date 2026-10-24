@@ -1,10 +1,13 @@
-import { EvaluateResponseSchema, type EvaluateRequest, type EvaluateResponse } from '@scenebrief/contracts';
+import type { EvaluateRequest, EvaluateResponse } from '@scenebrief/contracts';
+import { evaluateHybrid } from '@scenebrief/ai';
 import { MockRules, MockKnowledgeReferences, normalizeStatement } from '@scenebrief/fixtures';
+import { toAssistantRequest, fromAssistantResponse, AssistantResponseSchema } from './assistant-bridge.js';
 
 // Platform-side client for the correction assistant (workstream 02). Outcomes never throw:
 // a failing or disabled assistant must not affect capture or handoff.
 
-export type AssistantClientMode = 'mock' | 'unavailable' | 'http';
+// local: the correction assistant (@scenebrief/ai) in-process. http: the same assistant as the apps/assistant service.
+export type AssistantClientMode = 'local' | 'mock' | 'unavailable' | 'http';
 export type AssistantOutcome =
   | { status: 'completed'; response: EvaluateResponse }
   | { status: 'unavailable'; error: string }
@@ -40,17 +43,40 @@ export class MockAssistant implements AssistantClient {
   async health() { return { reachable: true, detail: 'Mock assistant (fixture replay).' }; }
 }
 
+/** The correction assistant's deterministic rules (optionally model-phrased), called in-process. */
+export class LocalAssistant implements AssistantClient {
+  readonly mode = 'local' as const;
+  readonly baseUrl = null;
+  constructor(private timeoutMs = 8000) {}
+  async evaluate(request: EvaluateRequest): Promise<AssistantOutcome> {
+    try {
+      const response = await withTimeout(evaluateHybrid(toAssistantRequest(request), {}), this.timeoutMs);
+      return { status: 'completed', response: fromAssistantResponse(response) };
+    } catch (error) {
+      return { status: 'failed', error: isTimeout(error) ? `Assistant timed out after ${this.timeoutMs} ms.` : 'Assistant could not evaluate this snapshot.' };
+    }
+  }
+  async health() { return { reachable: true, detail: 'In-process correction assistant (@scenebrief/ai).' }; }
+}
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  let timer: NodeJS.Timeout;
+  const timeout = new Promise<never>((_r, reject) => { timer = setTimeout(() => reject(Object.assign(new Error('timeout'), { name: 'TimeoutError' })), ms); });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
+
 const MAX_RESPONSE_BYTES = 200_000;
 
-/** HTTP client for the assistant service: POST {baseUrl}/evaluate, GET {baseUrl}/health. */
+/** HTTP client for the apps/assistant service: POST {baseUrl}/evaluate, GET {baseUrl}/health. */
 export class HttpAssistant implements AssistantClient {
   readonly mode = 'http' as const;
   constructor(readonly baseUrl: string, private timeoutMs = 8000, private fetchImpl: typeof fetch = fetch) {}
 
   async evaluate(request: EvaluateRequest): Promise<AssistantOutcome> {
-    let response: Response;
+    let body: string, response: Response;
+    try { body = JSON.stringify(toAssistantRequest(request)); } catch { return { status: 'failed', error: 'Snapshot could not be converted to the assistant request.' }; }
     try {
-      response = await this.fetchImpl(new URL('/evaluate', this.baseUrl), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(request), signal: AbortSignal.timeout(this.timeoutMs) });
+      response = await this.fetchImpl(new URL('/evaluate', this.baseUrl), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body, signal: AbortSignal.timeout(this.timeoutMs) });
     } catch (error) {
       return isTimeout(error) ? { status: 'failed', error: `Assistant timed out after ${this.timeoutMs} ms.` } : { status: 'unavailable', error: 'Assistant service unreachable.' };
     }
@@ -59,9 +85,10 @@ export class HttpAssistant implements AssistantClient {
     try {
       const body = await response.text();
       if (body.length > MAX_RESPONSE_BYTES) return { status: 'failed', error: 'Assistant response too large.' };
-      const parsed = EvaluateResponseSchema.safeParse(JSON.parse(body));
+      const parsed = AssistantResponseSchema.safeParse(JSON.parse(body));
       // Do not echo the response body; it may contain patient text.
-      return parsed.success ? { status: 'completed', response: parsed.data } : { status: 'failed', error: 'Assistant response failed schema validation.' };
+      if (!parsed.success) return { status: 'failed', error: 'Assistant response failed schema validation.' };
+      try { return { status: 'completed', response: fromAssistantResponse(parsed.data) }; } catch { return { status: 'failed', error: 'Assistant response failed schema validation.' }; }
     } catch (error) {
       return isTimeout(error) ? { status: 'failed', error: `Assistant timed out after ${this.timeoutMs} ms.` } : { status: 'failed', error: 'Assistant response was not valid JSON.' };
     }
@@ -80,7 +107,7 @@ function isTimeout(error: unknown) { return error instanceof Error && (error.nam
 /** Wraps the configured client with a runtime on/off switch (demo control for "assistant disabled"). */
 export class AssistantGateway {
   enabled = true;
-  constructor(readonly client: AssistantClient = new MockAssistant()) {}
+  constructor(readonly client: AssistantClient = new LocalAssistant()) {}
   get effectiveMode(): AssistantClientMode { return this.enabled ? this.client.mode : 'unavailable'; }
   status() { return { configuredMode: this.client.mode, enabled: this.enabled, effectiveMode: this.effectiveMode, baseUrl: this.client.baseUrl }; }
   async evaluate(request: EvaluateRequest): Promise<AssistantOutcome> {
@@ -90,15 +117,16 @@ export class AssistantGateway {
 }
 
 export function assistantFromEnv(env: NodeJS.ProcessEnv): AssistantGateway {
-  const mode = env.SCENEBRIEF_ASSISTANT_MODE ?? 'mock';
+  const mode = env.SCENEBRIEF_ASSISTANT_MODE ?? 'local';
+  const timeout = Number(env.SCENEBRIEF_ASSISTANT_TIMEOUT_MS ?? 8000);
+  if (!Number.isInteger(timeout) || timeout < 100 || timeout > 60000) throw new Error('SCENEBRIEF_ASSISTANT_TIMEOUT_MS must be an integer from 100 to 60000.');
+  if (mode === 'local') return new AssistantGateway(new LocalAssistant(timeout));
   if (mode === 'mock') return new AssistantGateway(new MockAssistant());
   if (mode === 'unavailable') return new AssistantGateway(new UnavailableAssistant());
   if (mode === 'http') {
     const url = env.SCENEBRIEF_ASSISTANT_URL ?? 'http://127.0.0.1:3002';
     if (!URL.canParse(url)) throw new Error(`SCENEBRIEF_ASSISTANT_URL is not a valid URL: ${url}`);
-    const timeout = Number(env.SCENEBRIEF_ASSISTANT_TIMEOUT_MS ?? 8000);
-    if (!Number.isInteger(timeout) || timeout < 100 || timeout > 60000) throw new Error('SCENEBRIEF_ASSISTANT_TIMEOUT_MS must be an integer from 100 to 60000.');
     return new AssistantGateway(new HttpAssistant(url, timeout));
   }
-  throw new Error(`SCENEBRIEF_ASSISTANT_MODE must be mock, unavailable or http (got ${mode}).`);
+  throw new Error(`SCENEBRIEF_ASSISTANT_MODE must be local, mock, unavailable or http (got ${mode}).`);
 }

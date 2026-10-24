@@ -99,7 +99,7 @@
       "limitation": null
     },
     {
-      "id": "src-43708813-e8bb-4e48-b4c2-2d6805c0f79e",
+      "id": "src-0e31f6d4-2d88-4653-9b28-988d21143045",
       "type": "crew",
       "label": "Crew entry — observation (transcribed, crew-reviewed)",
       "capturedAt": "2026-10-24T14:58:30.000Z",
@@ -109,7 +109,7 @@
       "limitation": null
     },
     {
-      "id": "src-7d4e2e64-039e-467a-bd70-f9e14249b2a4",
+      "id": "src-f7476b01-95b9-4ad1-8829-533704a31737",
       "type": "crew",
       "label": "Crew entry — observation (typed)",
       "capturedAt": "2026-10-24T14:59:30.000Z",
@@ -119,7 +119,7 @@
       "limitation": null
     },
     {
-      "id": "src-45d90b85-5d68-43ee-93e0-17b2e57cf2e8",
+      "id": "src-cf48f6ef-9596-4ac8-9706-f985ee6fc398",
       "type": "crew",
       "label": "Crew entry — observation (typed)",
       "capturedAt": "2026-10-24T15:00:30.000Z",
@@ -129,7 +129,7 @@
       "limitation": null
     },
     {
-      "id": "src-6424df14-382f-4eff-84aa-6dcddf90749c",
+      "id": "src-aa711ae5-47a0-4dd1-b0f3-cd103d3122f4",
       "type": "crew",
       "label": "Crew entry — observation clarification (typed)",
       "capturedAt": "2026-10-24T15:04:30.000Z",
@@ -139,7 +139,7 @@
       "limitation": null
     },
     {
-      "id": "src-3c3964ce-7eaa-40e7-9d5b-27f7cb3c0676",
+      "id": "src-512e6a37-4803-49f5-86eb-427348a06661",
       "type": "crew",
       "label": "Crew entry — timeline event",
       "capturedAt": "2026-10-24T15:06:00.000Z",
@@ -149,7 +149,7 @@
       "limitation": null
     },
     {
-      "id": "src-1f0b2cb3-7535-40f1-83e1-fbf2248612cb",
+      "id": "src-dd6e2698-6bf2-4c92-b3be-e784a7b4cd83",
       "type": "crew",
       "label": "Crew entry — timeline event",
       "capturedAt": "2026-10-24T15:07:00.000Z",
@@ -159,7 +159,7 @@
       "limitation": null
     },
     {
-      "id": "src-0d9f4a5f-2e78-4c7e-b52e-9cbb366ff050",
+      "id": "src-a2192cf5-c81c-4e2e-97de-a1d0cddbe198",
       "type": "crew",
       "label": "Crew entry — observation clarification (typed)",
       "capturedAt": "2026-10-24T15:09:00.000Z",
@@ -169,7 +169,7 @@
       "limitation": null
     },
     {
-      "id": "src-f29d2fc0-f884-4872-b84a-eab7496470a8",
+      "id": "src-1a8d5740-095a-45b7-b7e7-407feaa5fb9e",
       "type": "crew",
       "label": "Crew entry — measurement",
       "capturedAt": "2026-10-24T15:10:30.000Z",
@@ -179,7 +179,7 @@
       "limitation": null
     },
     {
-      "id": "src-de88dac3-4104-4988-a931-8351dacb15f1",
+      "id": "src-e04d33fe-5988-4e15-994f-abf4d8a34c63",
       "type": "crew",
       "label": "Crew entry — measurement",
       "capturedAt": "2026-10-24T15:11:30.000Z",
@@ -189,7 +189,7 @@
       "limitation": null
     },
     {
-      "id": "src-e9f2ca89-0f81-47b1-ba37-8c16f9a632b2",
+      "id": "src-67a3ad7d-86c1-4f32-93e2-33363f5c5607",
       "type": "crew",
       "label": "Crew entry — care event",
       "capturedAt": "2026-10-24T15:12:30.000Z",
@@ -199,7 +199,7 @@
       "limitation": null
     },
     {
-      "id": "src-c3c8af9c-b5da-44ff-82ba-f0912e78c620",
+      "id": "src-09d55810-e2bc-43bc-8458-a121638e64cb",
       "type": "crew",
       "label": "Crew entry — measurement",
       "capturedAt": "2026-10-24T15:13:30.000Z",
@@ -209,7 +209,7 @@
       "limitation": null
     },
     {
-      "id": "src-e820e808-fe16-45bc-9dbe-29b80b1a7995",
+      "id": "src-74524f5e-57d9-4118-9507-c6408f195e3d",
       "type": "crew",
       "label": "Crew entry — observation (typed)",
       "capturedAt": "2026-10-24T15:14:30.000Z",
@@ -219,7 +219,7 @@
       "limitation": null
     },
     {
-      "id": "src-fdcf0a90-e37f-401b-9949-9ba3712e042f",
+      "id": "src-98a60db3-e51f-4f10-bf83-1ec20279c456",
       "type": "crew",
       "label": "Crew entry — observation clarification (typed)",
       "capturedAt": "2026-10-24T15:16:00.000Z",
@@ -229,7 +229,7 @@
       "limitation": null
     },
     {
-      "id": "src-7484ed9a-65f5-42f2-8501-4fe138c88772",
+      "id": "src-6ec4b04d-a9bb-4464-9084-776cf417c0b5",
       "type": "crew",
       "label": "Crew entry — measurement correction",
       "capturedAt": "2026-10-24T15:18:30.000Z",
@@ -251,43 +251,43 @@
   ],
   "corrections": [
     {
-      "id": "corr-a9e55fa2-65d9-4258-8acd-9bc6c8556488",
+      "id": "corr-4783b8c0-0aa6-449f-9bee-697d477d808a",
       "targetType": "observation",
-      "originalId": "obs-2aab52d2-8b32-4a14-b82d-89bd25081360",
-      "replacementId": "obs-fcb2cc59-f076-40de-92af-451292300d30",
+      "originalId": "obs-2c21fb1e-bd6c-4b50-a080-78759a953c15",
+      "replacementId": "obs-155b8c02-eba2-42cc-b632-8b4ab1dcc424",
       "author": "Paramedic A",
       "recordedAt": "2026-10-24T15:05:30.000Z",
       "reason": null,
-      "feedbackId": "fb-f9d47d84-2673-4955-95b1-dedbcf34aa1a",
+      "feedbackId": "fb-2294508b-57e4-4bec-94a9-52da29181d93",
       "revision": 4
     },
     {
-      "id": "corr-f89e9fd0-3094-4061-9986-4a7c257e709f",
+      "id": "corr-4b1d2217-00e9-4769-a982-43097d990076",
       "targetType": "observation",
-      "originalId": "obs-785ada7e-a800-4a5e-9228-ef3abd05976d",
-      "replacementId": "obs-a1241d8a-073b-4c8c-bdf4-d6c15efada84",
+      "originalId": "obs-5dfd24cd-e42b-43c8-8354-cbf610eef4ae",
+      "replacementId": "obs-d1961d47-a068-439f-8b67-728313191a1c",
       "author": "Paramedic A",
       "recordedAt": "2026-10-24T15:10:00.000Z",
       "reason": null,
-      "feedbackId": "fb-9d4441ca-4f00-44b4-a788-335aa2f407e4",
+      "feedbackId": "fb-25c385af-e978-4543-884c-c2804464d7af",
       "revision": 7
     },
     {
-      "id": "corr-91a19316-d6ff-4ce2-a25a-f12e45ff8fe4",
+      "id": "corr-0ab3351f-13ac-4fea-b196-705b422c6536",
       "targetType": "observation",
-      "originalId": "obs-70d42855-b46f-4d83-aa2b-76c4addffb65",
-      "replacementId": "obs-5adb8363-4d51-4dea-a037-63c2e5255219",
+      "originalId": "obs-d6407298-7bfa-4888-b43d-95b9ff5d0dcb",
+      "replacementId": "obs-abcedd00-db1a-4ead-8d7b-937acc326f2e",
       "author": "Paramedic A",
       "recordedAt": "2026-10-24T15:17:00.000Z",
       "reason": "Rectal temperature now recorded.",
-      "feedbackId": "fb-8ad70fc9-537f-4c3d-be23-56233d6424d8",
+      "feedbackId": "fb-910bf29a-9add-424d-af4b-27ce9987d29e",
       "revision": 13
     },
     {
-      "id": "corr-b0f52e4f-c533-4706-9d48-1e0231c1d3ef",
+      "id": "corr-1f7187e3-19ed-4ebc-8ace-a5d1bab9cc45",
       "targetType": "measurement",
       "originalId": "meas-hr-arrival",
-      "replacementId": "meas-35d82c29-ed41-4b5d-8005-0e5cbb7079d3",
+      "replacementId": "meas-8648621c-0898-4f54-85b2-95d2e9893f7b",
       "author": "Paramedic A",
       "recordedAt": "2026-10-24T15:19:30.000Z",
       "reason": "Misread monitor",
@@ -331,10 +331,10 @@
       "clarifiesFeedbackId": null
     },
     {
-      "id": "obs-2aab52d2-8b32-4a14-b82d-89bd25081360",
+      "id": "obs-2c21fb1e-bd6c-4b50-a080-78759a953c15",
       "status": "superseded",
       "sourceIds": [
-        "src-43708813-e8bb-4e48-b4c2-2d6805c0f79e"
+        "src-0e31f6d4-2d88-4653-9b28-988d21143045"
       ],
       "recordedAt": "2026-10-24T14:59:00.000Z",
       "recordedBy": "crew",
@@ -348,10 +348,10 @@
       "clarifiesFeedbackId": null
     },
     {
-      "id": "obs-70d42855-b46f-4d83-aa2b-76c4addffb65",
+      "id": "obs-d6407298-7bfa-4888-b43d-95b9ff5d0dcb",
       "status": "superseded",
       "sourceIds": [
-        "src-7d4e2e64-039e-467a-bd70-f9e14249b2a4"
+        "src-f7476b01-95b9-4ad1-8829-533704a31737"
       ],
       "recordedAt": "2026-10-24T15:00:00.000Z",
       "recordedBy": "crew",
@@ -365,10 +365,10 @@
       "clarifiesFeedbackId": null
     },
     {
-      "id": "obs-785ada7e-a800-4a5e-9228-ef3abd05976d",
+      "id": "obs-5dfd24cd-e42b-43c8-8354-cbf610eef4ae",
       "status": "superseded",
       "sourceIds": [
-        "src-45d90b85-5d68-43ee-93e0-17b2e57cf2e8"
+        "src-cf48f6ef-9596-4ac8-9706-f985ee6fc398"
       ],
       "recordedAt": "2026-10-24T15:01:00.000Z",
       "recordedBy": "crew",
@@ -382,10 +382,10 @@
       "clarifiesFeedbackId": null
     },
     {
-      "id": "obs-fcb2cc59-f076-40de-92af-451292300d30",
+      "id": "obs-155b8c02-eba2-42cc-b632-8b4ab1dcc424",
       "status": "current",
       "sourceIds": [
-        "src-6424df14-382f-4eff-84aa-6dcddf90749c"
+        "src-aa711ae5-47a0-4dd1-b0f3-cd103d3122f4"
       ],
       "recordedAt": "2026-10-24T15:05:00.000Z",
       "recordedBy": "Paramedic A",
@@ -396,13 +396,13 @@
       "category": "account",
       "reportedBy": "witness",
       "inputMode": "typed",
-      "clarifiesFeedbackId": "fb-f9d47d84-2673-4955-95b1-dedbcf34aa1a"
+      "clarifiesFeedbackId": "fb-2294508b-57e4-4bec-94a9-52da29181d93"
     },
     {
-      "id": "obs-a1241d8a-073b-4c8c-bdf4-d6c15efada84",
+      "id": "obs-d1961d47-a068-439f-8b67-728313191a1c",
       "status": "current",
       "sourceIds": [
-        "src-0d9f4a5f-2e78-4c7e-b52e-9cbb366ff050"
+        "src-a2192cf5-c81c-4e2e-97de-a1d0cddbe198"
       ],
       "recordedAt": "2026-10-24T15:09:30.000Z",
       "recordedBy": "Paramedic A",
@@ -413,13 +413,13 @@
       "category": "skin",
       "reportedBy": "crew",
       "inputMode": "typed",
-      "clarifiesFeedbackId": "fb-9d4441ca-4f00-44b4-a788-335aa2f407e4"
+      "clarifiesFeedbackId": "fb-25c385af-e978-4543-884c-c2804464d7af"
     },
     {
-      "id": "obs-f42bb50e-075e-4a2b-a3da-cdc05781bf53",
+      "id": "obs-09c2441f-3b82-49ff-b8fa-8746c91d9ec5",
       "status": "current",
       "sourceIds": [
-        "src-e820e808-fe16-45bc-9dbe-29b80b1a7995"
+        "src-74524f5e-57d9-4118-9507-c6408f195e3d"
       ],
       "recordedAt": "2026-10-24T15:15:00.000Z",
       "recordedBy": "Paramedic A",
@@ -433,10 +433,10 @@
       "clarifiesFeedbackId": null
     },
     {
-      "id": "obs-5adb8363-4d51-4dea-a037-63c2e5255219",
+      "id": "obs-abcedd00-db1a-4ead-8d7b-937acc326f2e",
       "status": "current",
       "sourceIds": [
-        "src-fdcf0a90-e37f-401b-9949-9ba3712e042f"
+        "src-98a60db3-e51f-4f10-bf83-1ec20279c456"
       ],
       "recordedAt": "2026-10-24T15:16:30.000Z",
       "recordedBy": "Paramedic A",
@@ -447,7 +447,7 @@
       "category": "general",
       "reportedBy": "crew",
       "inputMode": "typed",
-      "clarifiesFeedbackId": "fb-8ad70fc9-537f-4c3d-be23-56233d6424d8"
+      "clarifiesFeedbackId": "fb-910bf29a-9add-424d-af4b-27ce9987d29e"
     }
   ],
   "measurements": [
@@ -474,10 +474,10 @@
       "note": null
     },
     {
-      "id": "meas-cf37a336-58b2-42a2-b3d8-782c3749eef8",
+      "id": "meas-c8479b88-0ea1-4a8d-809a-e0b4991bfadf",
       "status": "current",
       "sourceIds": [
-        "src-f29d2fc0-f884-4872-b84a-eab7496470a8"
+        "src-1a8d5740-095a-45b7-b7e7-407feaa5fb9e"
       ],
       "recordedAt": "2026-10-24T15:11:00.000Z",
       "recordedBy": "Paramedic A",
@@ -496,10 +496,10 @@
       "note": null
     },
     {
-      "id": "meas-9ac68c16-3d68-4160-9090-6b56aa65b541",
+      "id": "meas-e3176221-cf26-4b8a-a208-da6adfdca185",
       "status": "current",
       "sourceIds": [
-        "src-de88dac3-4104-4988-a931-8351dacb15f1"
+        "src-e04d33fe-5988-4e15-994f-abf4d8a34c63"
       ],
       "recordedAt": "2026-10-24T15:12:00.000Z",
       "recordedBy": "Paramedic A",
@@ -518,10 +518,10 @@
       "note": null
     },
     {
-      "id": "meas-808d9380-7e48-426a-bd4a-83de99ea0fdf",
+      "id": "meas-766088c1-d367-44ab-a340-ddc88327163f",
       "status": "current",
       "sourceIds": [
-        "src-c3c8af9c-b5da-44ff-82ba-f0912e78c620"
+        "src-09d55810-e2bc-43bc-8458-a121638e64cb"
       ],
       "recordedAt": "2026-10-24T15:14:00.000Z",
       "recordedBy": "Paramedic A",
@@ -540,10 +540,10 @@
       "note": null
     },
     {
-      "id": "meas-35d82c29-ed41-4b5d-8005-0e5cbb7079d3",
+      "id": "meas-8648621c-0898-4f54-85b2-95d2e9893f7b",
       "status": "current",
       "sourceIds": [
-        "src-7484ed9a-65f5-42f2-8501-4fe138c88772"
+        "src-6ec4b04d-a9bb-4464-9084-776cf417c0b5"
       ],
       "recordedAt": "2026-10-24T15:19:00.000Z",
       "recordedBy": "Paramedic A",
@@ -564,10 +564,10 @@
   ],
   "careEvents": [
     {
-      "id": "care-92dadcda-5e70-4722-9a93-e8ca7a256d26",
+      "id": "care-5ae35981-2486-461e-900c-9469f6760b1c",
       "status": "current",
       "sourceIds": [
-        "src-e9f2ca89-0f81-47b1-ba37-8c16f9a632b2"
+        "src-67a3ad7d-86c1-4f32-93e2-33363f5c5607"
       ],
       "recordedAt": "2026-10-24T15:13:00.000Z",
       "recordedBy": "Paramedic A",
@@ -649,10 +649,10 @@
       "note": null
     },
     {
-      "id": "tl-91f1222c-79f4-4046-bf1d-ff9a4a66624f",
+      "id": "tl-1f515f00-9573-40b1-8d82-6c304707d5fc",
       "status": "current",
       "sourceIds": [
-        "src-3c3964ce-7eaa-40e7-9d5b-27f7cb3c0676"
+        "src-512e6a37-4803-49f5-86eb-427348a06661"
       ],
       "recordedAt": "2026-10-24T15:06:30.000Z",
       "recordedBy": "crew",
@@ -665,10 +665,10 @@
       "note": "Friend found him; collapse not witnessed."
     },
     {
-      "id": "tl-6a1094e1-3f50-4b62-8e74-9362fdff8ac8",
+      "id": "tl-64f70c41-e8ff-4256-a510-0ce4ba8a3297",
       "status": "current",
       "sourceIds": [
-        "src-1f0b2cb3-7535-40f1-83e1-fbf2248612cb"
+        "src-dd6e2698-6bf2-4c92-b3be-e784a7b4cd83"
       ],
       "recordedAt": "2026-10-24T15:07:30.000Z",
       "recordedBy": "crew",
@@ -918,17 +918,17 @@
   ],
   "evaluations": [
     {
-      "id": "eval-1be166ad-f3e3-4c38-a5d9-655711398365",
+      "id": "eval-45d0f797-e4c4-4bb9-b5e9-884c819ba5e1",
       "requestId": "sample-4",
       "revision": 3,
       "status": "completed",
-      "mode": "mock",
+      "mode": "deterministic",
       "requestedAt": "2026-10-24T15:01:30.000Z",
       "completedAt": "2026-10-24T15:02:00.000Z",
       "feedbackIds": [
-        "fb-f9d47d84-2673-4955-95b1-dedbcf34aa1a",
-        "fb-8ad70fc9-537f-4c3d-be23-56233d6424d8",
-        "fb-9d4441ca-4f00-44b4-a788-335aa2f407e4"
+        "fb-2294508b-57e4-4bec-94a9-52da29181d93",
+        "fb-910bf29a-9add-424d-af4b-27ce9987d29e",
+        "fb-25c385af-e978-4543-884c-c2804464d7af"
       ],
       "discardedItems": 0,
       "suppressedDuplicates": 0,
@@ -938,76 +938,75 @@
   "feedback": [
     {
       "kind": "missing_context",
-      "message": "The account estimates timing but does not say whether the friend saw the collapse or found him afterward. Collapse time stays unknown until clarified.",
-      "suggestedQuestion": "Did you see him collapse, or did you find him afterward? About what time?",
+      "message": "The account mentions timing but does not say whether the collapse was seen. Collapse time stays unknown until someone reports it.",
+      "suggestedQuestion": "Did anyone see him collapse, or was he found afterward? About what time?",
       "observationIds": [
-        "obs-2aab52d2-8b32-4a14-b82d-89bd25081360"
+        "obs-2c21fb1e-bd6c-4b50-a080-78759a953c15"
       ],
       "evidenceSourceIds": [
-        "dispatch",
-        "fall",
-        "workout"
+        "src-0e31f6d4-2d88-4653-9b28-988d21143045"
       ],
       "knowledgeReferenceIds": [],
-      "spokenSummary": "Collapse timing is unclear. Ask whether the friend saw the collapse.",
-      "id": "fb-f9d47d84-2673-4955-95b1-dedbcf34aa1a",
-      "assistantItemId": "mock-witness-timing-obs-2aab52d2-8b32-4a14-b82d-89bd25081360",
-      "evaluationId": "eval-1be166ad-f3e3-4c38-a5d9-655711398365",
+      "spokenSummary": "Ask if the collapse was seen, or if he was found later.",
+      "id": "fb-2294508b-57e4-4bec-94a9-52da29181d93",
+      "assistantItemId": "fb-missing_context0-obs-2c21fb1e-bd6c-4b50-a080-78759a953c15",
+      "evaluationId": "eval-45d0f797-e4c4-4bb9-b5e9-884c819ba5e1",
       "revision": 3,
-      "mode": "mock",
+      "mode": "deterministic",
       "status": "clarified",
       "createdAt": "2026-10-24T15:02:30.000Z"
     },
     {
       "kind": "unsupported_inference",
-      "message": "A consumer wearable skin-temperature reading does not establish core body temperature. No clinical temperature measurement is linked to this statement.",
-      "suggestedQuestion": "Has a clinical temperature been measured? If so, record the value, method or site, and time.",
+      "message": "A consumer skin-temperature reading cannot establish core body temperature. Core temperature needs a clinical core method.",
+      "suggestedQuestion": "What was the core temperature by a clinical method (e.g., rectal), and at what time?",
       "observationIds": [
-        "obs-70d42855-b46f-4d83-aa2b-76c4addffb65"
+        "obs-d6407298-7bfa-4888-b43d-95b9ff5d0dcb"
       ],
-      "evidenceSourceIds": [
-        "whoop-overnight"
-      ],
+      "evidenceSourceIds": [],
       "knowledgeReferenceIds": [
-        "mock-kr-nata-2015-rectal"
+        "nata-2015-rec8-temperature-method",
+        "acsm-2023-ehi-consensus"
       ],
-      "spokenSummary": "Skin temperature is not core temperature. Record a clinical temperature with method and time.",
-      "id": "fb-8ad70fc9-537f-4c3d-be23-56233d6424d8",
-      "assistantItemId": "mock-skin-vs-core-obs-70d42855-b46f-4d83-aa2b-76c4addffb65",
-      "evaluationId": "eval-1be166ad-f3e3-4c38-a5d9-655711398365",
+      "spokenSummary": "Skin temperature is not core temperature.",
+      "id": "fb-910bf29a-9add-424d-af4b-27ce9987d29e",
+      "assistantItemId": "fb-unsupported_inference1-obs-d6407298-7bfa-4888-b43d-95b9ff5d0dcb",
+      "evaluationId": "eval-45d0f797-e4c4-4bb9-b5e9-884c819ba5e1",
       "revision": 3,
-      "mode": "mock",
+      "mode": "deterministic",
       "status": "clarified",
       "createdAt": "2026-10-24T15:03:00.000Z"
     },
     {
       "kind": "unsupported_inference",
-      "message": "Sweating does not exclude exertional heat stroke. Consider recording the skin finding without using it to rule heat illness in or out.",
-      "suggestedQuestion": null,
+      "message": "Sweating does not rule out exertional heat stroke; EHS can occur with intact sweating. This is a background-evidence point, not a diagnosis.",
+      "suggestedQuestion": "Can we document the core temperature (with method and time) and mental status rather than using sweating to exclude EHS?",
       "observationIds": [
-        "obs-785ada7e-a800-4a5e-9228-ef3abd05976d"
+        "obs-5dfd24cd-e42b-43c8-8354-cbf610eef4ae"
       ],
       "evidenceSourceIds": [],
       "knowledgeReferenceIds": [
-        "mock-kr-nata-2015-sweating"
+        "nata-2015-rec25-sweating",
+        "nata-2015-ehi-position",
+        "acsm-2023-ehi-consensus"
       ],
-      "spokenSummary": "Sweating does not rule out exertional heat stroke.",
-      "id": "fb-9d4441ca-4f00-44b4-a788-335aa2f407e4",
-      "assistantItemId": "mock-sweating-does-not-exclude-obs-785ada7e-a800-4a5e-9228-ef3abd05976d",
-      "evaluationId": "eval-1be166ad-f3e3-4c38-a5d9-655711398365",
+      "spokenSummary": "Sweating alone does not rule out heat stroke.",
+      "id": "fb-25c385af-e978-4543-884c-c2804464d7af",
+      "assistantItemId": "fb-unsupported_inference2-obs-5dfd24cd-e42b-43c8-8354-cbf610eef4ae",
+      "evaluationId": "eval-45d0f797-e4c4-4bb9-b5e9-884c819ba5e1",
       "revision": 3,
-      "mode": "mock",
+      "mode": "deterministic",
       "status": "clarified",
       "createdAt": "2026-10-24T15:03:30.000Z"
     }
   ],
   "resolutions": [
     {
-      "id": "res-fa48324b-0e2c-4c3f-a5bb-3b502c3251b8",
-      "feedbackId": "fb-f9d47d84-2673-4955-95b1-dedbcf34aa1a",
+      "id": "res-4ec8114a-ceaa-4056-92ab-4d3a7ed3f78f",
+      "feedbackId": "fb-2294508b-57e4-4bec-94a9-52da29181d93",
       "action": "clarify",
       "clarificationText": "Friend found him around 10:43 and called at 10:44. Did not see him collapse. Five minutes was a guess.",
-      "clarificationObservationId": "obs-fcb2cc59-f076-40de-92af-451292300d30",
+      "clarificationObservationId": "obs-155b8c02-eba2-42cc-b632-8b4ab1dcc424",
       "note": null,
       "resolvedBy": "Paramedic A",
       "resolvedAt": "2026-10-24T15:04:00.000Z",
@@ -1015,8 +1014,8 @@
       "revisionAfter": 4
     },
     {
-      "id": "res-240fa442-9ed1-4d7a-9abb-e1197d91805c",
-      "feedbackId": "fb-8ad70fc9-537f-4c3d-be23-56233d6424d8",
+      "id": "res-00511fa9-7b66-48a8-abf1-483bf6bf1c2b",
+      "feedbackId": "fb-910bf29a-9add-424d-af4b-27ce9987d29e",
       "action": "defer",
       "clarificationText": null,
       "clarificationObservationId": null,
@@ -1027,11 +1026,11 @@
       "revisionAfter": 6
     },
     {
-      "id": "res-56583b92-95e6-4d18-99dd-55b6a49492f2",
-      "feedbackId": "fb-9d4441ca-4f00-44b4-a788-335aa2f407e4",
+      "id": "res-8c3fa2e4-83c9-4b0e-b007-bbfc632ebd1f",
+      "feedbackId": "fb-25c385af-e978-4543-884c-c2804464d7af",
       "action": "clarify",
       "clarificationText": "Skin hot and sweaty. Heat illness remains a concern.",
-      "clarificationObservationId": "obs-a1241d8a-073b-4c8c-bdf4-d6c15efada84",
+      "clarificationObservationId": "obs-d1961d47-a068-439f-8b67-728313191a1c",
       "note": null,
       "resolvedBy": "Paramedic A",
       "resolvedAt": "2026-10-24T15:08:30.000Z",
@@ -1039,11 +1038,11 @@
       "revisionAfter": 7
     },
     {
-      "id": "res-9a908378-fe04-4307-a13d-fc8716856653",
-      "feedbackId": "fb-8ad70fc9-537f-4c3d-be23-56233d6424d8",
+      "id": "res-7b7bf1b3-39fe-44de-ae91-d70f6c5faef2",
+      "feedbackId": "fb-910bf29a-9add-424d-af4b-27ce9987d29e",
       "action": "clarify",
       "clarificationText": "Wearable shows elevated skin temperature (consumer device; not core temperature). Rectal temperature recorded separately.",
-      "clarificationObservationId": "obs-5adb8363-4d51-4dea-a037-63c2e5255219",
+      "clarificationObservationId": "obs-abcedd00-db1a-4ead-8d7b-937acc326f2e",
       "note": "Rectal temperature now recorded.",
       "resolvedBy": "Paramedic A",
       "resolvedAt": "2026-10-24T15:15:30.000Z",
@@ -1053,23 +1052,43 @@
   ],
   "knowledgeReferences": [
     {
-      "id": "mock-kr-nata-2015-rectal",
-      "title": "National Athletic Trainers’ Association Position Statement: Exertional Heat Illnesses (Casa DJ et al., J Athl Train 2015;50(9):986–1000)",
+      "id": "nata-2015-rec8-temperature-method",
+      "title": "NATA Position Statement: Exertional Heat Illnesses (2015) — Recommendation 8",
       "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4639891/",
-      "versionDate": "2015-09",
-      "section": "Recognition — Exertional Heat Stroke, recommendation 22",
-      "passage": "“Rectal temperature thermometry is the only method of obtaining an immediate and accurate measurement of core body temperature.”",
-      "applicability": "Consensus background for athletic trainers. Not the responder’s applicable local EMS protocol.",
+      "versionDate": "2015-09-01",
+      "section": "Recommendation 8 (cross-session check against nata.org PDF, 2026-10-24)",
+      "passage": "The assessment of rectal temperature is the clinical gold standard for obtaining core body temperature of patients with EHS … No other field-expedient methods … are valid or reliable after intense exercise in the heat.",
+      "applicability": "Consensus background; the measurement method under local protocol is the crew’s decision.",
       "reviewStatus": "unreviewed"
     },
     {
-      "id": "mock-kr-nata-2015-sweating",
-      "title": "National Athletic Trainers’ Association Position Statement: Exertional Heat Illnesses (Casa DJ et al., J Athl Train 2015;50(9):986–1000)",
+      "id": "acsm-2023-ehi-consensus",
+      "title": "ACSM Expert Consensus Statement on Exertional Heat Illness: Recognition, Management, and Return to Activity",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/37036463/",
+      "versionDate": "2023-04-01",
+      "section": "Abstract (Curr Sports Med Rep. 2023 Apr 1;22(4):134-149)",
+      "passage": "Exertional heat stroke is a true medical emergency with potential for organ injury and death. Identifying the athlete with suspected exertional heat stroke early in the course, stopping activity (body heat generation), and providing rapid total body cooling are essential for survival ... outcomes are likely related to the duration of severe hyperthermia.",
+      "applicability": "National expert consensus (background evidence). Supports: EHS is a time-critical emergency; rapid cooling and early recognition drive outcome. Not a local EMS protocol.",
+      "reviewStatus": "unreviewed"
+    },
+    {
+      "id": "nata-2015-rec25-sweating",
+      "title": "NATA Position Statement: Exertional Heat Illnesses (2015) — Recommendation 25",
       "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4639891/",
-      "versionDate": "2015-09",
-      "section": "Recognition — Exertional Heat Stroke, recommendation 25",
-      "passage": "“Most patients with EHS have hot, sweaty skin as opposed to those with the classical type of heat stroke”",
-      "applicability": "Consensus background for athletic trainers. Not the responder’s applicable local EMS protocol.",
+      "versionDate": "2015-09-01",
+      "section": "Recommendation 25 (cross-session check against nata.org PDF, 2026-10-24)",
+      "passage": "Most patients with EHS have hot, sweaty skin as opposed to those with the classical type of heat stroke … who present with dry skin.",
+      "applicability": "Consensus background for athletic trainers; not the responder’s local EMS protocol.",
+      "reviewStatus": "unreviewed"
+    },
+    {
+      "id": "nata-2015-ehi-position",
+      "title": "National Athletic Trainers' Association Position Statement: Exertional Heat Illnesses",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4639891/",
+      "versionDate": "2015-09-01",
+      "section": "Abstract (J Athl Train. 2015 Sep;50(9):986-1000; erratum 2017;52(4):401)",
+      "passage": "Best-practice recommendations for the prevention, recognition, and treatment of exertional heat illnesses (EHIs) ... exertional heat stroke remains one of the leading causes of sudden death during sport. Recommendations provide an integrated scientific and clinically applicable approach to the prevention, recognition, treatment of, and return-to-activity guidelines for EHIs.",
+      "applicability": "Position statement (background evidence). Supports: structured recognition and treatment of EHI; EHS is a leading cause of exertional sudden death. Not a local EMS protocol.",
       "reviewStatus": "unreviewed"
     }
   ],
@@ -1079,7 +1098,7 @@
       "revision": 13,
       "reviewedAt": "2026-10-24T15:18:00.000Z",
       "reviewedBy": "Paramedic A",
-      "text": "SYNTHETIC DEMO RECORD — not for clinical use. Generated deterministically from the crew-entered record; supports, not replaces, the verbal handoff.\nREVIEWED HANDOFF v1 · incident runner-found-down · revision 13 · reviewed by Paramedic A at 2026-10-24 11:18 EDT\n\nPRESENTATION\n- Dispatch: Emergency call at 10:44 EDT: person found down near running trail. [sources: dispatch]\n- Witness report (relayed by crew), 11:01 EDT: “Friend found him around 10:43 and called at 10:44. Did not see him collapse. Five minutes was a guess.” [sources: src-6424df14-382f-4eff-84aa-6dcddf90749c]\n- Crew observation, 11:03 EDT: “Wearable shows elevated skin temperature (consumer device; not core temperature). Rectal temperature recorded separately.” [sources: src-fdcf0a90-e37f-401b-9949-9ba3712e042f]\n\nEXERTION AND ENVIRONMENT\n- Activity: Outdoor run (device) — From workout record. [sources: workout]\n- Air temperature 88 °F — at 10:00 EDT — weather service — Weather station near the trail (synthetic) — environmental reading, not body temperature [sources: weather]\n- Relative humidity 70% — at 10:00 EDT — weather service — Weather station near the trail (synthetic) — environmental reading, not body temperature [sources: weather]\n\nNEUROLOGICAL AND SKIN OBSERVATIONS\n- Crew observation, 10:56 EDT: “Confused; slow to answer questions; responds to voice.” [sources: crew-arrival]\n- Crew observation, 10:56 EDT: “Skin hot and sweaty to touch.” [sources: crew-arrival]\n- Crew observation, 11:01 EDT: “Skin hot and sweaty. Heat illness remains a concern.” [sources: src-0d9f4a5f-2e78-4c7e-b52e-9cbb366ff050]\n\nCLINICAL MEASUREMENTS\n- Body temperature 41.2 °C — rectal — at 11:02 EDT — before cooling started — Rectal thermometer (synthetic), by Crew [sources: src-f29d2fc0-f884-4872-b84a-eab7496470a8]\n- Body temperature 38.9 °C — rectal — at 11:25 EDT — after cooling stopped — Rectal thermometer (synthetic), by Crew [sources: src-c3c8af9c-b5da-44ff-82ba-f0912e78c620]\n- Heart rate 140 bpm — at 10:57 EDT — before cooling started — Cardiac monitor (synthetic), by Crew [sources: crew-arrival]\n- Blood pressure 104/62 mmHg — at 11:03 EDT — before cooling started — Cardiac monitor (synthetic), by Crew [sources: src-de88dac3-4104-4988-a931-8351dacb15f1]\n- Respiratory rate: not documented.\n- SpO2: not documented.\n- Glucose: not documented.\n\nCARE AND RESPONSE\n- Cooling: Cold-water immersion in portable tub (cold-water immersion) — performed — 11:05 EDT–11:20 EDT — by Crew — Response: More alert by 11:20. [sources: src-e9f2ca89-0f81-47b1-ba37-8c16f9a632b2]\n- Crew observation, 11:26 EDT: “Answers name and location; still slow to respond.” [sources: src-e820e808-fe16-45bc-9dbe-29b80b1a7995]\n\nRELEVANT HISTORY\n- Age: 24 years (patient) — Profile; not verified on scene. [sources: profile]\n- Allergies: No known drug allergies (patient) — Self-reported in profile. [sources: profile]\n- Medications: None listed (patient) — Profile list; current use not confirmed. [sources: profile]\n- Relevant history: None listed (patient) — Profile list; not verified. [sources: profile]\n\nDEVICE CONTEXT (CONSUMER WEARABLE, BACKGROUND ONLY)\n- Consumer wearable data — background only. Synthetic consumer wearable fixtures. Integration unverified; not clinical measurements.\n- Overnight recovery score 18%. Proprietary consumer score; background only. (synthetic fixture) [sources: whoop-overnight]\n- Resting heart rate 9 bpm above personal baseline overnight. Background only. (synthetic fixture) [sources: whoop-overnight]\n- Overnight skin-temperature deviation +0.8 °C from baseline. Skin-temperature deviation is not core temperature. (synthetic fixture) [sources: whoop-overnight]\n- Outdoor run recorded from 09:05 EDT; end not recorded. Start of recorded workout, not illness onset. Gaps: Workout end not recorded. (synthetic fixture) [sources: workout]\n- Heart rate rose from 122 to 166 bpm during the recorded workout. Consumer optical sensor; cause of change unknown. Gaps: No samples after 10:34 EDT. (synthetic fixture) [sources: wearable-hr]\n- Recorded pace becomes variable from 10:34 EDT. Does not establish neurological symptoms or illness onset. (synthetic fixture) [sources: workout]\n- Device-reported fall at 10:42 EDT. Does not establish collapse, unconsciousness or downtime. (synthetic fixture) [sources: fall]\n\nTIMELINE (SOURCE-LINKED)\n- 09:05 EDT — Exertion start (recorded; device) — Start of recorded workout; not illness onset. [sources: workout]\n- 10:42 EDT — Device-reported fall event (recorded; device) — Device-reported; does not establish collapse or downtime. [sources: fall]\n- ~10:43 EDT — Discovery (patient found) (approximate; witness) — Friend found him; collapse not witnessed. [sources: src-3c3964ce-7eaa-40e7-9d5b-27f7cb3c0676]\n- 10:44 EDT — Emergency call (recorded; dispatch) [sources: dispatch]\n- 10:55 EDT — Crew arrival (recorded; crew) [sources: crew-arrival]\n- Time unknown — Collapse (unknown; witness) — Not witnessed. [sources: src-1f0b2cb3-7535-40f1-83e1-fbf2248612cb]\n\nCHANGES AND CORRECTIONS\n- Observation corrected at 11:05 EDT by Paramedic A: “Friend says he went for a run and dropped maybe five minutes ago. Not sure exactly.” → “Friend found him around 10:43 and called at 10:44. Did not see him collapse. Five minutes was a guess.” — crew clarification after assistant feedback [sources: src-43708813-e8bb-4e48-b4c2-2d6805c0f79e, src-6424df14-382f-4eff-84aa-6dcddf90749c]\n- Observation corrected at 11:10 EDT by Paramedic A: “He is sweating, so this cannot be heat stroke.” → “Skin hot and sweaty. Heat illness remains a concern.” — crew clarification after assistant feedback [sources: src-45d90b85-5d68-43ee-93e0-17b2e57cf2e8, src-0d9f4a5f-2e78-4c7e-b52e-9cbb366ff050]\n- Observation corrected at 11:17 EDT by Paramedic A: “The wearable skin temperature is elevated, so core temperature is confirmed high.” → “Wearable shows elevated skin temperature (consumer device; not core temperature). Rectal temperature recorded separately.” — reason: Rectal temperature now recorded. — crew clarification after assistant feedback [sources: src-7d4e2e64-039e-467a-bd70-f9e14249b2a4, src-fdcf0a90-e37f-401b-9949-9ba3712e042f]\n\nUNCERTAIN OR NOT DOCUMENTED\n- Not documented: respiratory rate, SpO2, glucose.\n- Symptom onset time: not documented.\n- Collapse time: unknown. Not witnessed.\n- Discovery time: approximate (~10:43 EDT, witness) — Friend found him; collapse not witnessed.\n- Last known normal: not documented.\n- Duration of any loss of consciousness: not documented.",
+      "text": "SYNTHETIC DEMO RECORD — not for clinical use. Generated deterministically from the crew-entered record; supports, not replaces, the verbal handoff.\nREVIEWED HANDOFF v1 · incident runner-found-down · revision 13 · reviewed by Paramedic A at 2026-10-24 11:18 EDT\n\nPRESENTATION\n- Dispatch: Emergency call at 10:44 EDT: person found down near running trail. [sources: dispatch]\n- Witness report (relayed by crew), 11:01 EDT: “Friend found him around 10:43 and called at 10:44. Did not see him collapse. Five minutes was a guess.” [sources: src-aa711ae5-47a0-4dd1-b0f3-cd103d3122f4]\n- Crew observation, 11:03 EDT: “Wearable shows elevated skin temperature (consumer device; not core temperature). Rectal temperature recorded separately.” [sources: src-98a60db3-e51f-4f10-bf83-1ec20279c456]\n\nEXERTION AND ENVIRONMENT\n- Activity: Outdoor run (device) — From workout record. [sources: workout]\n- Air temperature 88 °F — at 10:00 EDT — weather service — Weather station near the trail (synthetic) — environmental reading, not body temperature [sources: weather]\n- Relative humidity 70% — at 10:00 EDT — weather service — Weather station near the trail (synthetic) — environmental reading, not body temperature [sources: weather]\n\nNEUROLOGICAL AND SKIN OBSERVATIONS\n- Crew observation, 10:56 EDT: “Confused; slow to answer questions; responds to voice.” [sources: crew-arrival]\n- Crew observation, 10:56 EDT: “Skin hot and sweaty to touch.” [sources: crew-arrival]\n- Crew observation, 11:01 EDT: “Skin hot and sweaty. Heat illness remains a concern.” [sources: src-a2192cf5-c81c-4e2e-97de-a1d0cddbe198]\n\nCLINICAL MEASUREMENTS\n- Body temperature 41.2 °C — rectal — at 11:02 EDT — before cooling started — Rectal thermometer (synthetic), by Crew [sources: src-1a8d5740-095a-45b7-b7e7-407feaa5fb9e]\n- Body temperature 38.9 °C — rectal — at 11:25 EDT — after cooling stopped — Rectal thermometer (synthetic), by Crew [sources: src-09d55810-e2bc-43bc-8458-a121638e64cb]\n- Heart rate 140 bpm — at 10:57 EDT — before cooling started — Cardiac monitor (synthetic), by Crew [sources: crew-arrival]\n- Blood pressure 104/62 mmHg — at 11:03 EDT — before cooling started — Cardiac monitor (synthetic), by Crew [sources: src-e04d33fe-5988-4e15-994f-abf4d8a34c63]\n- Respiratory rate: not documented.\n- SpO2: not documented.\n- Glucose: not documented.\n\nCARE AND RESPONSE\n- Cooling: Cold-water immersion in portable tub (cold-water immersion) — performed — 11:05 EDT–11:20 EDT — by Crew — Response: More alert by 11:20. [sources: src-67a3ad7d-86c1-4f32-93e2-33363f5c5607]\n- Crew observation, 11:26 EDT: “Answers name and location; still slow to respond.” [sources: src-74524f5e-57d9-4118-9507-c6408f195e3d]\n\nRELEVANT HISTORY\n- Age: 24 years (patient) — Profile; not verified on scene. [sources: profile]\n- Allergies: No known drug allergies (patient) — Self-reported in profile. [sources: profile]\n- Medications: None listed (patient) — Profile list; current use not confirmed. [sources: profile]\n- Relevant history: None listed (patient) — Profile list; not verified. [sources: profile]\n\nDEVICE CONTEXT (CONSUMER WEARABLE, BACKGROUND ONLY)\n- Consumer wearable data — background only. Synthetic consumer wearable fixtures. Integration unverified; not clinical measurements.\n- Overnight recovery score 18%. Proprietary consumer score; background only. (synthetic fixture) [sources: whoop-overnight]\n- Resting heart rate 9 bpm above personal baseline overnight. Background only. (synthetic fixture) [sources: whoop-overnight]\n- Overnight skin-temperature deviation +0.8 °C from baseline. Skin-temperature deviation is not core temperature. (synthetic fixture) [sources: whoop-overnight]\n- Outdoor run recorded from 09:05 EDT; end not recorded. Start of recorded workout, not illness onset. Gaps: Workout end not recorded. (synthetic fixture) [sources: workout]\n- Heart rate rose from 122 to 166 bpm during the recorded workout. Consumer optical sensor; cause of change unknown. Gaps: No samples after 10:34 EDT. (synthetic fixture) [sources: wearable-hr]\n- Recorded pace becomes variable from 10:34 EDT. Does not establish neurological symptoms or illness onset. (synthetic fixture) [sources: workout]\n- Device-reported fall at 10:42 EDT. Does not establish collapse, unconsciousness or downtime. (synthetic fixture) [sources: fall]\n\nTIMELINE (SOURCE-LINKED)\n- 09:05 EDT — Exertion start (recorded; device) — Start of recorded workout; not illness onset. [sources: workout]\n- 10:42 EDT — Device-reported fall event (recorded; device) — Device-reported; does not establish collapse or downtime. [sources: fall]\n- ~10:43 EDT — Discovery (patient found) (approximate; witness) — Friend found him; collapse not witnessed. [sources: src-512e6a37-4803-49f5-86eb-427348a06661]\n- 10:44 EDT — Emergency call (recorded; dispatch) [sources: dispatch]\n- 10:55 EDT — Crew arrival (recorded; crew) [sources: crew-arrival]\n- Time unknown — Collapse (unknown; witness) — Not witnessed. [sources: src-dd6e2698-6bf2-4c92-b3be-e784a7b4cd83]\n\nCHANGES AND CORRECTIONS\n- Observation corrected at 11:05 EDT by Paramedic A: “Friend says he went for a run and dropped maybe five minutes ago. Not sure exactly.” → “Friend found him around 10:43 and called at 10:44. Did not see him collapse. Five minutes was a guess.” — crew clarification after assistant feedback [sources: src-0e31f6d4-2d88-4653-9b28-988d21143045, src-aa711ae5-47a0-4dd1-b0f3-cd103d3122f4]\n- Observation corrected at 11:10 EDT by Paramedic A: “He is sweating, so this cannot be heat stroke.” → “Skin hot and sweaty. Heat illness remains a concern.” — crew clarification after assistant feedback [sources: src-cf48f6ef-9596-4ac8-9706-f985ee6fc398, src-a2192cf5-c81c-4e2e-97de-a1d0cddbe198]\n- Observation corrected at 11:17 EDT by Paramedic A: “The wearable skin temperature is elevated, so core temperature is confirmed high.” → “Wearable shows elevated skin temperature (consumer device; not core temperature). Rectal temperature recorded separately.” — reason: Rectal temperature now recorded. — crew clarification after assistant feedback [sources: src-f7476b01-95b9-4ad1-8829-533704a31737, src-98a60db3-e51f-4f10-bf83-1ec20279c456]\n\nUNCERTAIN OR NOT DOCUMENTED\n- Not documented: respiratory rate, SpO2, glucose.\n- Symptom onset time: not documented.\n- Collapse time: unknown. Not witnessed.\n- Discovery time: approximate (~10:43 EDT, witness) — Friend found him; collapse not witnessed.\n- Last known normal: not documented.\n- Duration of any loss of consciousness: not documented.",
       "kind": "initial",
       "amendsVersion": null,
       "patientMatched": true,
@@ -1100,20 +1119,20 @@
               "text": "Witness report (relayed by crew), 11:01 EDT: “Friend found him around 10:43 and called at 10:44. Did not see him collapse. Five minutes was a guess.”",
               "state": "reported",
               "recordIds": [
-                "obs-fcb2cc59-f076-40de-92af-451292300d30"
+                "obs-155b8c02-eba2-42cc-b632-8b4ab1dcc424"
               ],
               "sourceIds": [
-                "src-6424df14-382f-4eff-84aa-6dcddf90749c"
+                "src-aa711ae5-47a0-4dd1-b0f3-cd103d3122f4"
               ]
             },
             {
               "text": "Crew observation, 11:03 EDT: “Wearable shows elevated skin temperature (consumer device; not core temperature). Rectal temperature recorded separately.”",
               "state": "documented",
               "recordIds": [
-                "obs-5adb8363-4d51-4dea-a037-63c2e5255219"
+                "obs-abcedd00-db1a-4ead-8d7b-937acc326f2e"
               ],
               "sourceIds": [
-                "src-fdcf0a90-e37f-401b-9949-9ba3712e042f"
+                "src-98a60db3-e51f-4f10-bf83-1ec20279c456"
               ]
             }
           ]
@@ -1182,10 +1201,10 @@
               "text": "Crew observation, 11:01 EDT: “Skin hot and sweaty. Heat illness remains a concern.”",
               "state": "documented",
               "recordIds": [
-                "obs-a1241d8a-073b-4c8c-bdf4-d6c15efada84"
+                "obs-d1961d47-a068-439f-8b67-728313191a1c"
               ],
               "sourceIds": [
-                "src-0d9f4a5f-2e78-4c7e-b52e-9cbb366ff050"
+                "src-a2192cf5-c81c-4e2e-97de-a1d0cddbe198"
               ]
             }
           ]
@@ -1198,20 +1217,20 @@
               "text": "Body temperature 41.2 °C — rectal — at 11:02 EDT — before cooling started — Rectal thermometer (synthetic), by Crew",
               "state": "documented",
               "recordIds": [
-                "meas-cf37a336-58b2-42a2-b3d8-782c3749eef8"
+                "meas-c8479b88-0ea1-4a8d-809a-e0b4991bfadf"
               ],
               "sourceIds": [
-                "src-f29d2fc0-f884-4872-b84a-eab7496470a8"
+                "src-1a8d5740-095a-45b7-b7e7-407feaa5fb9e"
               ]
             },
             {
               "text": "Body temperature 38.9 °C — rectal — at 11:25 EDT — after cooling stopped — Rectal thermometer (synthetic), by Crew",
               "state": "documented",
               "recordIds": [
-                "meas-808d9380-7e48-426a-bd4a-83de99ea0fdf"
+                "meas-766088c1-d367-44ab-a340-ddc88327163f"
               ],
               "sourceIds": [
-                "src-c3c8af9c-b5da-44ff-82ba-f0912e78c620"
+                "src-09d55810-e2bc-43bc-8458-a121638e64cb"
               ]
             },
             {
@@ -1228,10 +1247,10 @@
               "text": "Blood pressure 104/62 mmHg — at 11:03 EDT — before cooling started — Cardiac monitor (synthetic), by Crew",
               "state": "documented",
               "recordIds": [
-                "meas-9ac68c16-3d68-4160-9090-6b56aa65b541"
+                "meas-e3176221-cf26-4b8a-a208-da6adfdca185"
               ],
               "sourceIds": [
-                "src-de88dac3-4104-4988-a931-8351dacb15f1"
+                "src-e04d33fe-5988-4e15-994f-abf4d8a34c63"
               ]
             },
             {
@@ -1262,20 +1281,20 @@
               "text": "Cooling: Cold-water immersion in portable tub (cold-water immersion) — performed — 11:05 EDT–11:20 EDT — by Crew — Response: More alert by 11:20.",
               "state": "documented",
               "recordIds": [
-                "care-92dadcda-5e70-4722-9a93-e8ca7a256d26"
+                "care-5ae35981-2486-461e-900c-9469f6760b1c"
               ],
               "sourceIds": [
-                "src-e9f2ca89-0f81-47b1-ba37-8c16f9a632b2"
+                "src-67a3ad7d-86c1-4f32-93e2-33363f5c5607"
               ]
             },
             {
               "text": "Crew observation, 11:26 EDT: “Answers name and location; still slow to respond.”",
               "state": "documented",
               "recordIds": [
-                "obs-f42bb50e-075e-4a2b-a3da-cdc05781bf53"
+                "obs-09c2441f-3b82-49ff-b8fa-8746c91d9ec5"
               ],
               "sourceIds": [
-                "src-e820e808-fe16-45bc-9dbe-29b80b1a7995"
+                "src-74524f5e-57d9-4118-9507-c6408f195e3d"
               ]
             }
           ]
@@ -1436,10 +1455,10 @@
               "text": "~10:43 EDT — Discovery (patient found) (approximate; witness) — Friend found him; collapse not witnessed.",
               "state": "reported",
               "recordIds": [
-                "tl-91f1222c-79f4-4046-bf1d-ff9a4a66624f"
+                "tl-1f515f00-9573-40b1-8d82-6c304707d5fc"
               ],
               "sourceIds": [
-                "src-3c3964ce-7eaa-40e7-9d5b-27f7cb3c0676"
+                "src-512e6a37-4803-49f5-86eb-427348a06661"
               ]
             },
             {
@@ -1466,10 +1485,10 @@
               "text": "Time unknown — Collapse (unknown; witness) — Not witnessed.",
               "state": "unknown",
               "recordIds": [
-                "tl-6a1094e1-3f50-4b62-8e74-9362fdff8ac8"
+                "tl-64f70c41-e8ff-4256-a510-0ce4ba8a3297"
               ],
               "sourceIds": [
-                "src-1f0b2cb3-7535-40f1-83e1-fbf2248612cb"
+                "src-dd6e2698-6bf2-4c92-b3be-e784a7b4cd83"
               ]
             }
           ]
@@ -1482,36 +1501,36 @@
               "text": "Observation corrected at 11:05 EDT by Paramedic A: “Friend says he went for a run and dropped maybe five minutes ago. Not sure exactly.” → “Friend found him around 10:43 and called at 10:44. Did not see him collapse. Five minutes was a guess.” — crew clarification after assistant feedback",
               "state": "documented",
               "recordIds": [
-                "obs-2aab52d2-8b32-4a14-b82d-89bd25081360",
-                "obs-fcb2cc59-f076-40de-92af-451292300d30"
+                "obs-2c21fb1e-bd6c-4b50-a080-78759a953c15",
+                "obs-155b8c02-eba2-42cc-b632-8b4ab1dcc424"
               ],
               "sourceIds": [
-                "src-43708813-e8bb-4e48-b4c2-2d6805c0f79e",
-                "src-6424df14-382f-4eff-84aa-6dcddf90749c"
+                "src-0e31f6d4-2d88-4653-9b28-988d21143045",
+                "src-aa711ae5-47a0-4dd1-b0f3-cd103d3122f4"
               ]
             },
             {
               "text": "Observation corrected at 11:10 EDT by Paramedic A: “He is sweating, so this cannot be heat stroke.” → “Skin hot and sweaty. Heat illness remains a concern.” — crew clarification after assistant feedback",
               "state": "documented",
               "recordIds": [
-                "obs-785ada7e-a800-4a5e-9228-ef3abd05976d",
-                "obs-a1241d8a-073b-4c8c-bdf4-d6c15efada84"
+                "obs-5dfd24cd-e42b-43c8-8354-cbf610eef4ae",
+                "obs-d1961d47-a068-439f-8b67-728313191a1c"
               ],
               "sourceIds": [
-                "src-45d90b85-5d68-43ee-93e0-17b2e57cf2e8",
-                "src-0d9f4a5f-2e78-4c7e-b52e-9cbb366ff050"
+                "src-cf48f6ef-9596-4ac8-9706-f985ee6fc398",
+                "src-a2192cf5-c81c-4e2e-97de-a1d0cddbe198"
               ]
             },
             {
               "text": "Observation corrected at 11:17 EDT by Paramedic A: “The wearable skin temperature is elevated, so core temperature is confirmed high.” → “Wearable shows elevated skin temperature (consumer device; not core temperature). Rectal temperature recorded separately.” — reason: Rectal temperature now recorded. — crew clarification after assistant feedback",
               "state": "documented",
               "recordIds": [
-                "obs-70d42855-b46f-4d83-aa2b-76c4addffb65",
-                "obs-5adb8363-4d51-4dea-a037-63c2e5255219"
+                "obs-d6407298-7bfa-4888-b43d-95b9ff5d0dcb",
+                "obs-abcedd00-db1a-4ead-8d7b-937acc326f2e"
               ],
               "sourceIds": [
-                "src-7d4e2e64-039e-467a-bd70-f9e14249b2a4",
-                "src-fdcf0a90-e37f-401b-9949-9ba3712e042f"
+                "src-f7476b01-95b9-4ad1-8829-533704a31737",
+                "src-98a60db3-e51f-4f10-bf83-1ec20279c456"
               ]
             }
           ]
@@ -1519,26 +1538,26 @@
       ],
       "sourceIds": [
         "dispatch",
-        "src-6424df14-382f-4eff-84aa-6dcddf90749c",
-        "src-fdcf0a90-e37f-401b-9949-9ba3712e042f",
+        "src-aa711ae5-47a0-4dd1-b0f3-cd103d3122f4",
+        "src-98a60db3-e51f-4f10-bf83-1ec20279c456",
         "workout",
         "weather",
         "crew-arrival",
-        "src-0d9f4a5f-2e78-4c7e-b52e-9cbb366ff050",
-        "src-f29d2fc0-f884-4872-b84a-eab7496470a8",
-        "src-c3c8af9c-b5da-44ff-82ba-f0912e78c620",
-        "src-de88dac3-4104-4988-a931-8351dacb15f1",
-        "src-e9f2ca89-0f81-47b1-ba37-8c16f9a632b2",
-        "src-e820e808-fe16-45bc-9dbe-29b80b1a7995",
+        "src-a2192cf5-c81c-4e2e-97de-a1d0cddbe198",
+        "src-1a8d5740-095a-45b7-b7e7-407feaa5fb9e",
+        "src-09d55810-e2bc-43bc-8458-a121638e64cb",
+        "src-e04d33fe-5988-4e15-994f-abf4d8a34c63",
+        "src-67a3ad7d-86c1-4f32-93e2-33363f5c5607",
+        "src-74524f5e-57d9-4118-9507-c6408f195e3d",
         "profile",
         "whoop-overnight",
         "wearable-hr",
         "fall",
-        "src-3c3964ce-7eaa-40e7-9d5b-27f7cb3c0676",
-        "src-1f0b2cb3-7535-40f1-83e1-fbf2248612cb",
-        "src-43708813-e8bb-4e48-b4c2-2d6805c0f79e",
-        "src-45d90b85-5d68-43ee-93e0-17b2e57cf2e8",
-        "src-7d4e2e64-039e-467a-bd70-f9e14249b2a4"
+        "src-512e6a37-4803-49f5-86eb-427348a06661",
+        "src-dd6e2698-6bf2-4c92-b3be-e784a7b4cd83",
+        "src-0e31f6d4-2d88-4653-9b28-988d21143045",
+        "src-cf48f6ef-9596-4ac8-9706-f985ee6fc398",
+        "src-f7476b01-95b9-4ad1-8829-533704a31737"
       ],
       "uncertainties": [
         {
@@ -1558,7 +1577,7 @@
           "state": "unknown",
           "text": "Collapse time: unknown. Not witnessed.",
           "sourceIds": [
-            "src-1f0b2cb3-7535-40f1-83e1-fbf2248612cb"
+            "src-dd6e2698-6bf2-4c92-b3be-e784a7b4cd83"
           ]
         },
         {
@@ -1566,7 +1585,7 @@
           "state": "approximate",
           "text": "Discovery time: approximate (~10:43 EDT, witness) — Friend found him; collapse not witnessed.",
           "sourceIds": [
-            "src-3c3964ce-7eaa-40e7-9d5b-27f7cb3c0676"
+            "src-512e6a37-4803-49f5-86eb-427348a06661"
           ]
         },
         {
@@ -1589,7 +1608,7 @@
       "revision": 14,
       "reviewedAt": "2026-10-24T15:20:30.000Z",
       "reviewedBy": "Paramedic A",
-      "text": "SYNTHETIC DEMO RECORD — not for clinical use. Generated deterministically from the crew-entered record; supports, not replaces, the verbal handoff.\nREVIEWED HANDOFF v2 (amends v1) · incident runner-found-down · revision 14 · reviewed by Paramedic A at 2026-10-24 11:20 EDT\n\nCHANGES SINCE PREVIOUS VERSION\n- Added — Clinical measurements: Heart rate 142 bpm — at 10:57 EDT — before cooling started — Cardiac monitor (synthetic), by Crew\n- Added — Changes and corrections: Measurement corrected at 11:19 EDT by Paramedic A: “Heart rate 140 bpm — at 10:57 EDT — before cooling started — Cardiac monitor (synthetic), by Crew” → “Heart rate 142 bpm — at 10:57 EDT — before cooling started — Cardiac monitor (synthetic), by Crew” — reason: Misread monitor\n- No longer current — Clinical measurements: Heart rate 140 bpm — at 10:57 EDT — before cooling started — Cardiac monitor (synthetic), by Crew\n\nPRESENTATION\n- Dispatch: Emergency call at 10:44 EDT: person found down near running trail. [sources: dispatch]\n- Witness report (relayed by crew), 11:01 EDT: “Friend found him around 10:43 and called at 10:44. Did not see him collapse. Five minutes was a guess.” [sources: src-6424df14-382f-4eff-84aa-6dcddf90749c]\n- Crew observation, 11:03 EDT: “Wearable shows elevated skin temperature (consumer device; not core temperature). Rectal temperature recorded separately.” [sources: src-fdcf0a90-e37f-401b-9949-9ba3712e042f]\n\nEXERTION AND ENVIRONMENT\n- Activity: Outdoor run (device) — From workout record. [sources: workout]\n- Air temperature 88 °F — at 10:00 EDT — weather service — Weather station near the trail (synthetic) — environmental reading, not body temperature [sources: weather]\n- Relative humidity 70% — at 10:00 EDT — weather service — Weather station near the trail (synthetic) — environmental reading, not body temperature [sources: weather]\n\nNEUROLOGICAL AND SKIN OBSERVATIONS\n- Crew observation, 10:56 EDT: “Confused; slow to answer questions; responds to voice.” [sources: crew-arrival]\n- Crew observation, 10:56 EDT: “Skin hot and sweaty to touch.” [sources: crew-arrival]\n- Crew observation, 11:01 EDT: “Skin hot and sweaty. Heat illness remains a concern.” [sources: src-0d9f4a5f-2e78-4c7e-b52e-9cbb366ff050]\n\nCLINICAL MEASUREMENTS\n- Body temperature 41.2 °C — rectal — at 11:02 EDT — before cooling started — Rectal thermometer (synthetic), by Crew [sources: src-f29d2fc0-f884-4872-b84a-eab7496470a8]\n- Body temperature 38.9 °C — rectal — at 11:25 EDT — after cooling stopped — Rectal thermometer (synthetic), by Crew [sources: src-c3c8af9c-b5da-44ff-82ba-f0912e78c620]\n- Heart rate 142 bpm — at 10:57 EDT — before cooling started — Cardiac monitor (synthetic), by Crew [sources: src-7484ed9a-65f5-42f2-8501-4fe138c88772]\n- Blood pressure 104/62 mmHg — at 11:03 EDT — before cooling started — Cardiac monitor (synthetic), by Crew [sources: src-de88dac3-4104-4988-a931-8351dacb15f1]\n- Respiratory rate: not documented.\n- SpO2: not documented.\n- Glucose: not documented.\n\nCARE AND RESPONSE\n- Cooling: Cold-water immersion in portable tub (cold-water immersion) — performed — 11:05 EDT–11:20 EDT — by Crew — Response: More alert by 11:20. [sources: src-e9f2ca89-0f81-47b1-ba37-8c16f9a632b2]\n- Crew observation, 11:26 EDT: “Answers name and location; still slow to respond.” [sources: src-e820e808-fe16-45bc-9dbe-29b80b1a7995]\n\nRELEVANT HISTORY\n- Age: 24 years (patient) — Profile; not verified on scene. [sources: profile]\n- Allergies: No known drug allergies (patient) — Self-reported in profile. [sources: profile]\n- Medications: None listed (patient) — Profile list; current use not confirmed. [sources: profile]\n- Relevant history: None listed (patient) — Profile list; not verified. [sources: profile]\n\nDEVICE CONTEXT (CONSUMER WEARABLE, BACKGROUND ONLY)\n- Consumer wearable data — background only. Synthetic consumer wearable fixtures. Integration unverified; not clinical measurements.\n- Overnight recovery score 18%. Proprietary consumer score; background only. (synthetic fixture) [sources: whoop-overnight]\n- Resting heart rate 9 bpm above personal baseline overnight. Background only. (synthetic fixture) [sources: whoop-overnight]\n- Overnight skin-temperature deviation +0.8 °C from baseline. Skin-temperature deviation is not core temperature. (synthetic fixture) [sources: whoop-overnight]\n- Outdoor run recorded from 09:05 EDT; end not recorded. Start of recorded workout, not illness onset. Gaps: Workout end not recorded. (synthetic fixture) [sources: workout]\n- Heart rate rose from 122 to 166 bpm during the recorded workout. Consumer optical sensor; cause of change unknown. Gaps: No samples after 10:34 EDT. (synthetic fixture) [sources: wearable-hr]\n- Recorded pace becomes variable from 10:34 EDT. Does not establish neurological symptoms or illness onset. (synthetic fixture) [sources: workout]\n- Device-reported fall at 10:42 EDT. Does not establish collapse, unconsciousness or downtime. (synthetic fixture) [sources: fall]\n\nTIMELINE (SOURCE-LINKED)\n- 09:05 EDT — Exertion start (recorded; device) — Start of recorded workout; not illness onset. [sources: workout]\n- 10:42 EDT — Device-reported fall event (recorded; device) — Device-reported; does not establish collapse or downtime. [sources: fall]\n- ~10:43 EDT — Discovery (patient found) (approximate; witness) — Friend found him; collapse not witnessed. [sources: src-3c3964ce-7eaa-40e7-9d5b-27f7cb3c0676]\n- 10:44 EDT — Emergency call (recorded; dispatch) [sources: dispatch]\n- 10:55 EDT — Crew arrival (recorded; crew) [sources: crew-arrival]\n- Time unknown — Collapse (unknown; witness) — Not witnessed. [sources: src-1f0b2cb3-7535-40f1-83e1-fbf2248612cb]\n\nCHANGES AND CORRECTIONS\n- Observation corrected at 11:05 EDT by Paramedic A: “Friend says he went for a run and dropped maybe five minutes ago. Not sure exactly.” → “Friend found him around 10:43 and called at 10:44. Did not see him collapse. Five minutes was a guess.” — crew clarification after assistant feedback [sources: src-43708813-e8bb-4e48-b4c2-2d6805c0f79e, src-6424df14-382f-4eff-84aa-6dcddf90749c]\n- Observation corrected at 11:10 EDT by Paramedic A: “He is sweating, so this cannot be heat stroke.” → “Skin hot and sweaty. Heat illness remains a concern.” — crew clarification after assistant feedback [sources: src-45d90b85-5d68-43ee-93e0-17b2e57cf2e8, src-0d9f4a5f-2e78-4c7e-b52e-9cbb366ff050]\n- Observation corrected at 11:17 EDT by Paramedic A: “The wearable skin temperature is elevated, so core temperature is confirmed high.” → “Wearable shows elevated skin temperature (consumer device; not core temperature). Rectal temperature recorded separately.” — reason: Rectal temperature now recorded. — crew clarification after assistant feedback [sources: src-7d4e2e64-039e-467a-bd70-f9e14249b2a4, src-fdcf0a90-e37f-401b-9949-9ba3712e042f]\n- Measurement corrected at 11:19 EDT by Paramedic A: “Heart rate 140 bpm — at 10:57 EDT — before cooling started — Cardiac monitor (synthetic), by Crew” → “Heart rate 142 bpm — at 10:57 EDT — before cooling started — Cardiac monitor (synthetic), by Crew” — reason: Misread monitor [sources: crew-arrival, src-7484ed9a-65f5-42f2-8501-4fe138c88772]\n\nUNCERTAIN OR NOT DOCUMENTED\n- Not documented: respiratory rate, SpO2, glucose.\n- Symptom onset time: not documented.\n- Collapse time: unknown. Not witnessed.\n- Discovery time: approximate (~10:43 EDT, witness) — Friend found him; collapse not witnessed.\n- Last known normal: not documented.\n- Duration of any loss of consciousness: not documented.",
+      "text": "SYNTHETIC DEMO RECORD — not for clinical use. Generated deterministically from the crew-entered record; supports, not replaces, the verbal handoff.\nREVIEWED HANDOFF v2 (amends v1) · incident runner-found-down · revision 14 · reviewed by Paramedic A at 2026-10-24 11:20 EDT\n\nCHANGES SINCE PREVIOUS VERSION\n- Added — Clinical measurements: Heart rate 142 bpm — at 10:57 EDT — before cooling started — Cardiac monitor (synthetic), by Crew\n- Added — Changes and corrections: Measurement corrected at 11:19 EDT by Paramedic A: “Heart rate 140 bpm — at 10:57 EDT — before cooling started — Cardiac monitor (synthetic), by Crew” → “Heart rate 142 bpm — at 10:57 EDT — before cooling started — Cardiac monitor (synthetic), by Crew” — reason: Misread monitor\n- No longer current — Clinical measurements: Heart rate 140 bpm — at 10:57 EDT — before cooling started — Cardiac monitor (synthetic), by Crew\n\nPRESENTATION\n- Dispatch: Emergency call at 10:44 EDT: person found down near running trail. [sources: dispatch]\n- Witness report (relayed by crew), 11:01 EDT: “Friend found him around 10:43 and called at 10:44. Did not see him collapse. Five minutes was a guess.” [sources: src-aa711ae5-47a0-4dd1-b0f3-cd103d3122f4]\n- Crew observation, 11:03 EDT: “Wearable shows elevated skin temperature (consumer device; not core temperature). Rectal temperature recorded separately.” [sources: src-98a60db3-e51f-4f10-bf83-1ec20279c456]\n\nEXERTION AND ENVIRONMENT\n- Activity: Outdoor run (device) — From workout record. [sources: workout]\n- Air temperature 88 °F — at 10:00 EDT — weather service — Weather station near the trail (synthetic) — environmental reading, not body temperature [sources: weather]\n- Relative humidity 70% — at 10:00 EDT — weather service — Weather station near the trail (synthetic) — environmental reading, not body temperature [sources: weather]\n\nNEUROLOGICAL AND SKIN OBSERVATIONS\n- Crew observation, 10:56 EDT: “Confused; slow to answer questions; responds to voice.” [sources: crew-arrival]\n- Crew observation, 10:56 EDT: “Skin hot and sweaty to touch.” [sources: crew-arrival]\n- Crew observation, 11:01 EDT: “Skin hot and sweaty. Heat illness remains a concern.” [sources: src-a2192cf5-c81c-4e2e-97de-a1d0cddbe198]\n\nCLINICAL MEASUREMENTS\n- Body temperature 41.2 °C — rectal — at 11:02 EDT — before cooling started — Rectal thermometer (synthetic), by Crew [sources: src-1a8d5740-095a-45b7-b7e7-407feaa5fb9e]\n- Body temperature 38.9 °C — rectal — at 11:25 EDT — after cooling stopped — Rectal thermometer (synthetic), by Crew [sources: src-09d55810-e2bc-43bc-8458-a121638e64cb]\n- Heart rate 142 bpm — at 10:57 EDT — before cooling started — Cardiac monitor (synthetic), by Crew [sources: src-6ec4b04d-a9bb-4464-9084-776cf417c0b5]\n- Blood pressure 104/62 mmHg — at 11:03 EDT — before cooling started — Cardiac monitor (synthetic), by Crew [sources: src-e04d33fe-5988-4e15-994f-abf4d8a34c63]\n- Respiratory rate: not documented.\n- SpO2: not documented.\n- Glucose: not documented.\n\nCARE AND RESPONSE\n- Cooling: Cold-water immersion in portable tub (cold-water immersion) — performed — 11:05 EDT–11:20 EDT — by Crew — Response: More alert by 11:20. [sources: src-67a3ad7d-86c1-4f32-93e2-33363f5c5607]\n- Crew observation, 11:26 EDT: “Answers name and location; still slow to respond.” [sources: src-74524f5e-57d9-4118-9507-c6408f195e3d]\n\nRELEVANT HISTORY\n- Age: 24 years (patient) — Profile; not verified on scene. [sources: profile]\n- Allergies: No known drug allergies (patient) — Self-reported in profile. [sources: profile]\n- Medications: None listed (patient) — Profile list; current use not confirmed. [sources: profile]\n- Relevant history: None listed (patient) — Profile list; not verified. [sources: profile]\n\nDEVICE CONTEXT (CONSUMER WEARABLE, BACKGROUND ONLY)\n- Consumer wearable data — background only. Synthetic consumer wearable fixtures. Integration unverified; not clinical measurements.\n- Overnight recovery score 18%. Proprietary consumer score; background only. (synthetic fixture) [sources: whoop-overnight]\n- Resting heart rate 9 bpm above personal baseline overnight. Background only. (synthetic fixture) [sources: whoop-overnight]\n- Overnight skin-temperature deviation +0.8 °C from baseline. Skin-temperature deviation is not core temperature. (synthetic fixture) [sources: whoop-overnight]\n- Outdoor run recorded from 09:05 EDT; end not recorded. Start of recorded workout, not illness onset. Gaps: Workout end not recorded. (synthetic fixture) [sources: workout]\n- Heart rate rose from 122 to 166 bpm during the recorded workout. Consumer optical sensor; cause of change unknown. Gaps: No samples after 10:34 EDT. (synthetic fixture) [sources: wearable-hr]\n- Recorded pace becomes variable from 10:34 EDT. Does not establish neurological symptoms or illness onset. (synthetic fixture) [sources: workout]\n- Device-reported fall at 10:42 EDT. Does not establish collapse, unconsciousness or downtime. (synthetic fixture) [sources: fall]\n\nTIMELINE (SOURCE-LINKED)\n- 09:05 EDT — Exertion start (recorded; device) — Start of recorded workout; not illness onset. [sources: workout]\n- 10:42 EDT — Device-reported fall event (recorded; device) — Device-reported; does not establish collapse or downtime. [sources: fall]\n- ~10:43 EDT — Discovery (patient found) (approximate; witness) — Friend found him; collapse not witnessed. [sources: src-512e6a37-4803-49f5-86eb-427348a06661]\n- 10:44 EDT — Emergency call (recorded; dispatch) [sources: dispatch]\n- 10:55 EDT — Crew arrival (recorded; crew) [sources: crew-arrival]\n- Time unknown — Collapse (unknown; witness) — Not witnessed. [sources: src-dd6e2698-6bf2-4c92-b3be-e784a7b4cd83]\n\nCHANGES AND CORRECTIONS\n- Observation corrected at 11:05 EDT by Paramedic A: “Friend says he went for a run and dropped maybe five minutes ago. Not sure exactly.” → “Friend found him around 10:43 and called at 10:44. Did not see him collapse. Five minutes was a guess.” — crew clarification after assistant feedback [sources: src-0e31f6d4-2d88-4653-9b28-988d21143045, src-aa711ae5-47a0-4dd1-b0f3-cd103d3122f4]\n- Observation corrected at 11:10 EDT by Paramedic A: “He is sweating, so this cannot be heat stroke.” → “Skin hot and sweaty. Heat illness remains a concern.” — crew clarification after assistant feedback [sources: src-cf48f6ef-9596-4ac8-9706-f985ee6fc398, src-a2192cf5-c81c-4e2e-97de-a1d0cddbe198]\n- Observation corrected at 11:17 EDT by Paramedic A: “The wearable skin temperature is elevated, so core temperature is confirmed high.” → “Wearable shows elevated skin temperature (consumer device; not core temperature). Rectal temperature recorded separately.” — reason: Rectal temperature now recorded. — crew clarification after assistant feedback [sources: src-f7476b01-95b9-4ad1-8829-533704a31737, src-98a60db3-e51f-4f10-bf83-1ec20279c456]\n- Measurement corrected at 11:19 EDT by Paramedic A: “Heart rate 140 bpm — at 10:57 EDT — before cooling started — Cardiac monitor (synthetic), by Crew” → “Heart rate 142 bpm — at 10:57 EDT — before cooling started — Cardiac monitor (synthetic), by Crew” — reason: Misread monitor [sources: crew-arrival, src-6ec4b04d-a9bb-4464-9084-776cf417c0b5]\n\nUNCERTAIN OR NOT DOCUMENTED\n- Not documented: respiratory rate, SpO2, glucose.\n- Symptom onset time: not documented.\n- Collapse time: unknown. Not witnessed.\n- Discovery time: approximate (~10:43 EDT, witness) — Friend found him; collapse not witnessed.\n- Last known normal: not documented.\n- Duration of any loss of consciousness: not documented.",
       "kind": "amendment",
       "amendsVersion": 1,
       "patientMatched": true,
@@ -1610,20 +1629,20 @@
               "text": "Witness report (relayed by crew), 11:01 EDT: “Friend found him around 10:43 and called at 10:44. Did not see him collapse. Five minutes was a guess.”",
               "state": "reported",
               "recordIds": [
-                "obs-fcb2cc59-f076-40de-92af-451292300d30"
+                "obs-155b8c02-eba2-42cc-b632-8b4ab1dcc424"
               ],
               "sourceIds": [
-                "src-6424df14-382f-4eff-84aa-6dcddf90749c"
+                "src-aa711ae5-47a0-4dd1-b0f3-cd103d3122f4"
               ]
             },
             {
               "text": "Crew observation, 11:03 EDT: “Wearable shows elevated skin temperature (consumer device; not core temperature). Rectal temperature recorded separately.”",
               "state": "documented",
               "recordIds": [
-                "obs-5adb8363-4d51-4dea-a037-63c2e5255219"
+                "obs-abcedd00-db1a-4ead-8d7b-937acc326f2e"
               ],
               "sourceIds": [
-                "src-fdcf0a90-e37f-401b-9949-9ba3712e042f"
+                "src-98a60db3-e51f-4f10-bf83-1ec20279c456"
               ]
             }
           ]
@@ -1692,10 +1711,10 @@
               "text": "Crew observation, 11:01 EDT: “Skin hot and sweaty. Heat illness remains a concern.”",
               "state": "documented",
               "recordIds": [
-                "obs-a1241d8a-073b-4c8c-bdf4-d6c15efada84"
+                "obs-d1961d47-a068-439f-8b67-728313191a1c"
               ],
               "sourceIds": [
-                "src-0d9f4a5f-2e78-4c7e-b52e-9cbb366ff050"
+                "src-a2192cf5-c81c-4e2e-97de-a1d0cddbe198"
               ]
             }
           ]
@@ -1708,40 +1727,40 @@
               "text": "Body temperature 41.2 °C — rectal — at 11:02 EDT — before cooling started — Rectal thermometer (synthetic), by Crew",
               "state": "documented",
               "recordIds": [
-                "meas-cf37a336-58b2-42a2-b3d8-782c3749eef8"
+                "meas-c8479b88-0ea1-4a8d-809a-e0b4991bfadf"
               ],
               "sourceIds": [
-                "src-f29d2fc0-f884-4872-b84a-eab7496470a8"
+                "src-1a8d5740-095a-45b7-b7e7-407feaa5fb9e"
               ]
             },
             {
               "text": "Body temperature 38.9 °C — rectal — at 11:25 EDT — after cooling stopped — Rectal thermometer (synthetic), by Crew",
               "state": "documented",
               "recordIds": [
-                "meas-808d9380-7e48-426a-bd4a-83de99ea0fdf"
+                "meas-766088c1-d367-44ab-a340-ddc88327163f"
               ],
               "sourceIds": [
-                "src-c3c8af9c-b5da-44ff-82ba-f0912e78c620"
+                "src-09d55810-e2bc-43bc-8458-a121638e64cb"
               ]
             },
             {
               "text": "Heart rate 142 bpm — at 10:57 EDT — before cooling started — Cardiac monitor (synthetic), by Crew",
               "state": "documented",
               "recordIds": [
-                "meas-35d82c29-ed41-4b5d-8005-0e5cbb7079d3"
+                "meas-8648621c-0898-4f54-85b2-95d2e9893f7b"
               ],
               "sourceIds": [
-                "src-7484ed9a-65f5-42f2-8501-4fe138c88772"
+                "src-6ec4b04d-a9bb-4464-9084-776cf417c0b5"
               ]
             },
             {
               "text": "Blood pressure 104/62 mmHg — at 11:03 EDT — before cooling started — Cardiac monitor (synthetic), by Crew",
               "state": "documented",
               "recordIds": [
-                "meas-9ac68c16-3d68-4160-9090-6b56aa65b541"
+                "meas-e3176221-cf26-4b8a-a208-da6adfdca185"
               ],
               "sourceIds": [
-                "src-de88dac3-4104-4988-a931-8351dacb15f1"
+                "src-e04d33fe-5988-4e15-994f-abf4d8a34c63"
               ]
             },
             {
@@ -1772,20 +1791,20 @@
               "text": "Cooling: Cold-water immersion in portable tub (cold-water immersion) — performed — 11:05 EDT–11:20 EDT — by Crew — Response: More alert by 11:20.",
               "state": "documented",
               "recordIds": [
-                "care-92dadcda-5e70-4722-9a93-e8ca7a256d26"
+                "care-5ae35981-2486-461e-900c-9469f6760b1c"
               ],
               "sourceIds": [
-                "src-e9f2ca89-0f81-47b1-ba37-8c16f9a632b2"
+                "src-67a3ad7d-86c1-4f32-93e2-33363f5c5607"
               ]
             },
             {
               "text": "Crew observation, 11:26 EDT: “Answers name and location; still slow to respond.”",
               "state": "documented",
               "recordIds": [
-                "obs-f42bb50e-075e-4a2b-a3da-cdc05781bf53"
+                "obs-09c2441f-3b82-49ff-b8fa-8746c91d9ec5"
               ],
               "sourceIds": [
-                "src-e820e808-fe16-45bc-9dbe-29b80b1a7995"
+                "src-74524f5e-57d9-4118-9507-c6408f195e3d"
               ]
             }
           ]
@@ -1946,10 +1965,10 @@
               "text": "~10:43 EDT — Discovery (patient found) (approximate; witness) — Friend found him; collapse not witnessed.",
               "state": "reported",
               "recordIds": [
-                "tl-91f1222c-79f4-4046-bf1d-ff9a4a66624f"
+                "tl-1f515f00-9573-40b1-8d82-6c304707d5fc"
               ],
               "sourceIds": [
-                "src-3c3964ce-7eaa-40e7-9d5b-27f7cb3c0676"
+                "src-512e6a37-4803-49f5-86eb-427348a06661"
               ]
             },
             {
@@ -1976,10 +1995,10 @@
               "text": "Time unknown — Collapse (unknown; witness) — Not witnessed.",
               "state": "unknown",
               "recordIds": [
-                "tl-6a1094e1-3f50-4b62-8e74-9362fdff8ac8"
+                "tl-64f70c41-e8ff-4256-a510-0ce4ba8a3297"
               ],
               "sourceIds": [
-                "src-1f0b2cb3-7535-40f1-83e1-fbf2248612cb"
+                "src-dd6e2698-6bf2-4c92-b3be-e784a7b4cd83"
               ]
             }
           ]
@@ -1992,36 +2011,36 @@
               "text": "Observation corrected at 11:05 EDT by Paramedic A: “Friend says he went for a run and dropped maybe five minutes ago. Not sure exactly.” → “Friend found him around 10:43 and called at 10:44. Did not see him collapse. Five minutes was a guess.” — crew clarification after assistant feedback",
               "state": "documented",
               "recordIds": [
-                "obs-2aab52d2-8b32-4a14-b82d-89bd25081360",
-                "obs-fcb2cc59-f076-40de-92af-451292300d30"
+                "obs-2c21fb1e-bd6c-4b50-a080-78759a953c15",
+                "obs-155b8c02-eba2-42cc-b632-8b4ab1dcc424"
               ],
               "sourceIds": [
-                "src-43708813-e8bb-4e48-b4c2-2d6805c0f79e",
-                "src-6424df14-382f-4eff-84aa-6dcddf90749c"
+                "src-0e31f6d4-2d88-4653-9b28-988d21143045",
+                "src-aa711ae5-47a0-4dd1-b0f3-cd103d3122f4"
               ]
             },
             {
               "text": "Observation corrected at 11:10 EDT by Paramedic A: “He is sweating, so this cannot be heat stroke.” → “Skin hot and sweaty. Heat illness remains a concern.” — crew clarification after assistant feedback",
               "state": "documented",
               "recordIds": [
-                "obs-785ada7e-a800-4a5e-9228-ef3abd05976d",
-                "obs-a1241d8a-073b-4c8c-bdf4-d6c15efada84"
+                "obs-5dfd24cd-e42b-43c8-8354-cbf610eef4ae",
+                "obs-d1961d47-a068-439f-8b67-728313191a1c"
               ],
               "sourceIds": [
-                "src-45d90b85-5d68-43ee-93e0-17b2e57cf2e8",
-                "src-0d9f4a5f-2e78-4c7e-b52e-9cbb366ff050"
+                "src-cf48f6ef-9596-4ac8-9706-f985ee6fc398",
+                "src-a2192cf5-c81c-4e2e-97de-a1d0cddbe198"
               ]
             },
             {
               "text": "Observation corrected at 11:17 EDT by Paramedic A: “The wearable skin temperature is elevated, so core temperature is confirmed high.” → “Wearable shows elevated skin temperature (consumer device; not core temperature). Rectal temperature recorded separately.” — reason: Rectal temperature now recorded. — crew clarification after assistant feedback",
               "state": "documented",
               "recordIds": [
-                "obs-70d42855-b46f-4d83-aa2b-76c4addffb65",
-                "obs-5adb8363-4d51-4dea-a037-63c2e5255219"
+                "obs-d6407298-7bfa-4888-b43d-95b9ff5d0dcb",
+                "obs-abcedd00-db1a-4ead-8d7b-937acc326f2e"
               ],
               "sourceIds": [
-                "src-7d4e2e64-039e-467a-bd70-f9e14249b2a4",
-                "src-fdcf0a90-e37f-401b-9949-9ba3712e042f"
+                "src-f7476b01-95b9-4ad1-8829-533704a31737",
+                "src-98a60db3-e51f-4f10-bf83-1ec20279c456"
               ]
             },
             {
@@ -2029,11 +2048,11 @@
               "state": "documented",
               "recordIds": [
                 "meas-hr-arrival",
-                "meas-35d82c29-ed41-4b5d-8005-0e5cbb7079d3"
+                "meas-8648621c-0898-4f54-85b2-95d2e9893f7b"
               ],
               "sourceIds": [
                 "crew-arrival",
-                "src-7484ed9a-65f5-42f2-8501-4fe138c88772"
+                "src-6ec4b04d-a9bb-4464-9084-776cf417c0b5"
               ]
             }
           ]
@@ -2041,27 +2060,27 @@
       ],
       "sourceIds": [
         "dispatch",
-        "src-6424df14-382f-4eff-84aa-6dcddf90749c",
-        "src-fdcf0a90-e37f-401b-9949-9ba3712e042f",
+        "src-aa711ae5-47a0-4dd1-b0f3-cd103d3122f4",
+        "src-98a60db3-e51f-4f10-bf83-1ec20279c456",
         "workout",
         "weather",
         "crew-arrival",
-        "src-0d9f4a5f-2e78-4c7e-b52e-9cbb366ff050",
-        "src-f29d2fc0-f884-4872-b84a-eab7496470a8",
-        "src-c3c8af9c-b5da-44ff-82ba-f0912e78c620",
-        "src-7484ed9a-65f5-42f2-8501-4fe138c88772",
-        "src-de88dac3-4104-4988-a931-8351dacb15f1",
-        "src-e9f2ca89-0f81-47b1-ba37-8c16f9a632b2",
-        "src-e820e808-fe16-45bc-9dbe-29b80b1a7995",
+        "src-a2192cf5-c81c-4e2e-97de-a1d0cddbe198",
+        "src-1a8d5740-095a-45b7-b7e7-407feaa5fb9e",
+        "src-09d55810-e2bc-43bc-8458-a121638e64cb",
+        "src-6ec4b04d-a9bb-4464-9084-776cf417c0b5",
+        "src-e04d33fe-5988-4e15-994f-abf4d8a34c63",
+        "src-67a3ad7d-86c1-4f32-93e2-33363f5c5607",
+        "src-74524f5e-57d9-4118-9507-c6408f195e3d",
         "profile",
         "whoop-overnight",
         "wearable-hr",
         "fall",
-        "src-3c3964ce-7eaa-40e7-9d5b-27f7cb3c0676",
-        "src-1f0b2cb3-7535-40f1-83e1-fbf2248612cb",
-        "src-43708813-e8bb-4e48-b4c2-2d6805c0f79e",
-        "src-45d90b85-5d68-43ee-93e0-17b2e57cf2e8",
-        "src-7d4e2e64-039e-467a-bd70-f9e14249b2a4"
+        "src-512e6a37-4803-49f5-86eb-427348a06661",
+        "src-dd6e2698-6bf2-4c92-b3be-e784a7b4cd83",
+        "src-0e31f6d4-2d88-4653-9b28-988d21143045",
+        "src-cf48f6ef-9596-4ac8-9706-f985ee6fc398",
+        "src-f7476b01-95b9-4ad1-8829-533704a31737"
       ],
       "uncertainties": [
         {
@@ -2081,7 +2100,7 @@
           "state": "unknown",
           "text": "Collapse time: unknown. Not witnessed.",
           "sourceIds": [
-            "src-1f0b2cb3-7535-40f1-83e1-fbf2248612cb"
+            "src-dd6e2698-6bf2-4c92-b3be-e784a7b4cd83"
           ]
         },
         {
@@ -2089,7 +2108,7 @@
           "state": "approximate",
           "text": "Discovery time: approximate (~10:43 EDT, witness) — Friend found him; collapse not witnessed.",
           "sourceIds": [
-            "src-3c3964ce-7eaa-40e7-9d5b-27f7cb3c0676"
+            "src-512e6a37-4803-49f5-86eb-427348a06661"
           ]
         },
         {

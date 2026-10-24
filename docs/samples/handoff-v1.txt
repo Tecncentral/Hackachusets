@@ -3,8 +3,8 @@ REVIEWED HANDOFF v1 · incident runner-found-down · revision 13 · reviewed by 
 
 PRESENTATION
 - Dispatch: Emergency call at 10:44 EDT: person found down near running trail. [sources: dispatch]
-- Witness report (relayed by crew), 11:01 EDT: “Friend found him around 10:43 and called at 10:44. Did not see him collapse. Five minutes was a guess.” [sources: src-6424df14-382f-4eff-84aa-6dcddf90749c]
-- Crew observation, 11:03 EDT: “Wearable shows elevated skin temperature (consumer device; not core temperature). Rectal temperature recorded separately.” [sources: src-fdcf0a90-e37f-401b-9949-9ba3712e042f]
+- Witness report (relayed by crew), 11:01 EDT: “Friend found him around 10:43 and called at 10:44. Did not see him collapse. Five minutes was a guess.” [sources: src-aa711ae5-47a0-4dd1-b0f3-cd103d3122f4]
+- Crew observation, 11:03 EDT: “Wearable shows elevated skin temperature (consumer device; not core temperature). Rectal temperature recorded separately.” [sources: src-98a60db3-e51f-4f10-bf83-1ec20279c456]
 
 EXERTION AND ENVIRONMENT
 - Activity: Outdoor run (device) — From workout record. [sources: workout]
@@ -14,20 +14,20 @@ EXERTION AND ENVIRONMENT
 NEUROLOGICAL AND SKIN OBSERVATIONS
 - Crew observation, 10:56 EDT: “Confused; slow to answer questions; responds to voice.” [sources: crew-arrival]
 - Crew observation, 10:56 EDT: “Skin hot and sweaty to touch.” [sources: crew-arrival]
-- Crew observation, 11:01 EDT: “Skin hot and sweaty. Heat illness remains a concern.” [sources: src-0d9f4a5f-2e78-4c7e-b52e-9cbb366ff050]
+- Crew observation, 11:01 EDT: “Skin hot and sweaty. Heat illness remains a concern.” [sources: src-a2192cf5-c81c-4e2e-97de-a1d0cddbe198]
 
 CLINICAL MEASUREMENTS
-- Body temperature 41.2 °C — rectal — at 11:02 EDT — before cooling started — Rectal thermometer (synthetic), by Crew [sources: src-f29d2fc0-f884-4872-b84a-eab7496470a8]
-- Body temperature 38.9 °C — rectal — at 11:25 EDT — after cooling stopped — Rectal thermometer (synthetic), by Crew [sources: src-c3c8af9c-b5da-44ff-82ba-f0912e78c620]
+- Body temperature 41.2 °C — rectal — at 11:02 EDT — before cooling started — Rectal thermometer (synthetic), by Crew [sources: src-1a8d5740-095a-45b7-b7e7-407feaa5fb9e]
+- Body temperature 38.9 °C — rectal — at 11:25 EDT — after cooling stopped — Rectal thermometer (synthetic), by Crew [sources: src-09d55810-e2bc-43bc-8458-a121638e64cb]
 - Heart rate 140 bpm — at 10:57 EDT — before cooling started — Cardiac monitor (synthetic), by Crew [sources: crew-arrival]
-- Blood pressure 104/62 mmHg — at 11:03 EDT — before cooling started — Cardiac monitor (synthetic), by Crew [sources: src-de88dac3-4104-4988-a931-8351dacb15f1]
+- Blood pressure 104/62 mmHg — at 11:03 EDT — before cooling started — Cardiac monitor (synthetic), by Crew [sources: src-e04d33fe-5988-4e15-994f-abf4d8a34c63]
 - Respiratory rate: not documented.
 - SpO2: not documented.
 - Glucose: not documented.
 
 CARE AND RESPONSE
-- Cooling: Cold-water immersion in portable tub (cold-water immersion) — performed — 11:05 EDT–11:20 EDT — by Crew — Response: More alert by 11:20. [sources: src-e9f2ca89-0f81-47b1-ba37-8c16f9a632b2]
-- Crew observation, 11:26 EDT: “Answers name and location; still slow to respond.” [sources: src-e820e808-fe16-45bc-9dbe-29b80b1a7995]
+- Cooling: Cold-water immersion in portable tub (cold-water immersion) — performed — 11:05 EDT–11:20 EDT — by Crew — Response: More alert by 11:20. [sources: src-67a3ad7d-86c1-4f32-93e2-33363f5c5607]
+- Crew observation, 11:26 EDT: “Answers name and location; still slow to respond.” [sources: src-74524f5e-57d9-4118-9507-c6408f195e3d]
 
 RELEVANT HISTORY
 - Age: 24 years (patient) — Profile; not verified on scene. [sources: profile]
@@ -48,15 +48,15 @@ DEVICE CONTEXT (CONSUMER WEARABLE, BACKGROUND ONLY)
 TIMELINE (SOURCE-LINKED)
 - 09:05 EDT — Exertion start (recorded; device) — Start of recorded workout; not illness onset. [sources: workout]
 - 10:42 EDT — Device-reported fall event (recorded; device) — Device-reported; does not establish collapse or downtime. [sources: fall]
-- ~10:43 EDT — Discovery (patient found) (approximate; witness) — Friend found him; collapse not witnessed. [sources: src-3c3964ce-7eaa-40e7-9d5b-27f7cb3c0676]
+- ~10:43 EDT — Discovery (patient found) (approximate; witness) — Friend found him; collapse not witnessed. [sources: src-512e6a37-4803-49f5-86eb-427348a06661]
 - 10:44 EDT — Emergency call (recorded; dispatch) [sources: dispatch]
 - 10:55 EDT — Crew arrival (recorded; crew) [sources: crew-arrival]
-- Time unknown — Collapse (unknown; witness) — Not witnessed. [sources: src-1f0b2cb3-7535-40f1-83e1-fbf2248612cb]
+- Time unknown — Collapse (unknown; witness) — Not witnessed. [sources: src-dd6e2698-6bf2-4c92-b3be-e784a7b4cd83]
 
 CHANGES AND CORRECTIONS
-- Observation corrected at 11:05 EDT by Paramedic A: “Friend says he went for a run and dropped maybe five minutes ago. Not sure exactly.” → “Friend found him around 10:43 and called at 10:44. Did not see him collapse. Five minutes was a guess.” — crew clarification after assistant feedback [sources: src-43708813-e8bb-4e48-b4c2-2d6805c0f79e, src-6424df14-382f-4eff-84aa-6dcddf90749c]
-- Observation corrected at 11:10 EDT by Paramedic A: “He is sweating, so this cannot be heat stroke.” → “Skin hot and sweaty. Heat illness remains a concern.” — crew clarification after assistant feedback [sources: src-45d90b85-5d68-43ee-93e0-17b2e57cf2e8, src-0d9f4a5f-2e78-4c7e-b52e-9cbb366ff050]
-- Observation corrected at 11:17 EDT by Paramedic A: “The wearable skin temperature is elevated, so core temperature is confirmed high.” → “Wearable shows elevated skin temperature (consumer device; not core temperature). Rectal temperature recorded separately.” — reason: Rectal temperature now recorded. — crew clarification after assistant feedback [sources: src-7d4e2e64-039e-467a-bd70-f9e14249b2a4, src-fdcf0a90-e37f-401b-9949-9ba3712e042f]
+- Observation corrected at 11:05 EDT by Paramedic A: “Friend says he went for a run and dropped maybe five minutes ago. Not sure exactly.” → “Friend found him around 10:43 and called at 10:44. Did not see him collapse. Five minutes was a guess.” — crew clarification after assistant feedback [sources: src-0e31f6d4-2d88-4653-9b28-988d21143045, src-aa711ae5-47a0-4dd1-b0f3-cd103d3122f4]
+- Observation corrected at 11:10 EDT by Paramedic A: “He is sweating, so this cannot be heat stroke.” → “Skin hot and sweaty. Heat illness remains a concern.” — crew clarification after assistant feedback [sources: src-cf48f6ef-9596-4ac8-9706-f985ee6fc398, src-a2192cf5-c81c-4e2e-97de-a1d0cddbe198]
+- Observation corrected at 11:17 EDT by Paramedic A: “The wearable skin temperature is elevated, so core temperature is confirmed high.” → “Wearable shows elevated skin temperature (consumer device; not core temperature). Rectal temperature recorded separately.” — reason: Rectal temperature now recorded. — crew clarification after assistant feedback [sources: src-f7476b01-95b9-4ad1-8829-533704a31737, src-98a60db3-e51f-4f10-bf83-1ec20279c456]
 
 UNCERTAIN OR NOT DOCUMENTED
 - Not documented: respiratory rate, SpO2, glucose.

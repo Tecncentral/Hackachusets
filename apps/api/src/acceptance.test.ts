@@ -35,19 +35,23 @@ it('runs capture → assessment → correction → reassessment → handoff, wit
   incident = await mutate('/observations', retry); // duplicate request
   expect(incident.observations.filter(o => o.text === ExampleStatements.skinTemperatureInference)).toHaveLength(1);
 
+  // The default assistant is the real correction assistant (@scenebrief/ai rules, in-process).
   incident = await mutate('/evaluations', at());
-  const timing = incident.feedback.find(f => f.kind === 'missing_context')!;
+  expect(incident.evaluations.at(-1)).toMatchObject({ status: 'completed', mode: 'deterministic', discardedItems: 0 });
+  const witnessId = incident.observations.find(o => o.text === ExampleStatements.witnessAccount)!.id;
+  const timing = incident.feedback.find(f => f.kind === 'missing_context' && f.observationIds.includes(witnessId))!;
   const skin = incident.feedback.find(f => f.kind === 'unsupported_inference')!;
-  expect(timing.suggestedQuestion).toContain('Did you see him collapse');
-  expect(timing.evidenceSourceIds).toEqual(expect.arrayContaining(['dispatch', 'fall']));
-  expect(skin.message).toContain('does not establish core body temperature');
-  expect(skin.suggestedQuestion).toContain('method or site, and time');
+  expect(timing.suggestedQuestion).toMatch(/see him collapse.*found/i);
+  expect(skin.message).toMatch(/cannot establish core body temperature/i);
+  expect(skin.suggestedQuestion).toMatch(/core temperature.*method.*time/i);
 
   // 2. Sweating inference gets a source-backed clarification.
   incident = await mutate('/observations', { ...at(), text: ExampleStatements.sweatingInference, observedAt: '2026-10-24T15:00:00Z' });
   incident = await mutate('/evaluations', at());
-  const sweating = incident.feedback.find(f => f.message.startsWith('Sweating does not exclude'))!;
-  expect(incident.knowledgeReferences.find(k => k.id === sweating.knowledgeReferenceIds[0])).toMatchObject({ url: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC4639891/', reviewStatus: 'unreviewed' });
+  const sweating = incident.feedback.find(f => /sweating/i.test(f.spokenSummary ?? ''))!;
+  expect(sweating.message).toMatch(/sweating does not rule out exertional heat stroke/i);
+  expect(sweating.message).not.toMatch(/diagnosed|has heat stroke/i);
+  expect(incident.knowledgeReferences.find(k => k.id === 'nata-2015-rec25-sweating')).toMatchObject({ url: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC4639891/', reviewStatus: 'unreviewed' });
   expect(incident.feedback.filter(f => f.status === 'open')).toHaveLength(3); // no duplicates from re-evaluation
 
   // 3. The EMT clarifies, defers and later dismisses.

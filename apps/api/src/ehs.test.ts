@@ -163,7 +163,7 @@ const item = (observationIds: string[], extra: object = {}) => ({ id: 'a1', kind
 
 describe('assistant evaluation', () => {
   it('mock returns source-backed feedback for the shared example statements only', async () => {
-    const s = matched();
+    const s = matched({ assistant: new AssistantGateway(new MockAssistant()) });
     obs(s, ExampleStatements.skinTemperatureInference); obs(s, ExampleStatements.sweatingInference); obs(s, 'Patient is sweating.');
     const result = await s.evaluate({ requestId: rid(), baseRevision: s.snapshot().revision });
     expect(result.evaluations.at(-1)).toMatchObject({ status: 'completed', mode: 'mock' });
@@ -216,7 +216,7 @@ describe('assistant evaluation', () => {
     expect(result.evaluations[1]).toMatchObject({ status: 'failed' });
   });
   it('HTTP client reports timeouts, bad responses and unreachable services without throwing', async () => {
-    const request = { incidentId: 'x', revision: 0 } as EvaluateRequest;
+    const request: EvaluateRequest = { incidentId: 'x', revision: 0, patientMatched: false, observations: [], measurements: [], sources: [], careEvents: [], timelineEvents: [], contextFacts: [], environmentReadings: [], wearableRecords: [], protocolContext: { agencyProtocolId: null, applicability: 'not_configured', note: '' } };
     const slow = (_u: unknown, init?: RequestInit) => new Promise<Response>((_r, reject) => init?.signal?.addEventListener('abort', () => reject(Object.assign(new Error('t'), { name: 'TimeoutError' }))));
     expect(await new HttpAssistant('http://a', 100, slow as typeof fetch).evaluate(request)).toMatchObject({ status: 'failed', error: expect.stringContaining('timed out') });
     expect(await new HttpAssistant('http://a', 100, (async () => new Response('{"nope":1}')) as typeof fetch).evaluate(request)).toMatchObject({ status: 'failed', error: expect.stringContaining('validation') });
