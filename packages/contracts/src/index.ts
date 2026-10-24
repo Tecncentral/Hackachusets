@@ -1,0 +1,18 @@
+import { z } from 'zod';
+export const IncidentId = 'runner-found-down';
+export const SourceSchema = z.object({ id: z.string(), type: z.enum(['wearable','dispatch','voice']), label: z.string(), capturedAt: z.string().datetime(), eventTime: z.string().datetime().nullable(), text: z.string() });
+export const ClaimSchema = z.object({ id: z.string(), field: z.enum(['account','discoveryTime','collapseTime']), value: z.string().nullable(), sourceIds: z.array(z.string()), status: z.enum(['reported','unknown','superseded']), recordedAt: z.string().datetime() });
+export const CorrectionSchema = z.object({ id: z.string(), originalClaimId: z.string(), replacementClaimId: z.string(), author: z.string(), recordedAt: z.string().datetime() });
+export const HandoffSchema = z.object({ version: z.number().int().positive(), revision: z.number().int().nonnegative(), reviewedAt: z.string().datetime(), reviewedBy: z.string(), text: z.string() });
+export const IncidentSchema = z.object({ id: z.string(), revision: z.number().int().nonnegative(), synthetic: z.literal(true), patient: z.object({ id: z.string(), name: z.string(), sharing: z.boolean(), matched: z.boolean() }), sources: z.array(SourceSchema), claims: z.array(ClaimSchema), corrections: z.array(CorrectionSchema), handoffs: z.array(HandoffSchema) });
+export const TranscriptRequest = z.object({ requestId: z.string().min(1), text: z.string().trim().min(1).max(5000) }).strict();
+export const ReviewRequest = z.object({ revision: z.number().int().nonnegative(), reviewedBy: z.string().trim().min(1).max(100) }).strict();
+export const MatchRequest = z.object({ patientId: z.string(), confirmed: z.literal(true) }).strict();
+export const SharingRequest = z.object({ sharing: z.boolean() }).strict();
+export type Incident = z.infer<typeof IncidentSchema>;
+export type Claim = z.infer<typeof ClaimSchema>;
+export type SourceRecord = z.infer<typeof SourceSchema>;
+export type Handoff = z.infer<typeof HandoffSchema>;
+export type TranscriptInput = z.infer<typeof TranscriptRequest>;
+export const DemoInitial = 'Friend says short run, dropped about five minutes ago.';
+export const DemoClarification = 'Found him at 10:43. Did not witness collapse. Five minutes was a guess.';

@@ -1,0 +1,20 @@
+{
+  "name": "scenebrief",
+  "description": "SceneBrief development agent. Runs scenario tests after edits to incident logic or extraction code.",
+  "tools": ["*"],
+  "resources": [
+    "file://AGENTS.md",
+    "file://docs/team-workflow.md",
+    "file://docs/api-contract.md",
+    "file://.kiro/steering/project.md"
+  ],
+  "hooks": {
+    "postToolUse": [
+      {
+        "matcher": "write",
+        "command": "node .kiro/hooks/scenario-check.mjs",
+        "timeout_ms": 60000
+      }
+    ]
+  }
+}

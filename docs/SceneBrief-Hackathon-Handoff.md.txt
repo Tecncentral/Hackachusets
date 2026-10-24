@@ -1,0 +1,52 @@
+# SceneBrief — Hackathon Handoff
+
+Oct 24, 2026 · @Shashank Kakarlapudi
+
+## 1. The idea
+
+SceneBrief listens as the EMT describes the scene, checks what they say against the patient's wearable data, and flags claims that rest on a wrong assumption. It then produces a reviewable ER handoff.
+
+**Problem.** On a collapse or "found down" call, paramedics must piece together when it started and what came before, from stressed witnesses, while treating the patient. The patient's watch often recorded the answer.
+
+**What it does**
+
+- The EMT describes what happened out loud; SceneBrief turns it into claims about onset, downtime, activity and symptoms.
+- It checks each claim against pre-arrival Apple Watch and WHOOP data and photographed documents (med lists, ID).
+- When a claim conflicts with the data, it flags it with the source and suggests what to confirm.
+- The EMT confirms or corrects by voice, with agency-approved assessment prompts alongside.
+- It produces a one-screen ER handoff: known, changed, uncertain, with wearable readings kept separate from confirmed symptoms.
+
+**Why both devices.** WHOOP supplies the baseline: resting heart rate, HRV, overnight temperature and breathing, recovery. Apple Watch supplies the event: workout, GPS, weather, fall detection, ECG. The two cross-check each other like witnesses. It works with either and is sharper with both.
+
+**Guardrails.** It flags and surfaces; it never diagnoses. The demo uses synthetic data. Real use assumes the patient opted in ahead of time, like Medical ID.
+
+## 2. Demo case: exertional heat stroke
+
+A 24-year-old runner collapses near the end of a long run on a hot morning. SceneBrief shows the ER that the problem built up over 90 minutes rather than striking suddenly.
+
+**Why this case.** Heat stroke is time-critical, and its treatment, rapid cooling, can start on scene. Its wearable signature is distinctive: a long effort in the heat, then collapse. The call starts as "found down, confused," so stroke and low blood sugar stay on the list until checked.
+
+**Synthetic timeline**
+
+| Time | Source | Event |
+| --- | --- | --- |
+| Night before | WHOOP | Recovery 18%, resting HR +9 bpm over baseline, skin temp +0.8 °C (context, not cause) |
+| 9:05 AM | Apple Watch | Outdoor run starts; 88 °F, 70% humidity |
+| 9:05–10:34 | Apple + WHOOP | HR climbs from 152 to 186 bpm while pace slows; both devices agree |
+| 10:34 | Apple Watch | Pace becomes erratic |
+| 10:42 | Apple Watch | Fall detected; HR still 171 bpm |
+| 10:44 | 911 call | Friend: "He was fine, then just dropped." |
+| 10:55 | EMT voice note | Confused, hot sweaty skin, HR 140 |
+
+**What the EMT says, and what gets flagged**
+
+EMT dictation at 10:58: "24-year-old male, collapsed suddenly while jogging, down about five minutes per bystander. Short run, likely dehydration. Possible cardiac event."
+
+| EMT said | Wearable data shows | Flag |
+| --- | --- | --- |
+| Collapsed suddenly | Pace erratic for 8 min before the fall at 10:42 | Onset was gradual; ask the witness about stumbling or confusion |
+| Down about 5 minutes | Fall detected 10:42; EMS arrived 10:55 | Downtime is about 13 min, not 5 |
+| Short run, likely dehydration | 97-min run at 88 °F, HR above 170 for 40+ min | Long effort in heat; prompt core temperature and cooling protocol |
+| Possible cardiac event | No irregular rhythm alert; HR tracked effort until the fall | Not ruled out; prompt 12-lead ECG |
+
+Each flag shows its source and asks the EMT to confirm or correct. The handoff lists what is known (97-minute run in heat, fall at 10:42, ~13 min down), what changed (erratic pace from 10:34) and what is uncertain (core temperature, whether illness came first).

@@ -1,0 +1,48 @@
+# User journey
+
+The EMT talks while treating; SceneBrief checks every claim against the patient's wearables and sends the ER a verified brief before the ambulance arrives. Times follow the heat stroke demo.
+
+## Journey map
+
+```mermaid
+flowchart TD
+  P["Earlier: patient links Apple Watch + WHOOP and opts in"]
+  subgraph EMT
+    E1["10:55 Arrives on scene<br/>Scans the opt-in code"]
+    E2["10:58 Narrates the scene<br/>Talks while treating"]
+    E3["11:00 Confirms or corrects<br/>By voice, on the spot"]
+    E4["Transport: Photographs med list<br/>Starts transport"]
+  end
+  subgraph SceneBrief
+    S1["Loads wearable data<br/>Last 24 h, Apple + WHOOP"]
+    S2["Checks each claim<br/>Against wearable timeline"]
+    S3["Flags 4 claims<br/>Prompts temp, glucose, ECG"]
+    S4["Sends brief to ER<br/>Before ambulance arrives"]
+  end
+  subgraph ER["ER team"]
+    R1["At the ER: Reviews the handoff<br/>Known, changed, uncertain<br/>Taps items to see source"]
+  end
+  P -.-> S1
+  E1 --> S1
+  E1 --> E2
+  E2 --> S2
+  S1 --> S2
+  S2 --> S3
+  S3 --> E3
+  E3 --> E4
+  E4 --> S4
+  S4 --> R1
+```
+
+The one loop that matters is SceneBrief flagging claims and the EMT confirming or correcting them, all before the ER sees the brief.
+
+## Pain points it removes
+
+| Stage | Pain point today | With SceneBrief |
+| --- | --- | --- |
+| Before the call | Wearable history is locked on the patient's phone | Patient opts in ahead of time, like Medical ID |
+| Arrival | EMT starts with only a stressed witness's account | 24 h of Apple Watch and WHOOP data loads when the EMT scans the opt-in code |
+| Assess and narrate | Notes are written later, from memory | EMT talks while treating; speech becomes claims |
+| Flag and clarify | Wrong assumptions ("sudden collapse," "down 5 minutes") go unchecked | Conflicts are flagged with their source; EMT confirms or corrects by voice; protocol prompts appear |
+| Transport | The handoff is pieced together at the ER door | The brief reaches the ER before the ambulance does |
+| ER handoff | Verbal handoff loses detail and uncertainty | One screen: known, changed, uncertain, each item linked to its source |
