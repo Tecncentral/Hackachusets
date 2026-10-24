@@ -1,0 +1,75 @@
+{
+  "incidentId": "runner-found-down",
+  "revision": 3,
+  "mode": "mock",
+  "feedback": [
+    {
+      "kind": "missing_context",
+      "message": "The account estimates timing but does not say whether the friend saw the collapse or found him afterward. Collapse time stays unknown until clarified.",
+      "suggestedQuestion": "Did you see him collapse, or did you find him afterward? About what time?",
+      "evidenceSourceIds": [
+        "dispatch",
+        "fall",
+        "workout"
+      ],
+      "knowledgeReferenceIds": [],
+      "spokenSummary": "Collapse timing is unclear. Ask whether the friend saw the collapse.",
+      "id": "mock-witness-timing-obs-2aab52d2-8b32-4a14-b82d-89bd25081360",
+      "observationIds": [
+        "obs-2aab52d2-8b32-4a14-b82d-89bd25081360"
+      ]
+    },
+    {
+      "kind": "unsupported_inference",
+      "message": "A consumer wearable skin-temperature reading does not establish core body temperature. No clinical temperature measurement is linked to this statement.",
+      "suggestedQuestion": "Has a clinical temperature been measured? If so, record the value, method or site, and time.",
+      "evidenceSourceIds": [
+        "whoop-overnight"
+      ],
+      "knowledgeReferenceIds": [
+        "mock-kr-nata-2015-rectal"
+      ],
+      "spokenSummary": "Skin temperature is not core temperature. Record a clinical temperature with method and time.",
+      "id": "mock-skin-vs-core-obs-70d42855-b46f-4d83-aa2b-76c4addffb65",
+      "observationIds": [
+        "obs-70d42855-b46f-4d83-aa2b-76c4addffb65"
+      ]
+    },
+    {
+      "kind": "unsupported_inference",
+      "message": "Sweating does not exclude exertional heat stroke. Consider recording the skin finding without using it to rule heat illness in or out.",
+      "suggestedQuestion": null,
+      "evidenceSourceIds": [],
+      "knowledgeReferenceIds": [
+        "mock-kr-nata-2015-sweating"
+      ],
+      "spokenSummary": "Sweating does not rule out exertional heat stroke.",
+      "id": "mock-sweating-does-not-exclude-obs-785ada7e-a800-4a5e-9228-ef3abd05976d",
+      "observationIds": [
+        "obs-785ada7e-a800-4a5e-9228-ef3abd05976d"
+      ]
+    }
+  ],
+  "knowledgeReferences": [
+    {
+      "id": "mock-kr-nata-2015-sweating",
+      "title": "National Athletic Trainers’ Association Position Statement: Exertional Heat Illnesses (Casa DJ et al., J Athl Train 2015;50(9):986–1000)",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4639891/",
+      "versionDate": "2015-09",
+      "applicability": "Consensus background for athletic trainers. Not the responder’s applicable local EMS protocol.",
+      "reviewStatus": "unreviewed",
+      "section": "Recognition — Exertional Heat Stroke, recommendation 25",
+      "passage": "“Most patients with EHS have hot, sweaty skin as opposed to those with the classical type of heat stroke”"
+    },
+    {
+      "id": "mock-kr-nata-2015-rectal",
+      "title": "National Athletic Trainers’ Association Position Statement: Exertional Heat Illnesses (Casa DJ et al., J Athl Train 2015;50(9):986–1000)",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4639891/",
+      "versionDate": "2015-09",
+      "applicability": "Consensus background for athletic trainers. Not the responder’s applicable local EMS protocol.",
+      "reviewStatus": "unreviewed",
+      "section": "Recognition — Exertional Heat Stroke, recommendation 22",
+      "passage": "“Rectal temperature thermometry is the only method of obtaining an immediate and accurate measurement of core body temperature.”"
+    }
+  ]
+}

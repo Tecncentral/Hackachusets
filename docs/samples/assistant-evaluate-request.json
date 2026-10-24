@@ -1,0 +1,535 @@
+{
+  "incidentId": "runner-found-down",
+  "revision": 3,
+  "patientMatched": true,
+  "observations": [
+    {
+      "id": "obs-arrival-neuro",
+      "status": "current",
+      "sourceIds": [
+        "crew-arrival"
+      ],
+      "recordedAt": "2026-10-24T14:57:00Z",
+      "recordedBy": "synthetic fixture",
+      "addedAtRevision": 0,
+      "baseRevision": 0,
+      "text": "Confused; slow to answer questions; responds to voice.",
+      "observedAt": "2026-10-24T14:56:00Z",
+      "category": "neurological",
+      "reportedBy": "crew",
+      "inputMode": "typed",
+      "clarifiesFeedbackId": null
+    },
+    {
+      "id": "obs-arrival-skin",
+      "status": "current",
+      "sourceIds": [
+        "crew-arrival"
+      ],
+      "recordedAt": "2026-10-24T14:57:00Z",
+      "recordedBy": "synthetic fixture",
+      "addedAtRevision": 0,
+      "baseRevision": 0,
+      "text": "Skin hot and sweaty to touch.",
+      "observedAt": "2026-10-24T14:56:00Z",
+      "category": "skin",
+      "reportedBy": "crew",
+      "inputMode": "typed",
+      "clarifiesFeedbackId": null
+    },
+    {
+      "id": "obs-2aab52d2-8b32-4a14-b82d-89bd25081360",
+      "status": "current",
+      "sourceIds": [
+        "src-43708813-e8bb-4e48-b4c2-2d6805c0f79e"
+      ],
+      "recordedAt": "2026-10-24T14:59:00.000Z",
+      "recordedBy": "crew",
+      "addedAtRevision": 1,
+      "baseRevision": 0,
+      "text": "Friend says he went for a run and dropped maybe five minutes ago. Not sure exactly.",
+      "observedAt": "2026-10-24T14:58:00Z",
+      "category": "account",
+      "reportedBy": "witness",
+      "inputMode": "transcribed",
+      "clarifiesFeedbackId": null
+    },
+    {
+      "id": "obs-70d42855-b46f-4d83-aa2b-76c4addffb65",
+      "status": "current",
+      "sourceIds": [
+        "src-7d4e2e64-039e-467a-bd70-f9e14249b2a4"
+      ],
+      "recordedAt": "2026-10-24T15:00:00.000Z",
+      "recordedBy": "crew",
+      "addedAtRevision": 2,
+      "baseRevision": 1,
+      "text": "The wearable skin temperature is elevated, so core temperature is confirmed high.",
+      "observedAt": "2026-10-24T14:59:00Z",
+      "category": "general",
+      "reportedBy": "crew",
+      "inputMode": "typed",
+      "clarifiesFeedbackId": null
+    },
+    {
+      "id": "obs-785ada7e-a800-4a5e-9228-ef3abd05976d",
+      "status": "current",
+      "sourceIds": [
+        "src-45d90b85-5d68-43ee-93e0-17b2e57cf2e8"
+      ],
+      "recordedAt": "2026-10-24T15:01:00.000Z",
+      "recordedBy": "crew",
+      "addedAtRevision": 3,
+      "baseRevision": 2,
+      "text": "He is sweating, so this cannot be heat stroke.",
+      "observedAt": "2026-10-24T15:00:00Z",
+      "category": "general",
+      "reportedBy": "crew",
+      "inputMode": "typed",
+      "clarifiesFeedbackId": null
+    }
+  ],
+  "measurements": [
+    {
+      "id": "meas-hr-arrival",
+      "status": "current",
+      "sourceIds": [
+        "crew-arrival"
+      ],
+      "recordedAt": "2026-10-24T14:57:00Z",
+      "recordedBy": "synthetic fixture",
+      "addedAtRevision": 0,
+      "baseRevision": 0,
+      "kind": "heart_rate",
+      "value": 140,
+      "diastolic": null,
+      "unit": "bpm",
+      "site": null,
+      "device": "Cardiac monitor (synthetic)",
+      "observer": "Crew",
+      "deviceClass": "clinical",
+      "measuredAt": "2026-10-24T14:57:00Z",
+      "coolingPhase": "before_cooling",
+      "note": null
+    }
+  ],
+  "sources": [
+    {
+      "id": "profile",
+      "type": "patient_profile",
+      "label": "Synthetic emergency profile",
+      "capturedAt": "2026-10-24T14:43:00Z",
+      "eventTime": "2026-09-12T16:00:00Z",
+      "text": "Fictional self-reported profile, last reviewed 2026-09-12. Age 24. No known drug allergies. No regular medications or relevant history listed.",
+      "origin": "synthetic_fixture",
+      "limitation": "Self-reported and not verified on scene. Medication list may be out of date."
+    },
+    {
+      "id": "whoop-overnight",
+      "type": "wearable",
+      "label": "Synthetic overnight recovery summary",
+      "capturedAt": "2026-10-24T14:43:00Z",
+      "eventTime": "2026-10-24T10:30:00Z",
+      "text": "Recovery 18%. Resting heart rate 9 bpm above personal baseline. Skin-temperature deviation +0.8 °C from baseline.",
+      "origin": "synthetic_fixture",
+      "limitation": "Consumer background context. Skin-temperature deviation is not core temperature."
+    },
+    {
+      "id": "workout",
+      "type": "wearable",
+      "label": "Synthetic workout",
+      "capturedAt": "2026-10-24T14:43:00Z",
+      "eventTime": "2026-10-24T13:05:00Z",
+      "text": "Workout record begins at 09:05 EDT. Does not establish illness onset.",
+      "origin": "synthetic_fixture",
+      "limitation": "Start of recorded workout, not illness onset. Pace changes do not establish symptoms."
+    },
+    {
+      "id": "wearable-hr",
+      "type": "wearable",
+      "label": "Synthetic workout heart-rate samples",
+      "capturedAt": "2026-10-24T14:43:00Z",
+      "eventTime": "2026-10-24T13:05:00Z",
+      "text": "Optical heart-rate samples 09:05–10:34 EDT rising from 122 to 166 bpm. No samples after 10:34 EDT.",
+      "origin": "synthetic_fixture",
+      "limitation": "Consumer optical sensor. Gap after 10:34 EDT. Not a clinical measurement."
+    },
+    {
+      "id": "fall",
+      "type": "wearable",
+      "label": "Synthetic fall fixture — integration unverified",
+      "capturedAt": "2026-10-24T14:43:00Z",
+      "eventTime": "2026-10-24T14:42:00Z",
+      "text": "Device-reported fall at 10:42 EDT. Collapse and loss of consciousness unconfirmed.",
+      "origin": "synthetic_fixture",
+      "limitation": "Does not establish collapse, unconsciousness or downtime."
+    },
+    {
+      "id": "weather",
+      "type": "weather",
+      "label": "Synthetic weather record near the route",
+      "capturedAt": "2026-10-24T14:43:00Z",
+      "eventTime": "2026-10-24T14:00:00Z",
+      "text": "Air temperature 88 °F, relative humidity 70% at 10:00 EDT near the trail.",
+      "origin": "synthetic_fixture",
+      "limitation": "Environmental estimate. Not body temperature."
+    },
+    {
+      "id": "dispatch",
+      "type": "dispatch",
+      "label": "Simulated dispatch",
+      "capturedAt": "2026-10-24T14:44:00Z",
+      "eventTime": "2026-10-24T14:44:00Z",
+      "text": "Emergency call at 10:44 EDT: person found down near running trail.",
+      "origin": "synthetic_fixture",
+      "limitation": null
+    },
+    {
+      "id": "crew-arrival",
+      "type": "crew",
+      "label": "Synthetic crew record at arrival",
+      "capturedAt": "2026-10-24T14:57:00Z",
+      "eventTime": "2026-10-24T14:55:00Z",
+      "text": "Crew arrival 10:55 EDT. Patient confused, slow to answer. Skin hot and sweaty. Heart rate 140 bpm on monitor at 10:57 EDT.",
+      "origin": "synthetic_fixture",
+      "limitation": null
+    },
+    {
+      "id": "src-43708813-e8bb-4e48-b4c2-2d6805c0f79e",
+      "type": "crew",
+      "label": "Crew entry — observation (transcribed, crew-reviewed)",
+      "capturedAt": "2026-10-24T14:58:30.000Z",
+      "eventTime": "2026-10-24T14:58:00Z",
+      "text": "Friend says he went for a run and dropped maybe five minutes ago. Not sure exactly.",
+      "origin": "crew_entry",
+      "limitation": null
+    },
+    {
+      "id": "src-7d4e2e64-039e-467a-bd70-f9e14249b2a4",
+      "type": "crew",
+      "label": "Crew entry — observation (typed)",
+      "capturedAt": "2026-10-24T14:59:30.000Z",
+      "eventTime": "2026-10-24T14:59:00Z",
+      "text": "The wearable skin temperature is elevated, so core temperature is confirmed high.",
+      "origin": "crew_entry",
+      "limitation": null
+    },
+    {
+      "id": "src-45d90b85-5d68-43ee-93e0-17b2e57cf2e8",
+      "type": "crew",
+      "label": "Crew entry — observation (typed)",
+      "capturedAt": "2026-10-24T15:00:30.000Z",
+      "eventTime": "2026-10-24T15:00:00Z",
+      "text": "He is sweating, so this cannot be heat stroke.",
+      "origin": "crew_entry",
+      "limitation": null
+    }
+  ],
+  "careEvents": [],
+  "timelineEvents": [
+    {
+      "id": "tl-workout-start",
+      "status": "current",
+      "sourceIds": [
+        "workout"
+      ],
+      "recordedAt": "2026-10-24T14:57:00Z",
+      "recordedBy": "synthetic fixture",
+      "addedAtRevision": 0,
+      "baseRevision": 0,
+      "kind": "exertion_start",
+      "time": "2026-10-24T13:05:00Z",
+      "certainty": "recorded",
+      "reportedBy": "device",
+      "note": "Start of recorded workout; not illness onset."
+    },
+    {
+      "id": "tl-device-fall",
+      "status": "current",
+      "sourceIds": [
+        "fall"
+      ],
+      "recordedAt": "2026-10-24T14:57:00Z",
+      "recordedBy": "synthetic fixture",
+      "addedAtRevision": 0,
+      "baseRevision": 0,
+      "kind": "device_fall_event",
+      "time": "2026-10-24T14:42:00Z",
+      "certainty": "recorded",
+      "reportedBy": "device",
+      "note": "Device-reported; does not establish collapse or downtime."
+    },
+    {
+      "id": "tl-emergency-call",
+      "status": "current",
+      "sourceIds": [
+        "dispatch"
+      ],
+      "recordedAt": "2026-10-24T14:57:00Z",
+      "recordedBy": "synthetic fixture",
+      "addedAtRevision": 0,
+      "baseRevision": 0,
+      "kind": "emergency_call",
+      "time": "2026-10-24T14:44:00Z",
+      "certainty": "recorded",
+      "reportedBy": "dispatch",
+      "note": null
+    },
+    {
+      "id": "tl-crew-arrival",
+      "status": "current",
+      "sourceIds": [
+        "crew-arrival"
+      ],
+      "recordedAt": "2026-10-24T14:57:00Z",
+      "recordedBy": "synthetic fixture",
+      "addedAtRevision": 0,
+      "baseRevision": 0,
+      "kind": "crew_arrival",
+      "time": "2026-10-24T14:55:00Z",
+      "certainty": "recorded",
+      "reportedBy": "crew",
+      "note": null
+    }
+  ],
+  "contextFacts": [
+    {
+      "id": "fact-age",
+      "status": "current",
+      "sourceIds": [
+        "profile"
+      ],
+      "recordedAt": "2026-10-24T14:57:00Z",
+      "recordedBy": "synthetic fixture",
+      "addedAtRevision": 0,
+      "baseRevision": 0,
+      "category": "age",
+      "value": "24 years",
+      "state": "documented",
+      "reportedBy": "patient",
+      "note": "Profile; not verified on scene."
+    },
+    {
+      "id": "fact-allergies",
+      "status": "current",
+      "sourceIds": [
+        "profile"
+      ],
+      "recordedAt": "2026-10-24T14:57:00Z",
+      "recordedBy": "synthetic fixture",
+      "addedAtRevision": 0,
+      "baseRevision": 0,
+      "category": "allergy",
+      "value": "No known drug allergies",
+      "state": "documented",
+      "reportedBy": "patient",
+      "note": "Self-reported in profile."
+    },
+    {
+      "id": "fact-medications",
+      "status": "current",
+      "sourceIds": [
+        "profile"
+      ],
+      "recordedAt": "2026-10-24T14:57:00Z",
+      "recordedBy": "synthetic fixture",
+      "addedAtRevision": 0,
+      "baseRevision": 0,
+      "category": "medication",
+      "value": "None listed",
+      "state": "documented",
+      "reportedBy": "patient",
+      "note": "Profile list; current use not confirmed."
+    },
+    {
+      "id": "fact-history",
+      "status": "current",
+      "sourceIds": [
+        "profile"
+      ],
+      "recordedAt": "2026-10-24T14:57:00Z",
+      "recordedBy": "synthetic fixture",
+      "addedAtRevision": 0,
+      "baseRevision": 0,
+      "category": "relevant_history",
+      "value": "None listed",
+      "state": "documented",
+      "reportedBy": "patient",
+      "note": "Profile list; not verified."
+    },
+    {
+      "id": "fact-activity",
+      "status": "current",
+      "sourceIds": [
+        "workout"
+      ],
+      "recordedAt": "2026-10-24T14:57:00Z",
+      "recordedBy": "synthetic fixture",
+      "addedAtRevision": 0,
+      "baseRevision": 0,
+      "category": "activity",
+      "value": "Outdoor run",
+      "state": "documented",
+      "reportedBy": "device",
+      "note": "From workout record."
+    }
+  ],
+  "environmentReadings": [
+    {
+      "id": "env-air-temp",
+      "status": "current",
+      "sourceIds": [
+        "weather"
+      ],
+      "recordedAt": "2026-10-24T14:57:00Z",
+      "recordedBy": "synthetic fixture",
+      "addedAtRevision": 0,
+      "baseRevision": 0,
+      "kind": "ambient_temperature",
+      "value": 88,
+      "unit": "°F",
+      "measuredAt": "2026-10-24T14:00:00Z",
+      "location": "Weather station near the trail (synthetic)",
+      "method": "weather_service"
+    },
+    {
+      "id": "env-humidity",
+      "status": "current",
+      "sourceIds": [
+        "weather"
+      ],
+      "recordedAt": "2026-10-24T14:57:00Z",
+      "recordedBy": "synthetic fixture",
+      "addedAtRevision": 0,
+      "baseRevision": 0,
+      "kind": "relative_humidity",
+      "value": 70,
+      "unit": "%",
+      "measuredAt": "2026-10-24T14:00:00Z",
+      "location": "Weather station near the trail (synthetic)",
+      "method": "weather_service"
+    }
+  ],
+  "wearableRecords": [
+    {
+      "id": "wr-recovery",
+      "sourceId": "whoop-overnight",
+      "metric": "recovery",
+      "startTime": "2026-10-24T03:00:00Z",
+      "endTime": "2026-10-24T10:30:00Z",
+      "value": 18,
+      "unit": "%",
+      "samples": [],
+      "summary": "Overnight recovery score 18%.",
+      "limitation": "Proprietary consumer score; background only.",
+      "gaps": null,
+      "consumerDevice": true
+    },
+    {
+      "id": "wr-resting-hr",
+      "sourceId": "whoop-overnight",
+      "metric": "resting_heart_rate_deviation",
+      "startTime": "2026-10-24T03:00:00Z",
+      "endTime": "2026-10-24T10:30:00Z",
+      "value": 9,
+      "unit": "bpm above baseline",
+      "samples": [],
+      "summary": "Resting heart rate 9 bpm above personal baseline overnight.",
+      "limitation": "Background only.",
+      "gaps": null,
+      "consumerDevice": true
+    },
+    {
+      "id": "wr-skin-temp",
+      "sourceId": "whoop-overnight",
+      "metric": "skin_temperature_deviation",
+      "startTime": "2026-10-24T03:00:00Z",
+      "endTime": "2026-10-24T10:30:00Z",
+      "value": 0.8,
+      "unit": "°C from baseline",
+      "samples": [],
+      "summary": "Overnight skin-temperature deviation +0.8 °C from baseline.",
+      "limitation": "Skin-temperature deviation is not core temperature.",
+      "gaps": null,
+      "consumerDevice": true
+    },
+    {
+      "id": "wr-workout",
+      "sourceId": "workout",
+      "metric": "workout",
+      "startTime": "2026-10-24T13:05:00Z",
+      "endTime": null,
+      "value": null,
+      "unit": null,
+      "samples": [],
+      "summary": "Outdoor run recorded from 09:05 EDT; end not recorded.",
+      "limitation": "Start of recorded workout, not illness onset.",
+      "gaps": "Workout end not recorded.",
+      "consumerDevice": true
+    },
+    {
+      "id": "wr-hr",
+      "sourceId": "wearable-hr",
+      "metric": "heart_rate",
+      "startTime": "2026-10-24T13:05:00Z",
+      "endTime": "2026-10-24T14:34:00Z",
+      "value": null,
+      "unit": "bpm",
+      "samples": [
+        {
+          "time": "2026-10-24T13:05:00Z",
+          "value": 122
+        },
+        {
+          "time": "2026-10-24T13:35:00Z",
+          "value": 141
+        },
+        {
+          "time": "2026-10-24T14:05:00Z",
+          "value": 152
+        },
+        {
+          "time": "2026-10-24T14:34:00Z",
+          "value": 166
+        }
+      ],
+      "summary": "Heart rate rose from 122 to 166 bpm during the recorded workout.",
+      "limitation": "Consumer optical sensor; cause of change unknown.",
+      "gaps": "No samples after 10:34 EDT.",
+      "consumerDevice": true
+    },
+    {
+      "id": "wr-pace",
+      "sourceId": "workout",
+      "metric": "pace",
+      "startTime": "2026-10-24T14:34:00Z",
+      "endTime": null,
+      "value": null,
+      "unit": null,
+      "samples": [],
+      "summary": "Recorded pace becomes variable from 10:34 EDT.",
+      "limitation": "Does not establish neurological symptoms or illness onset.",
+      "gaps": null,
+      "consumerDevice": true
+    },
+    {
+      "id": "wr-fall",
+      "sourceId": "fall",
+      "metric": "fall_event",
+      "startTime": "2026-10-24T14:42:00Z",
+      "endTime": null,
+      "value": null,
+      "unit": null,
+      "samples": [],
+      "summary": "Device-reported fall at 10:42 EDT.",
+      "limitation": "Does not establish collapse, unconsciousness or downtime.",
+      "gaps": null,
+      "consumerDevice": true
+    }
+  ],
+  "protocolContext": {
+    "agencyProtocolId": null,
+    "applicability": "not_configured",
+    "note": "No agency protocol configured. Consensus documents are background only; responders follow their applicable agency protocols."
+  }
+}
