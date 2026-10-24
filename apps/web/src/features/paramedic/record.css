@@ -1,0 +1,111 @@
+/* Styles for StatusSummary and RecordPanel. Every selector is scoped under .ws-status-summary
+   or .ws-record. Readable at 360px with no horizontal overflow; 44px targets; reduced-motion safe. */
+
+/* ---- Current status card ---- */
+.ws-status-summary { overflow-wrap: anywhere; }
+.ws-status-summary-h { margin: 0 0 10px; font-size: 1.05rem; }
+.ws-status-summary-grid {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+.ws-status-summary-item { margin: 0; }
+.ws-status-summary-item > dt { font-weight: 650; color: var(--ink-quiet); font-size: .85rem; }
+.ws-status-summary-item > dd { margin: 2px 0 0; overflow-wrap: anywhere; }
+.ws-status-summary-sub { margin-top: 2px; font-size: .9rem; }
+.ws-status-summary-vitals,
+.ws-status-summary-tags { list-style: none; margin: 0; padding: 0; }
+.ws-status-summary-vitals > li { margin: 2px 0; overflow-wrap: anywhere; }
+.ws-status-summary-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+
+@media (min-width: 560px) {
+  .ws-status-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* ---- Record panel ---- */
+.ws-record { overflow-wrap: anywhere; }
+.ws-record > h2 { margin: 0 0 12px; }
+
+.ws-record-section {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  margin: 0 0 12px;
+  overflow: hidden;
+}
+.ws-record-summary {
+  display: flex;
+  align-items: center;
+  min-height: var(--target);
+  padding: 10px 14px;
+  font-weight: 650;
+  cursor: pointer;
+  list-style: none;
+}
+.ws-record-summary::-webkit-details-marker { display: none; }
+.ws-record-summary::before {
+  content: "▸";
+  margin-right: 10px;
+  color: var(--ink-quiet);
+  transition: transform .15s ease;
+}
+.ws-record-section[open] > .ws-record-summary::before { transform: rotate(90deg); }
+.ws-record-summary:hover { background: var(--teal-soft); }
+
+.ws-record-body { padding: 4px 14px 14px; }
+
+.ws-record-list { list-style: none; margin: 0; padding: 0; }
+.ws-record-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+  overflow-wrap: anywhere;
+}
+.ws-record-list > .ws-record-row:first-child { border-top: none; }
+
+.ws-record-time { font-variant-numeric: tabular-nums; font-weight: 650; color: var(--ink-quiet); }
+.ws-record-main { line-height: 1.5; }
+.ws-record-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.ws-record-obs-clarified { color: var(--ink-quiet); }
+.ws-record-obs-clarified .ws-record-main { opacity: .85; }
+.ws-record-clarifiedby { color: var(--teal); font-size: .9rem; }
+
+.ws-record-changed {
+  margin: 8px 0 12px;
+  padding: 10px 12px;
+  background: var(--amber-bg);
+  border: 1px solid var(--amber-line);
+  border-radius: var(--radius);
+}
+.ws-record-changed > strong { display: block; margin-bottom: 4px; }
+
+.ws-record-caption { font-size: .85rem; margin: 10px 0 0; }
+
+/* Sources (shared with SourceList) */
+.ws-record-sources { list-style: none; margin: 0; padding: 0; }
+.ws-record-source { padding: 10px 0; border-top: 1px solid var(--line); overflow-wrap: anywhere; }
+.ws-record-sources > .ws-record-source:first-child { border-top: none; }
+.ws-record-source-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.ws-record-source-times {
+  margin: 6px 0 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 4px 16px;
+  font-size: .85rem;
+  color: var(--ink-quiet);
+}
+.ws-record-source-times > div { display: flex; gap: 6px; }
+.ws-record-source-times dt { font-weight: 650; margin: 0; }
+.ws-record-source-times dd { margin: 0; }
+
+@media (min-width: 560px) {
+  .ws-record-source-times { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ws-record-summary::before { transition: none; }
+}
