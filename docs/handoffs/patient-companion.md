@@ -1,5 +1,6 @@
 # Handoff — Patient companion (Trauma Llama `#patient`, simulated demo)
 
+- PR (draft): https://github.com/Tecncentral/Hackachusets/pull/6
 - Branch: `feat/patient-companion` · Worktree: `.scenebrief-worktrees/scenebrief-patient-companion`
 - Based on `feat/emt-website-ehs` @ `fbe7a80` (canonical-contract repair). **Draft PR targets `feat/emt-website-ehs`** so the diff is patient-only; retarget to `main` after PR #3 merges.
 - Design source: `project 2/Patient.dc.html`, `Patient-Phone.dc.html`, `Intake.dc.html` (outside the repo; translated to React, not copied).
